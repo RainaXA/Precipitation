@@ -1,15 +1,43 @@
 const { Client, Intents, MessageEmbed } = require('discord.js');
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
+const fs = require('fs');
 
 var prefix = "pr:"
-var version = "v0.02"
-var verText = "the robot revolution"
+var version = "v0.1"
+var verText = "just for you"
 
 client.login('[token]')
 
+function saveConfiguration() {
+  fs.writeFile('config.json', JSON.stringify(config), function (err) {
+    if (err) console.log("settings could not be saved!");
+  })
+  setTimeout(saveConfiguration, 5000)
+}
+
 client.on('ready', () => {
   console.log('Precipitation has started!')
+  client.user.setActivity("v0.1 (" + prefix + ") || " + prefix + "help")
+  setTimeout(saveConfiguration, 5000)
 })
+
+if(!fs.existsSync('./config.json')) {
+  console.log('config.json does not exist - creating')
+  var config = {
+    "guilds": {
+
+    },
+    "users": {
+
+    }
+  };
+  fs.writeFile('config.json', JSON.stringify(config), function (err) {
+    if (err) throw err;
+    console.log('config.json has been created')
+  })
+} else {
+  var config = JSON.parse(fs.readFileSync("./config.json"));
+}
 
 client.on('messageCreate', message => {
   if (message.content.startsWith(prefix)) var command = message.content.slice(prefix.length)
@@ -26,7 +54,7 @@ client.on('messageCreate', message => {
           pingMessage = "yeah i got you"
           break;
         case 2:
-          pingMessage ﻿= "awooga"
+          pingMessage = "awooga"
           break;
         case 3:
           pingMessage = "i'm so random and quirky!!!"
@@ -70,4 +98,11 @@ client.on('messageCreate', message => {
       message.channel.send({embeds: [aboutEmbed]})
       break;
   }
+  /* if(command.startsWith("help ")) {
+    let cmd = command.slice(5);
+    switch (cmd) {
+      case "ping":
+
+    }
+  } */
 })
