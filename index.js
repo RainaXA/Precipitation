@@ -3,7 +3,7 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_
 const fs = require('fs');
 
 var prefix = "pr:"
-var version = "v0.11"
+var version = "v0.111"
 var verText = "just for you"
 
 client.login('[token]')
@@ -22,23 +22,23 @@ function initUser(au) {
 
 function name(user) {
   if(!config.users[user]) {
+    console.log("huh")
     initUser(user)
-    console.log("lol#0")
-    return client.users.fetch(user).username
   }
   if(!config.users[user].name) {
-    console.log ("lol #1")
-    console.log(client.users.fetch(user))
-    console.log(user)
-    // config.users[user].name =
-    return client.users.fetch(user).username
+    console.log("wait??")
+    client.users.fetch(user).then((usr) => {
+      console.log(usr)
+      config.users[user].name = (usr.username).toString()
+    })
   }
+  console.log(config.users[user].name)
   return config.users[user].name
 }
 
 client.on('ready', () => {
   console.log('Precipitation has started!')
-  client.user.setActivity("v0.11 || " + prefix + "help")
+  client.user.setActivity("v0.111 || pr:help")
   setTimeout(saveConfiguration, 5000)
 })
 
@@ -125,6 +125,8 @@ client.on('messageCreate', message => {
       let cmd = command.slice(5);
       if(cmd.length >= 75) {
         message.channel.send("Your name isn't that long.")
+      } else if((cmd.includes("<@") && cmd.includes(">")) || cmd.includes("@everyone") || cmd.includes("@here")) {
+        message.channel.send("Nice try.")
       } else {
       if (!config.users[message.author.id]) {
         initUser(message.author.id);
@@ -132,6 +134,6 @@ client.on('messageCreate', message => {
       config.users[message.author.id].name = cmd;
       message.channel.send("Sure, I'll refer to you by \"" + name(message.author.id) + "\".")
     }
-  }
+    }
   }
 })
