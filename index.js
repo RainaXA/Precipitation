@@ -3,7 +3,7 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_
 const fs = require('fs');
 
 var prefix = "pr:"
-var version = "v0.112"
+var version = "v0.12"
 var verText = "just for you"
 
 client.login('[token]')
@@ -12,7 +12,6 @@ function saveConfiguration() {
   fs.writeFile('config.json', JSON.stringify(config), function (err) {
     if (err) console.log("settings could not be saved!");
   })
-  console.log ("saved")
   setTimeout(saveConfiguration, 5000)
 }
 
@@ -94,7 +93,9 @@ client.on('messageCreate', message => {
         .setTitle("Precipitation Index")
         .setDescription('List of all commands -- use `' + prefix + '` before all commands!')
         .addFields(
-          { name: "General", value: "ping\nhelp\nversion\nabout" }
+          { name: "General", value: "ping\nhelp\nversion\nabout", inline: true },
+          { name: "Personalization", value: "name\ngender", inline: true },
+          { name: "Alpha", value: "gtest", inline: true }
         )
         .setColor("BLUE")
         .setFooter({ text: 'Precipitation ' + version });
@@ -115,6 +116,12 @@ client.on('messageCreate', message => {
         .setFooter({ text: 'Precipitation ' + version });
         message.channel.send({embeds: [aboutEmbed]})
         break;
+      case "gtest": // this command only stays until there is a command that utilizes gender
+        let genderedMessage;
+        if(config.users[message.author.id].gender == "female") genderedMessage = "girl";
+        if(config.users[message.author.id].gender == "male") genderedMessage = "dude";
+        if(config.users[message.author.id].gender == "other") genderedMessage = "real one";
+        message.channel.send("hey, you a " + genderedMessage + " to me <3");
     }
     if(command.startsWith("name ")) {
       let cmd = command.slice(5);
@@ -129,6 +136,38 @@ client.on('messageCreate', message => {
       config.users[message.author.id].name = cmd;
       message.channel.send("Sure, I'll refer to you by \"" + name(message.author) + "\".")
     }
+  } else if(command.startsWith("gender ")) {
+    let cmd = command.slice(7).toLowerCase();
+    let gender;
+    switch(cmd) {
+      case "female":
+      case "she/her":
+      case "f":
+        gender = "female";
+        break;
+      case "male":
+      case "he/him":
+      case "m":
+        gender = "male";
+        break;
+      case "other":
+      case "they/them":
+      case "o":
+        gender = "other";
+        break;
+      default:
+        gender = "n/a"
     }
+    if (gender == "n/a") {
+      message.channel.send("I'll just set your gender to **other**. If you'd rather not be, please use \"female\" or \"male.\"")
+    } else {
+      message.channel.send("Sure thing, I'll refer to you as **" + gender + "**.")
+    }
+    if(!config.users[message.author.id]) {
+      initUser(message.author.id)
+    }
+    if (gender == "n/a") gender = "other";
+    config.users[message.author.id].gender = gender;
+  }
   }
 })
