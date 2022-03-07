@@ -3,7 +3,7 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_
 const fs = require('fs');
 
 var prefix = "pr:"
-var version = "v0.111"
+var version = "v0.112"
 var verText = "just for you"
 
 client.login('[token]')
@@ -21,24 +21,19 @@ function initUser(au) {
 }
 
 function name(user) {
-  if(!config.users[user]) {
-    console.log("huh")
-    initUser(user)
+  if(!config.users[user.id]) {
+    initUser(user.id)
   }
-  if(!config.users[user].name) {
-    console.log("wait??")
-    client.users.fetch(user).then((usr) => {
-      console.log(usr)
-      config.users[user].name = (usr.username).toString()
-    })
+  if(!config.users[user.id].name) {
+    return user.username
+  } else {
+    return config.users[user.id].name
   }
-  console.log(config.users[user].name)
-  return config.users[user].name
 }
 
 client.on('ready', () => {
   console.log('Precipitation has started!')
-  client.user.setActivity("v0.111 || pr:help")
+  client.user.setActivity(version + " || " + prefix + "help")
   setTimeout(saveConfiguration, 5000)
 })
 
@@ -65,7 +60,7 @@ client.on('messageCreate', message => {
     var command = message.content.slice(prefix.length)
     switch (command) {
       case "ping":
-      let user = message.author.id
+        let user = message.author
         let startTime = Date.now();
         let rng = Math.floor(Math.random() * 6)
         let pingMessage;
@@ -132,7 +127,7 @@ client.on('messageCreate', message => {
         initUser(message.author.id);
       }
       config.users[message.author.id].name = cmd;
-      message.channel.send("Sure, I'll refer to you by \"" + name(message.author.id) + "\".")
+      message.channel.send("Sure, I'll refer to you by \"" + name(message.author) + "\".")
     }
     }
   }
