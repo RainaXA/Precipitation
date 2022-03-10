@@ -3,7 +3,7 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_
 const fs = require('fs');
 
 var prefix = "pr:"
-var version = "v0.12"
+var version = "v0.1.2.1"
 var verText = "just for you"
 
 client.login('[token]')
@@ -16,17 +16,24 @@ function saveConfiguration() {
 }
 
 function initUser(au) {
-  config.users[au] = {}
+  if(!config.users[au]) {
+    config.users[au] = {}
+  }
 }
 
 function name(user) {
-  if(!config.users[user.id]) {
-    initUser(user.id)
-  }
   if(!config.users[user.id].name) {
     return user.username
   } else {
     return config.users[user.id].name
+  }
+}
+
+function gender(user) {
+  if(config.users[user.id].gender) {
+    return config.users[user.id].gender
+  } else {
+    return "other";
   }
 }
 
@@ -57,6 +64,7 @@ if(!fs.existsSync('./config.json')) {
 client.on('messageCreate', message => {
   if (message.content.startsWith(prefix) && !message.author.bot) {
     var command = message.content.slice(prefix.length)
+    initUser(message.author.id)
     switch (command) {
       case "ping":
         let user = message.author
@@ -118,10 +126,13 @@ client.on('messageCreate', message => {
         break;
       case "gtest": // this command only stays until there is a command that utilizes gender
         let genderedMessage;
-        if(config.users[message.author.id].gender == "female") genderedMessage = "girl";
-        if(config.users[message.author.id].gender == "male") genderedMessage = "dude";
-        if(config.users[message.author.id].gender == "other") genderedMessage = "real one";
+        if(gender(message.author) == "female") genderedMessage = "girl";
+        if(gender(message.author) == "male") genderedMessage = "dude";
+        if(gender(message.author) == "other") genderedMessage = "real one";
         message.channel.send("hey, you a " + genderedMessage + " to me <3");
+        break;
+      case "name":
+        message.channel.send("Hey! This won't do anything unless you put a name. However, in 0.1.2.2 (the next version), this will clear your name instead.")
     }
     if(command.startsWith("name ")) {
       let cmd = command.slice(5);
@@ -130,9 +141,6 @@ client.on('messageCreate', message => {
       } else if((cmd.includes("<@") && cmd.includes(">")) || cmd.includes("@everyone") || cmd.includes("@here")) {
         message.channel.send("Nice try.")
       } else {
-      if (!config.users[message.author.id]) {
-        initUser(message.author.id);
-      }
       config.users[message.author.id].name = cmd;
       message.channel.send("Sure, I'll refer to you by \"" + name(message.author) + "\".")
     }
@@ -162,9 +170,6 @@ client.on('messageCreate', message => {
       message.channel.send("I'll just set your gender to **other**. If you'd rather not be, please use \"female\" or \"male.\"")
     } else {
       message.channel.send("Sure thing, I'll refer to you as **" + gender + "**.")
-    }
-    if(!config.users[message.author.id]) {
-      initUser(message.author.id)
     }
     if (gender == "n/a") gender = "other";
     config.users[message.author.id].gender = gender;
