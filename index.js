@@ -3,7 +3,7 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_
 const fs = require('fs');
 
 var prefix = "pr:"
-var version = "v0.1.2.1"
+var version = "v0.1.2.2"
 var verText = "just for you"
 
 client.login('[token]')
@@ -29,11 +29,17 @@ function name(user) {
   }
 }
 
-function gender(user) {
-  if(config.users[user.id].gender) {
-    return config.users[user.id].gender
+function gender(user, mMessage, fMessage, oMessage) { // male first, female second, others third
+  if(mMessage && fMessage && oMessage) {
+    if(config.users[user.id].gender == "male") return mMessage;
+    if(config.users[user.id].gender == "female") return fMessage;
+    if(!config.users[user.id].gender || config.users[user.id].gender == "other") return oMessage;
   } else {
-    return "other";
+    if(config.users[user.id].gender) {
+      return config.users[user.id].gender
+    } else {
+      return "other";
+    }
   }
 }
 
@@ -48,7 +54,7 @@ if(!fs.existsSync('./config.json')) {
   var config = {
     "guilds": {
 
-    },
+    },﻿
     "users": {
 
     }
@@ -62,10 +68,10 @@ if(!fs.existsSync('./config.json')) {
 }
 
 client.on('messageCreate', message => {
-  if (message.content.startsWith(prefix) && !message.author.bot) {
+  if (message.content.toLowerCase().startsWith(prefix) && !message.author.bot) {
     var command = message.content.slice(prefix.length)
     initUser(message.author.id)
-    switch (command) {
+    switch (command.toLowerCase()) {
       case "ping":
         let user = message.author
         let startTime = Date.now();
@@ -125,16 +131,13 @@ client.on('messageCreate', message => {
         message.channel.send({embeds: [aboutEmbed]})
         break;
       case "gtest": // this command only stays until there is a command that utilizes gender
-        let genderedMessage;
-        if(gender(message.author) == "female") genderedMessage = "girl";
-        if(gender(message.author) == "male") genderedMessage = "dude";
-        if(gender(message.author) == "other") genderedMessage = "real one";
-        message.channel.send("hey, you a " + genderedMessage + " to me <3");
+        message.channel.send("hey, you a " + gender(message.author, "dude", "girl", "real one") + " to me <3");
         break;
       case "name":
-        message.channel.send("Hey! This won't do anything unless you put a name. However, in 0.1.2.2 (the next version), this will clear your name instead.")
+        config.users[message.author.id].name = null;
+        message.channel.send("Sure, I will refer to you by your username.")
     }
-    if(command.startsWith("name ")) {
+    if(command.toLowerCase().startsWith("name ")) {
       let cmd = command.slice(5);
       if(cmd.length >= 75) {
         message.channel.send("Your name isn't that long.")
