@@ -3,7 +3,7 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_
 const fs = require('fs');
 
 var prefix = "pr:"
-var version = "v0.1.3"
+var version = "v0.1.3.1"
 var verText = "just for you"
 
 client.login('[token]')
@@ -47,73 +47,79 @@ function gender(user, mMessage, fMessage, oMessage) { // male first, female seco
 }
 
 function placeValue(num) {
-  if(num.endsWith("11") || num.endsWith("12") || num.endsWith("13")) {
-    return num + "th";
-  } else if(num.endsWith("1")) {
-    return num + "st";
-  } else if(num.endsWith("2")) {
-    return num + "nd";
-  } else if(num.endsWith("3")) {
-    return num + "rd";
+  let number = num.toString()
+  if(number.endsWith("11") || number.endsWith("12") || number.endsWith("13")) {
+    return number + "th";
+  } else if(number.endsWith("1")) {
+    return number + "st";
+  } else if(number.endsWith("2")) {
+    return number + "nd";
+  } else if(number.endsWith("3")) {
+    return number + "rd";
   } else {
-    return num + "th";
+    return number + "th";
   }
 }
 
 function getMonth(month) {
   switch(month) {
-    case "1":
+    case 1:
       return "January";
-    case "2":
+    case 2:
       return "February";
-    case "3":
+    case 3:
       return "March";
-    case "4":
+    case 4:
       return "April";
-    case "5":
+    case 5:
       return "May";
-    case "6":
+    case 6:
       return "June";
-    case "7":
+    case 7:
       return "July";
-    case "8":
+    case 8:
       return "August";
-    case "9":
+    case 9:
       return "September";
-    case "10":
+    case 10:
       return "October";
-    case "11":
+    case 11:
       return "November";
-    case "12":
+    case 12:
       return "December";
     }
 }
 
-function getDaysInMonth(month) {
+function getDaysInMonth(month, year) {
+  let leap = (year % 100 === 0) ? (year % 400 === 0) : (year % 4 === 0);
   switch(month) {
-    case "1":
+    case 1:
       return 31;
-    case "2":
-      return 28;
-    case "3":
+    case 2:
+      if(leap == true) {
+        return 29;
+      } else {
+        return 28;
+      }
+    case 3:
       return 31;
-    case "4":
+    case 4:
       return 30;
-    case "5":
+    case 5:
       return 31;
-    case "6":
+    case 6:
       return 30;
-    case "7":
+    case 7:
       return 31;
-    case "8":
+    case 8:
       return 31;
-    case "9":
+    case 9:
       return 30;
-    case "10":
+    case 10:
       return 31;
-    case "11":
+    case 11:
       return 30;
-    case "12":
+    case 12:
       return 31;
     default:
       return "invalid month"
@@ -268,28 +274,28 @@ client.on('messageCreate', message => {
     let cmd = command.slice(9).split("/");
     let year = new Date().getFullYear();
     if(!command.includes("/")) {
-      message.channel.send("Currently, you must separate your birthday with slashes, and it must be in mm/dd/yyyy format. *(don't worry, non-Americans, you'll be saved in the future.)*")
+      message.channel.send("Currently, you must separate your birthday with slashes, and it must be in mm/dd/yyyy format.")  // two Europeans who have used this bot said it's better to keep it in one format.
     } else if(cmd.length != 3) {
-      message.channel.send("That's not how dates work. It's mm/dd/yyyy. *(don't worry, non-Americans, you'll be saved in the future.)*")
+      message.channel.send("That's not how dates work. It's mm/dd/yyyy.") // two Europeans who have used this bot said it's better to keep it in one format.
     } else if(isNaN(parseInt(cmd[0])) || isNaN(parseInt(cmd[1])) || isNaN(parseInt(cmd[2]))) {
       message.channel.send("You have to, you know, put just numbers in a birthday.")
     } else if(cmd[0].includes("-") || cmd[1].includes("-") || cmd[2].includes("-")) {
       message.channel.send("Please exclude the negative sign. That's not how birthdays work.")
     } else if(cmd[0].includes(".") || cmd[1].includes(".") || cmd[2].includes(".")) {
-      message.channel.send("Please take out the decimal, I don't believe birthdays work like that either.")
-    } else if(getDaysInMonth(cmd[0]) == "invalid month") {
+      message.channel.send("Please take out the decimal, I don't believe birthdays work like that.")
+    } else if(getDaysInMonth(parseInt(cmd[0]), cmd[2]) == "invalid month") {
       message.channel.send("Please give me a valid month. If you put a 0 at the beginning, please exclude this for now.")
-    } else if(getDaysInMonth(cmd[0]) < parseInt(cmd[1])) {
-      message.channel.send("Your birthday is not past when the month ended. *(unless you were born on a leap day! you'll be saved in the future.)*")
+    } else if(getDaysInMonth(parseInt(cmd[0]), parseInt(cmd[2])) < parseInt(cmd[1])) {
+      message.channel.send("Your birthday is not past when the month ended.")
     } else if(parseInt(cmd[2]) > year) {
       message.channel.send("Nice try, time traveler.")
     } else if(parseInt(cmd[2]) < 1903) {
       message.channel.send("So you're trying to tell me you're older than the oldest alive person on Earth? I doubt that.")
     } else {
-      message.channel.send("Okay, I will set your birthday as " + toProperUSFormat(cmd[0], cmd[1], cmd[2]) + ".")
-      config.users[message.author.id].birthday.month = cmd[0];
-      config.users[message.author.id].birthday.day = cmd[1];
-      config.users[message.author.id].birthday.year = cmd[2];
+      message.channel.send("Okay, I will set your birthday as " + toProperUSFormat(parseInt(cmd[0]), parseInt(cmd[1]), cmd[2]) + ".")
+      config.users[message.author.id].birthday.month = parseInt(cmd[0]);
+      config.users[message.author.id].birthday.day = parseInt(cmd[1]);
+      config.users[message.author.id].birthday.year = parseInt(cmd[2]);
     }
   } else if (command.startsWith("placevalue ")) {
     let cmd = command.slice(11)
