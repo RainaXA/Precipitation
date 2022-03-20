@@ -1,15 +1,43 @@
 const { Client, Intents, MessageEmbed } = require('discord.js');
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 const fs = require('fs');
-const colors = require('colors'); // yes, you can do this within the node.js console using the weird thingies. however, im lazy, i do this later lol, i just want to get this done quickly readline = require('readline');
+const colors = require('colors'); // yes, you can do this within the node.js console using the weird thingies. however, im lazy, i do this later lol, i just want to get this done quickly
+const readline = require('readline');
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+
 
 var prefix = "pr:"
-var version = "v0.1.5"
+var version = "v0.1.6"
 var verText = "just for you"
 
 var debugging = 0;
 
 client.login('[token]')
+
+function processConsoleCommand() {
+  rl.question('', (answer) => {
+    switch (answer) {
+      case "ping":
+        log("Hello!\n", "output", 0)
+        break;
+      case "help":
+        log("\nPrecipitation Help Index", "output", 3)
+        log("General", "output", 1)
+        log("ping", "output", 0)
+        log("help", "output", 0)
+        log("e\n", "output", 0)
+    }
+    if(answer.startsWith("e ")) {
+      let cmd = answer.slice(2)
+      eval(cmd)
+    }
+    processConsoleCommand();
+  });
+}
 
 function saveConfiguration() {
   fs.writeFile('config.json', JSON.stringify(config), function (err) {
@@ -98,7 +126,7 @@ function initUser(au) {
   }
   if(!config.users[au.id].consent) {
     config.users[au.id].consent = {};
-    au.send("Hello! By default, Precipitation may log some messages you send that are affiliated with the bot for debugging purposes only.\nIn particular, all messages that begin with the bots prefix, and certain actions the bot is performing throughout commands.\n\nIf you do not consent, please type `pr:debugConsent` to disable this.")
+    au.send("Hello! By default, Precipitation may log some messages you send that are affiliated with the bot for debugging purposes only.\nIn particular, all messages that begin with the bots prefix, and certain actions the bot is performing throughout commands.\n\nIf you do not consent, please type `pr;debugConsent` to disable this.")
     config.users[au.id].consent.debug = true;
   }
 }
@@ -225,6 +253,7 @@ client.on('ready', () => {
   log('Precipitation has started!', "success", 1, null)
   client.user.setActivity(version + " || " + prefix + "help")
   setTimeout(saveConfiguration, 5000)
+  processConsoleCommand();
 })
 
 if(!fs.existsSync('./config.json')) {
@@ -232,7 +261,7 @@ if(!fs.existsSync('./config.json')) {
   var config = {
     "guilds": {
 
-    },﻿
+    },
     "users": {
 
     }
@@ -251,13 +280,14 @@ client.on('messageCreate', message => {
     initUser(message.author)
     if (config.users[message.author.id].consent.debug == true) log(message.author.tag + " (" + message.author.id + "): " + message.content, "debug", 3, message.author.id)
     var command = message.content.slice(prefix.length)
+    var parameters = command.split("--")
     switch (command.toLowerCase()) {
       case "ping":
         let user = message.author
         let startTime = Date.now();
-        let rng = Math.floor(Math.random() * 6)
+        let raelynnTooCute = Math.floor(Math.random() * 6)
         let pingMessage;
-        switch (rng) {
+        switch (raelynnTooCute) {
           case 0:
             pingMessage = "Pinging..."
             break;
@@ -295,16 +325,13 @@ client.on('messageCreate', message => {
         .setFooter({ text: 'Precipitation ' + version });
         message.channel.send({embeds: [helpEmbed]})
         break;
-      case "ver":
-      case "version":
-        message.channel.send("Precipitation " + version + ": " + verText + ".");
-        break;
       case "about":
         let aboutEmbed = new MessageEmbed()
         .setTitle("Precipitation " + version)
         .setDescription('Kinda cool hybrid moderation-fun bot')
         .addFields(
-          { name: "Creator", value: "**raina#7847** - bot developer" }
+          { name: "Creator", value: "**raina#7847** - bot developer" },
+          { name: "Version Support", value: "**Current Stable**: gets all updates after dev build"}
         )
         .setColor("BLUE")
         .setFooter({ text: 'Precipitation ' + version });
@@ -352,7 +379,13 @@ client.on('messageCreate', message => {
           config.users[message.author.id].consent.debug = true;
         }
     }
-    if(command.toLowerCase().startsWith("name ")) {
+    if(command.toLowerCase().startsWith("ver") || command.toLowerCase().startsWith("version")) {
+      if(parameters[1] == "no-ver-text") {
+        message.channel.send("Precipitation " + version)
+      } else {
+        message.channel.send("Precipitation " + version + ": " + verText + ".");
+      }
+    } else if(command.toLowerCase().startsWith("name ")) {
       let cmd = command.slice(5);
       if(cmd.length >= 75) {
         message.channel.send("Your name isn't that long.")
