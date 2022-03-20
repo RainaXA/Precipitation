@@ -3,7 +3,7 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_
 const fs = require('fs');
 
 var prefix = "pr:"
-var version = "v0.1.3.1"
+var version = "v0.1.4"
 var verText = "just for you"
 
 client.login('[token]')
@@ -21,6 +21,9 @@ function initUser(au) {
   }
   if(!config.users[au].birthday) {
     config.users[au].birthday = {};
+  }
+  if(!config.users[au].location) {
+    config.users[au].location = {};
   }
 }
 
@@ -130,6 +133,18 @@ function toProperUSFormat(month, day, year) {
   return getMonth(month) + " " + placeValue(day) + ", " + year;
 }
 
+function getLocationFormat(user) {
+  if(!config.users[user.id].location.continent) return "Please set a continent first."
+  if(config.users[user.id].location.country) {
+    if(config.users[user.id].location.country == "Western" || config.users[user.id].location.country == "Eastern") {
+      return config.users[user.id].location.country + " " + config.users[user.id].location.continent;
+    }
+    return config.users[user.id].location.country
+  } else {
+    return config.users[user.id].location.continent
+  }
+}
+
 client.on('ready', () => {
   console.log('Precipitation has started!')
   client.user.setActivity(version + " || " + prefix + "help")
@@ -141,7 +156,7 @@ if(!fs.existsSync('./config.json')) {
   var config = {
     "guilds": {
 
-    },﻿
+    },
     "users": {
 
     }
@@ -195,8 +210,8 @@ client.on('messageCreate', message => {
         .setDescription('List of all commands -- use `' + prefix + '` before all commands!')
         .addFields(
           { name: "General", value: "ping\nhelp\nversion\nabout", inline: true },
-          { name: "Personalization", value: "name\ngender\nbirthday", inline: true },
-          { name: "Alpha", value: "gtest\nbtest\nplacevalue", inline: true }
+          { name: "Personalization", value: "name\ngender\nbirthday\nlocation (list)", inline: true },
+          { name: "Alpha", value: "gtest\nbtest\nltest\nplacevalue", inline: true }
         )
         .setColor("BLUE")
         .setFooter({ text: 'Precipitation ' + version });
@@ -230,6 +245,25 @@ client.on('messageCreate', message => {
         } else {
           message.channel.send(toProperUSFormat(config.users[message.author.id].birthday.month, config.users[message.author.id].birthday.day, config.users[message.author.id].birthday.year))
         }
+        break;
+      case "ltest":
+        if(!config.users[message.author.id].location.continent) {
+          message.channel.send("Please set a continent first, using " + prefix + "location continent [set].")
+        } else {
+          message.channel.send(getLocationFormat(message.author))
+        }
+        break;
+      case "location":
+        let locationHelp = new MessageEmbed()
+        .setTitle("Precipitation " + version + " Locations")
+        .setDescription('Just use ' + prefix + 'location continent [location] to set!')
+        .addFields(
+          { name: "Continents", value: "North America\nSouth America\nEurope\nAfrica\nAsia\nOceania\nAntarctica", inline: true },
+          { name: "Countries", value: prefix + "location country [country name]. If you do not live in the US, you can use west or east to denote Western or Eastern." }
+        )
+        .setColor("BLUE")
+        .setFooter({ text: 'Precipitation ' + version });
+        message.channel.send({embeds: [locationHelp]})
     }
     if(command.toLowerCase().startsWith("name ")) {
       let cmd = command.slice(5);
@@ -302,6 +336,96 @@ client.on('messageCreate', message => {
     if(isNaN(parseInt(cmd))) return message.channel.send("Please input a number.")
     if(cmd.includes(".")) return message.channel.send("This will still work with the decimal, but please exclude it. I'm picky, okay?")
     message.channel.send(placeValue(cmd))
+  } else if (command.startsWith("location ")) {
+    let cmd = command.slice(9).toLowerCase();
+    if (cmd == "list") {
+      let locationList = new MessageEmbed()
+      .setTitle("Precipitation " + version + " Locations")
+      .setDescription('Just use ' + prefix + 'location continent [location] to set!')
+      .addFields(
+        { name: "Continents", value: "North America\nSouth America\nEurope\nAfrica\nAsia\nOceania\nAntarctica", inline: true },
+        { name: "Countries", value: prefix + "location country [country name]. If you do not live in the US, you can use west or east to denote Western or Eastern." }
+      )
+      .setColor("BLUE")
+      .setFooter({ text: 'Precipitation ' + version });
+      message.channel.send({embeds: [locationList]})
+    }
+    if (cmd == "continent") message.channel.send("Please re-run the command with your continent afterwards.")
+    if (cmd.startsWith("continent ")) {
+      let continent;
+      cmd = cmd.slice(10)
+      switch(cmd) {
+        case "north america":
+        case "na":
+          message.channel.send("Okay, I'm setting your continent to **North America**.")
+          continent = "North America";
+          break;
+        case "south america":
+        case "sa":
+          message.channel.send("Okay, I'm setting your continent to **South America**.")
+          continent = "South America";
+          break;
+        case "europe":
+        case "eu":
+          message.channel.send("Okay, I'm setting your continent to **Europe**.")
+          continent = "Europe";
+          break;
+        case "africa":
+          message.channel.send("Okay, I'm setting your continent to **Africa**.")
+          continent = "Africa";
+          break;
+        case "asia":
+          message.channel.send("Okay, I'm setting your continent to **Asia**.")
+          continent = "Asia";
+          break;
+        case "oceania":
+        case "australia":
+          message.channel.send("Okay, I'm setting your continent to **Oceania**.")
+          continent = "Oceania";
+          break;
+        case "antarctica":
+          message.channel.send("Okay, I'm setting your continent to **Antarctica**.")
+          continent = "Antarctica";
+          break;
+        default:
+          continent = "n/a"
+      }
+      if(continent != "n/a") {
+        config.users[message.author.id].location.country = null;
+        config.users[message.author.id].location.continent = continent;
+      } else {
+        message.channel.send("Please enter a valid continent.")
+      }
+    } else if (cmd.startsWith("country ")) {
+      cmd = cmd.slice(8)
+      switch (cmd) {
+        case "us":
+        case "united states":
+        case "america":
+        case "united states of america":
+          config.users[message.author.id].location.continent = "North America";
+          config.users[message.author.id].location.country = "United States";
+          console.log(config.users[message.author.id].location.country)
+          message.channel.send("Okay, I'm setting your country to **United States**, which also sets your continent to **North America**.")
+          break;
+        case "west":
+          if(config.users[message.author.id].location.continent) {
+            config.users[message.author.id].location.country = "Western";
+            message.channel.send("Okay, I've set it so you are from **Western " + config.users[message.author.id].location.continent + "**.")
+          } else {
+            message.channel.send("Please set your continent first.")
+          }
+          break;
+        case "east":
+          if(config.users[message.author.id].location.continent) {
+            config.users[message.author.id].location.country = "Eastern";
+            message.channel.send("Okay, I've set it so you are from **Eastern " + config.users[message.author.id].location.continent + "**.")
+          } else {
+            message.channel.send("Please set your continent first.")
+          }
+          break;
+      }
+    }
   }
   }
 })
