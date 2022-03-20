@@ -1,29 +1,105 @@
 const { Client, Intents, MessageEmbed } = require('discord.js');
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 const fs = require('fs');
+const colors = require('colors'); // yes, you can do this within the node.js console using the weird thingies. however, im lazy, i do this later lol, i just want to get this done quickly readline = require('readline');
 
 var prefix = "pr:"
-var version = "v0.1.4"
+var version = "v0.1.5"
 var verText = "just for you"
+
+var debugging = 0;
 
 client.login('[token]')
 
 function saveConfiguration() {
   fs.writeFile('config.json', JSON.stringify(config), function (err) {
-    if (err) console.log("settings could not be saved!");
+    if (!err) log("Saved settings.", "debug", 3, null)
+    if (err) log("Settings couldn't be saved!", "error", 3, null)
   })
   setTimeout(saveConfiguration, 5000);
 }
 
+function log(message, type, level, debugUser) {
+  // debug level: will only display if the current debugging level is >= the level set on the log
+
+  // rule of thumb:
+  // level 0 debugging: should be used most of the time, will log next to nothing
+  // level 1 debugging: will log specific areas that are known to cause trouble, or may not be very stable (always changing)
+  // level 2 debugging: logs new changes, describes most of what the bot is doing
+  // level 3 debugging: logs ALL messages that begin with the bot prefix
+  let msg;
+  switch (type) {
+    case "error":
+      msg = ("[X] " + message).brightRed
+      break;
+    case "warn":
+      msg = ("[!] " + message).brightYellow
+      break;
+    case "info":
+      msg = ("[i] " + message).brightBlue
+      break;
+    case "success":
+      msg = ("[>] " + message).brightGreen
+      break;
+    case "unknown":
+      msg = ("[?] " + message).brightCyan
+      break;
+    case "output":
+      msg = (message).brightWhite
+      break;
+    case "debug":
+      msg = ("[-] " + message).brightMagenta
+      break;
+  }
+  if (type != "debug") {
+    switch(level) {
+      case 0:
+      default:
+        break;
+      case 1:
+        msg = msg.bold
+        break;
+      case 2:
+        msg = msg.bold.italic
+        break;
+      case 3:
+        msg = msg.bold.italic.underline
+        break;
+    }
+    console.log(msg)
+  } else {
+    if(debugUser == null) {
+      if(debugging >= level) {
+        return console.log(msg.bold);
+      } else {
+        return;
+      }
+    }
+    if(config.users[debugUser].consent.debug == false) return;
+    if(debugging >= level) {
+      if(level == debugging) {
+        console.log(msg.bold)
+      } else {
+        console.log(msg)
+      }
+    }
+  }
+}
+
 function initUser(au) {
-  if(!config.users[au]) {
-    config.users[au] = {};
+  if(!config.users[au.id]) {
+    config.users[au.id] = {};
   }
-  if(!config.users[au].birthday) {
-    config.users[au].birthday = {};
+  if(!config.users[au.id].birthday) {
+    config.users[au.id].birthday = {};
   }
-  if(!config.users[au].location) {
-    config.users[au].location = {};
+  if(!config.users[au.id].location) {
+    config.users[au.id].location = {};
+  }
+  if(!config.users[au.id].consent) {
+    config.users[au.id].consent = {};
+    au.send("Hello! By default, Precipitation may log some messages you send that are affiliated with the bot for debugging purposes only.\nIn particular, all messages that begin with the bots prefix, and certain actions the bot is performing throughout commands.\n\nIf you do not consent, please type `pr:debugConsent` to disable this.")
+    config.users[au.id].consent.debug = true;
   }
 }
 
@@ -146,33 +222,35 @@ function getLocationFormat(user) {
 }
 
 client.on('ready', () => {
-  console.log('Precipitation has started!')
+  log('Precipitation has started!', "success", 1, null)
   client.user.setActivity(version + " || " + prefix + "help")
   setTimeout(saveConfiguration, 5000)
 })
 
 if(!fs.existsSync('./config.json')) {
-  console.log('config.json does not exist - creating')
+  log('config.json does not exist. Creating now.', "warn", 0, null)
   var config = {
     "guilds": {
 
-    },
+    },﻿
     "users": {
 
     }
   };
   fs.writeFile('config.json', JSON.stringify(config), function (err) {
     if (err) throw err;
-    console.log('config.json has been created')
+    log('config.json has been created.', "success", 0, null)
   })
 } else {
   var config = JSON.parse(fs.readFileSync("./config.json"));
 }
 
 client.on('messageCreate', message => {
+  // if (message.author.id == client.user.id) log(message.author.tag + " (" + message.author.id + "): " + message.content, "debug", 3, null)
   if (message.content.toLowerCase().startsWith(prefix) && !message.author.bot) {
+    initUser(message.author)
+    if (config.users[message.author.id].consent.debug == true) log(message.author.tag + " (" + message.author.id + "): " + message.content, "debug", 3, message.author.id)
     var command = message.content.slice(prefix.length)
-    initUser(message.author.id)
     switch (command.toLowerCase()) {
       case "ping":
         let user = message.author
@@ -264,6 +342,15 @@ client.on('messageCreate', message => {
         .setColor("BLUE")
         .setFooter({ text: 'Precipitation ' + version });
         message.channel.send({embeds: [locationHelp]})
+      break;
+      case "debugconsent":
+        if(config.users[message.author.id].consent.debug == true) {
+          message.channel.send("Okay, your messages will not be subject to any debug logging.")
+          config.users[message.author.id].consent.debug = false;
+        } else {
+          message.channel.send("Okay, your messages will be subject to any debug logging.")
+          config.users[message.author.id].consent.debug = true;
+        }
     }
     if(command.toLowerCase().startsWith("name ")) {
       let cmd = command.slice(5);
@@ -337,8 +424,10 @@ client.on('messageCreate', message => {
     if(cmd.includes(".")) return message.channel.send("This will still work with the decimal, but please exclude it. I'm picky, okay?")
     message.channel.send(placeValue(cmd))
   } else if (command.startsWith("location ")) {
+    log("Location command begins.", "debug", 2, message.author.id) // introduced recently (0.1.4)
     let cmd = command.slice(9).toLowerCase();
     if (cmd == "list") {
+      log("Listing continents and countries.", "debug", 2, message.author.id)
       let locationList = new MessageEmbed()
       .setTitle("Precipitation " + version + " Locations")
       .setDescription('Just use ' + prefix + 'location continent [location] to set!')
@@ -349,11 +438,16 @@ client.on('messageCreate', message => {
       .setColor("BLUE")
       .setFooter({ text: 'Precipitation ' + version });
       message.channel.send({embeds: [locationList]})
+      log("Listed.", "debug", 2, message.author.id)
     }
-    if (cmd == "continent") message.channel.send("Please re-run the command with your continent afterwards.")
+    if (cmd == "continent") {
+      message.channel.send("Please re-run the command with your continent afterwards.")
+      log("Improperly run command (pr:location continent).", "debug", 2, message.author.id)
+    }
     if (cmd.startsWith("continent ")) {
       let continent;
       cmd = cmd.slice(10)
+      log("Continent picked.", "debug", 2, message.author.id)
       switch(cmd) {
         case "north america":
         case "na":
@@ -391,12 +485,16 @@ client.on('messageCreate', message => {
           continent = "n/a"
       }
       if(continent != "n/a") {
+        log("Setting continent.", "debug", 2, message.author.id)
         config.users[message.author.id].location.country = null;
         config.users[message.author.id].location.continent = continent;
+        log("Set continent.", "debug", 2, message.author.id)
       } else {
+        log("Invalid continent.", "debug", 2, message.author.id)
         message.channel.send("Please enter a valid continent.")
       }
     } else if (cmd.startsWith("country ")) {
+      log("Setting country.", "debug", 2, message.author.id)
       cmd = cmd.slice(8)
       switch (cmd) {
         case "us":
@@ -405,7 +503,6 @@ client.on('messageCreate', message => {
         case "united states of america":
           config.users[message.author.id].location.continent = "North America";
           config.users[message.author.id].location.country = "United States";
-          console.log(config.users[message.author.id].location.country)
           message.channel.send("Okay, I'm setting your country to **United States**, which also sets your continent to **North America**.")
           break;
         case "west":
@@ -425,6 +522,7 @@ client.on('messageCreate', message => {
           }
           break;
       }
+      log("Set country.", "debug", 2, message.author.id)
     }
   }
   }
