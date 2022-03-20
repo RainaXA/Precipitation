@@ -10,8 +10,8 @@ const rl = readline.createInterface({
 });
 
 
-var prefix = "pr:"
-var version = "v0.1.6"
+var prefix = "pr:" // currently pr; in the official Precipitation, changed for source
+var version = "v0.1.6.1"
 var verText = "just for you"
 
 var debugging = 0;
@@ -41,13 +41,13 @@ function processConsoleCommand() {
 
 function saveConfiguration() {
   fs.writeFile('config.json', JSON.stringify(config), function (err) {
-    if (!err) log("Saved settings.", "debug", 3, null)
-    if (err) log("Settings couldn't be saved!", "error", 3, null)
+    if (!err) log("Saved settings.", "debug", 3)
+    if (err) log("Settings couldn't be saved!", "error", 3)
   })
   setTimeout(saveConfiguration, 5000);
 }
 
-function log(message, type, level, debugUser) {
+function log(message, type, level) {
   // debug level: will only display if the current debugging level is >= the level set on the log
 
   // rule of thumb:
@@ -55,6 +55,8 @@ function log(message, type, level, debugUser) {
   // level 1 debugging: will log specific areas that are known to cause trouble, or may not be very stable (always changing)
   // level 2 debugging: logs new changes, describes most of what the bot is doing
   // level 3 debugging: logs ALL messages that begin with the bot prefix
+
+  // will be redone!! ^^^
   let msg;
   switch (type) {
     case "error":
@@ -96,14 +98,6 @@ function log(message, type, level, debugUser) {
     }
     console.log(msg)
   } else {
-    if(debugUser == null) {
-      if(debugging >= level) {
-        return console.log(msg.bold);
-      } else {
-        return;
-      }
-    }
-    if(config.users[debugUser].consent.debug == false) return;
     if(debugging >= level) {
       if(level == debugging) {
         console.log(msg.bold)
@@ -124,11 +118,7 @@ function initUser(au) {
   if(!config.users[au.id].location) {
     config.users[au.id].location = {};
   }
-  if(!config.users[au.id].consent) {
-    config.users[au.id].consent = {};
-    au.send("Hello! By default, Precipitation may log some messages you send that are affiliated with the bot for debugging purposes only.\nIn particular, all messages that begin with the bots prefix, and certain actions the bot is performing throughout commands.\n\nIf you do not consent, please type `pr;debugConsent` to disable this.")
-    config.users[au.id].consent.debug = true;
-  }
+  // change of heart!
 }
 
 function name(user) {
@@ -250,14 +240,14 @@ function getLocationFormat(user) {
 }
 
 client.on('ready', () => {
-  log('Precipitation has started!', "success", 1, null)
+  log('Precipitation has started!', "success", 1)
   client.user.setActivity(version + " || " + prefix + "help")
   setTimeout(saveConfiguration, 5000)
   processConsoleCommand();
 })
 
 if(!fs.existsSync('./config.json')) {
-  log('config.json does not exist. Creating now.', "warn", 0, null)
+  log('config.json does not exist. Creating now.', "warn", 0)
   var config = {
     "guilds": {
 
@@ -275,10 +265,8 @@ if(!fs.existsSync('./config.json')) {
 }
 
 client.on('messageCreate', message => {
-  // if (message.author.id == client.user.id) log(message.author.tag + " (" + message.author.id + "): " + message.content, "debug", 3, null)
   if (message.content.toLowerCase().startsWith(prefix) && !message.author.bot) {
     initUser(message.author)
-    if (config.users[message.author.id].consent.debug == true) log(message.author.tag + " (" + message.author.id + "): " + message.content, "debug", 3, message.author.id)
     var command = message.content.slice(prefix.length)
     var parameters = command.split("--")
     switch (command.toLowerCase()) {
@@ -331,14 +319,14 @@ client.on('messageCreate', message => {
         .setDescription('Kinda cool hybrid moderation-fun bot')
         .addFields(
           { name: "Creator", value: "**raina#7847** - bot developer" },
-          { name: "Version Support", value: "**Current Stable**: gets all updates after dev build"}
+          { name: "Version Support", value: "**Older Stable**: given some updates from newer version"}
         )
         .setColor("BLUE")
         .setFooter({ text: 'Precipitation ' + version });
         message.channel.send({embeds: [aboutEmbed]})
         break;
       case "gtest": // this command only stays until there is a command that utilizes gender
-        message.channel.send("hey, you a " + gender(message.author, "dude", "girl", "real one") + " to me <3");
+        message.channel.send("hey, you a " + gender(message.author, "dude", "girl", "real one") + " to me <3"); // why the fuck does this break in v0.2??? please someone make a PR
         break;
       case "name":
         config.users[message.author.id].name = null;
@@ -370,14 +358,6 @@ client.on('messageCreate', message => {
         .setFooter({ text: 'Precipitation ' + version });
         message.channel.send({embeds: [locationHelp]})
       break;
-      case "debugconsent":
-        if(config.users[message.author.id].consent.debug == true) {
-          message.channel.send("Okay, your messages will not be subject to any debug logging.")
-          config.users[message.author.id].consent.debug = false;
-        } else {
-          message.channel.send("Okay, your messages will be subject to any debug logging.")
-          config.users[message.author.id].consent.debug = true;
-        }
     }
     if(command.toLowerCase().startsWith("ver") || command.toLowerCase().startsWith("version")) {
       if(parameters[1] == "no-ver-text") {
@@ -457,10 +437,8 @@ client.on('messageCreate', message => {
     if(cmd.includes(".")) return message.channel.send("This will still work with the decimal, but please exclude it. I'm picky, okay?")
     message.channel.send(placeValue(cmd))
   } else if (command.startsWith("location ")) {
-    log("Location command begins.", "debug", 2, message.author.id) // introduced recently (0.1.4)
     let cmd = command.slice(9).toLowerCase();
     if (cmd == "list") {
-      log("Listing continents and countries.", "debug", 2, message.author.id)
       let locationList = new MessageEmbed()
       .setTitle("Precipitation " + version + " Locations")
       .setDescription('Just use ' + prefix + 'location continent [location] to set!')
@@ -471,16 +449,13 @@ client.on('messageCreate', message => {
       .setColor("BLUE")
       .setFooter({ text: 'Precipitation ' + version });
       message.channel.send({embeds: [locationList]})
-      log("Listed.", "debug", 2, message.author.id)
     }
     if (cmd == "continent") {
       message.channel.send("Please re-run the command with your continent afterwards.")
-      log("Improperly run command (pr:location continent).", "debug", 2, message.author.id)
     }
     if (cmd.startsWith("continent ")) {
       let continent;
       cmd = cmd.slice(10)
-      log("Continent picked.", "debug", 2, message.author.id)
       switch(cmd) {
         case "north america":
         case "na":
@@ -518,16 +493,12 @@ client.on('messageCreate', message => {
           continent = "n/a"
       }
       if(continent != "n/a") {
-        log("Setting continent.", "debug", 2, message.author.id)
         config.users[message.author.id].location.country = null;
         config.users[message.author.id].location.continent = continent;
-        log("Set continent.", "debug", 2, message.author.id)
       } else {
-        log("Invalid continent.", "debug", 2, message.author.id)
         message.channel.send("Please enter a valid continent.")
       }
     } else if (cmd.startsWith("country ")) {
-      log("Setting country.", "debug", 2, message.author.id)
       cmd = cmd.slice(8)
       switch (cmd) {
         case "us":
@@ -555,7 +526,6 @@ client.on('messageCreate', message => {
           }
           break;
       }
-      log("Set country.", "debug", 2, message.author.id)
     }
   }
   }
