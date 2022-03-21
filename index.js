@@ -11,10 +11,78 @@ const rl = readline.createInterface({
 
 
 var prefix = "pr:"
-var version = "v0.2"
+var version = "v0.2.1"
 var verText = "in a flash"
 
 var debugging = 0;
+
+var commands = {
+  "ping": {
+    "name": "ping",
+    "description": "Gets the current latency of the bot.",
+    "syntax": "[--no-name / --client-ping]"
+  },
+  "help": {
+    "name": "help",
+    "description": "Gets a list of commands, or shows information about a command.",
+    "syntax": "(command)"
+  },
+  "version": {
+    "name": "version",
+    "description": "Shows the current bot version (of the prefix used.)",
+    "syntax": "[--no-ver-text]"
+  },
+  "ver": {
+    "name": "version",
+    "description": "Shows the current bot version (of the prefix used.)",
+    "syntax": "[--no-ver-text]"
+  },
+  "about": {
+    "name": "about",
+    "description": "Gives information and credits, as well as the current version support for the bot.",
+    "syntax" : ""
+  },
+  "name": {
+    "name": "name", // topical
+    "description": "Sets the name for the bot to refer to you as.",
+    "syntax": "(name)"
+  },
+  "gender": {
+    "name": "gender",
+    "description": "Sets the gender for the bot to refer to you as.",
+    "syntax": "(**male / female** / other)"
+  },
+  "birthday": {
+    "name": "birthday",
+    "description": "Sets your birthday.",
+    "syntax": "**(mm/dd/yyyy)**"
+  },
+  "location": {
+    "name": "location",
+    "description": "Sets your current location.",
+    "syntax": "**(continent / country)** **(continent / west / east / united states)**"
+  },
+  "gtest": {
+    "name": "gtest",
+    "description": "Temporary alpha command to see that gender works as intended.",
+    "syntax": ""
+  },
+  "btest": {
+    "name": "btest",
+    "description": "Temporary alpha command to see that birthday works as intended.",
+    "syntax": ""
+  },
+  "ltest": {
+    "name": "ltest",
+    "description": "Temporary alpha command to see that location works as intended.",
+    "syntax": ""
+  },
+  "placevalue": {
+    "name": "placevalue",
+    "description": "Temporary alpha command to see that the placevalue function works as intended.",
+    "syntax": "**(number)**"
+  }
+}
 
 client.login('[token]')
 
@@ -55,8 +123,6 @@ function log(message, type, level) {
   // level 1 debugging: will log specific areas that are known to cause trouble, or may not be very stable (always changing)
   // level 2 debugging: logs new changes, describes most of what the bot is doing
   // level 3 debugging: logs ALL messages that begin with the bot prefix
-  
-  // WILL BE REDONE ^^^^
   let msg;
   switch (type) {
     case "error":
@@ -118,7 +184,7 @@ function initUser(au) {
   if(!config.users[au.id].location) {
     config.users[au.id].location = {};
   }
-  // removed debugging based on user interaction - change of heart
+  // removed debugging based on user interaction
 }
 
 function name(user) {
@@ -251,7 +317,7 @@ if(!fs.existsSync('./config.json')) {
   var config = {
     "guilds": {
 
-    },
+    },﻿
     "users": {
 
     }
@@ -276,7 +342,7 @@ client.on('messageCreate', message => {
     switch(command.toLowerCase()) {
       // ping command
       case "ping":
-        let user = message.author
+        let user = name(message.author)
         let raelynnTooCute = Math.floor(Math.random() * 6)
         let pingMessage;
         switch (raelynnTooCute) {
@@ -301,23 +367,58 @@ client.on('messageCreate', message => {
         }
         let startTime = Date.now();
         message.channel.send("<:ping_receive:502755206841237505> " + pingMessage).then(function(message) {
-          message.edit("<:ping_transmit:502755300017700865> (" + (Date.now() - startTime) + "ms) Hey, " + name(user) + "!");
+          switch(parameter) { // I'm aware you cannot combine the two. I'm sorry, that's how it is for now.
+            case "no-name":
+              message.edit("<:ping_transmit:502755300017700865> (" + (Date.now() - startTime) + "ms) Hey!")
+              break;
+            case "client-ping":
+              message.edit("<:ping_transmit:502755300017700865> (" + Math.round(client.ws.ping) + "ms) Hey, " + user + "!");
+              break;
+            default:
+              message.edit("<:ping_transmit:502755300017700865> (" + (Date.now() - startTime) + "ms) Hey, " + user + "!");
+          }
         })
         break;
 
       // help command
       case "help":
-        let helpEmbed = new MessageEmbed()
-        .setTitle("Precipitation Index")
-        .setDescription('List of all commands -- use `' + prefix + '` before all commands!')
-        .addFields(
-          { name: "General", value: "ping\nhelp\nversion\nabout", inline: true },
-          { name: "Personalization", value: "name\ngender\nbirthday\nlocation", inline: true },
-          { name: "Alpha", value: "gtest\nbtest\nltest\nplacevalue", inline: true }
-        )
-        .setColor("BLUE")
-        .setFooter({ text: 'Precipitation ' + version });
-        return message.channel.send({embeds: [helpEmbed]})
+        let cmdHelp = args.toLowerCase()
+        switch(cmdHelp) {
+          case "ping":
+          case "help":
+          case "ver":
+          case "version":
+          case "about":
+          case "name":
+          case "gender":
+          case "birthday":
+          case "location":
+          case 'gtest':
+          case "btest":
+          case "ltest":
+          case "placevalue":
+            let commandHelpEmbed = new MessageEmbed()
+            .setTitle("Precipitation Index || " + prefix + cmdHelp)
+            .addFields(
+              { name: "Description", value: commands[cmdHelp].description},
+              { name: "Syntax", value: prefix + cmdHelp + " " + commands[cmdHelp].syntax}
+            )
+            .setColor("BLUE")
+            .setFooter({ text: 'Precipitation ' + version + " || [] denotes a parameter, () denotes an argument, bolded is REQUIRED."});
+            return message.channel.send({embeds: [commandHelpEmbed]})
+          default:
+            let helpEmbed = new MessageEmbed()
+            .setTitle("Precipitation Index")
+            .setDescription('List of all commands -- use `' + prefix + '` before all commands!')
+            .addFields(
+              { name: "General", value: "ping\nhelp\nversion\nabout", inline: true },
+              { name: "Personalization", value: "name\ngender\nbirthday\nlocation", inline: true },
+              { name: "Alpha", value: "gtest\nbtest\nltest\nplacevalue", inline: true }
+            )
+            .setColor("BLUE")
+            .setFooter({ text: 'Precipitation ' + version });
+            return message.channel.send({embeds: [helpEmbed]})
+        }
 
       // version command
       case "ver":
@@ -332,7 +433,7 @@ client.on('messageCreate', message => {
         .setDescription('Kinda cool hybrid moderation-fun bot')
         .addFields(
           { name: "Creator", value: "**raina#7847** - bot developer" },
-          { name: "Version Support", value: "**Dev** - currently being worked on!!"}
+          { name: "Version Support", value: "**Current Stable**: gets all updates after dev build"}
         )
         .setColor("BLUE")
         .setFooter({ text: 'Precipitation ' + version });
@@ -401,8 +502,9 @@ client.on('messageCreate', message => {
         // ORIGINAL LINE THAT DIDNT WORK WHEN I CHANGED SOME SHIT ^^^^^
 
 
-      // location of the new easter egg! HA! find it first, then i'll put it here ;)
-      // a little hint: "how bout you go initialize some bitches?"
+      // easter egg!
+      // kind hint: how bout you go ___ some bitches?
+      
 
       // birthday command
       case "birthday":
@@ -526,4 +628,3 @@ client.on('messageCreate', message => {
     }
   }
 })
-// dev side note: lot less lines!! I'm very impressed with myself here, it could be less, but my gtest rant also expanded that... but it wouldn't be true source code without that, wouldn't it?
