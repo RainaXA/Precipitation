@@ -10,11 +10,79 @@ const rl = readline.createInterface({
 });
 
 
-var prefix = "pr:" // currently pr; in the official Precipitation, changed for source
-var version = "v0.1.6.1"
+var prefix = "pr:" // pr; in official Precipitation, changed for source
+var version = "v0.1.7"
 var verText = "just for you"
 
 var debugging = 0;
+
+var commands = {
+  "ping": {
+    "name": "ping",
+    "description": "Gets the current latency of the bot.",
+    "syntax": "[--no-name / --client-ping]"
+  },
+  "help": {
+    "name": "help",
+    "description": "Gets a list of commands, or shows information about a command.",
+    "syntax": "(command)"
+  },
+  "version": {
+    "name": "version",
+    "description": "Shows the current bot version (of the prefix used.)",
+    "syntax": "[--no-ver-text]"
+  },
+  "ver": {
+    "name": "version",
+    "description": "Shows the current bot version (of the prefix used.)",
+    "syntax": "[--no-ver-text]"
+  },
+  "about": {
+    "name": "about",
+    "description": "Gives information and credits, as well as the current version support for the bot.",
+    "syntax" : ""
+  },
+  "name": {
+    "name": "name", // topical
+    "description": "Sets the name for the bot to refer to you as.",
+    "syntax": "(name)"
+  },
+  "gender": {
+    "name": "gender",
+    "description": "Sets the gender for the bot to refer to you as.",
+    "syntax": "(**male / female** / other)"
+  },
+  "birthday": {
+    "name": "birthday",
+    "description": "Sets your birthday.",
+    "syntax": "**(mm/dd/yyyy)**"
+  },
+  "location": {
+    "name": "location",
+    "description": "Sets your current location.",
+    "syntax": "**(continent / country)** **(continent / west / east / united states)**"
+  },
+  "gtest": {
+    "name": "gtest",
+    "description": "Temporary alpha command to see that gender works as intended.",
+    "syntax": ""
+  },
+  "btest": {
+    "name": "btest",
+    "description": "Temporary alpha command to see that birthday works as intended.",
+    "syntax": ""
+  },
+  "ltest": {
+    "name": "ltest",
+    "description": "Temporary alpha command to see that location works as intended.",
+    "syntax": ""
+  },
+  "placevalue": {
+    "name": "placevalue",
+    "description": "Temporary alpha command to see that the placevalue function works as intended.",
+    "syntax": "**(number)**"
+  }
+}
 
 client.login('[token]')
 
@@ -270,36 +338,7 @@ client.on('messageCreate', message => {
     var command = message.content.slice(prefix.length)
     var parameters = command.split("--")
     switch (command.toLowerCase()) {
-      case "ping":
-        let user = message.author
-        let startTime = Date.now();
-        let raelynnTooCute = Math.floor(Math.random() * 6)
-        let pingMessage;
-        switch (raelynnTooCute) {
-          case 0:
-            pingMessage = "Pinging..."
-            break;
-          case 1:
-            pingMessage = "yeah i got you"
-            break;
-          case 2:
-            pingMessage = "awooga"
-            break;
-          case 3:
-            pingMessage = "i'm so random and quirky!!!"
-            break;
-          case 4:
-            pingMessage = "ew are you a pisces? that makes you satan!"
-            break;
-          case 5:
-            pingMessage = "i'm a scorpio so it makes sense for me to kill my whole family"
-            break;
-        }
-        message.channel.send("<:ping_receive:502755206841237505> " + pingMessage).then(function(message) {
-          let endTime = Date.now() - startTime
-          message.edit("<:ping_transmit:502755300017700865> (" + endTime + "ms) Hey, " + name(user) + "!");
-        })
-        break;
+      // old handler downfall, if there is a parameter, it has to be if/else. thank god v0.2 exists..
       case "help": // standalone help
         let helpEmbed = new MessageEmbed()
         .setTitle("Precipitation Index")
@@ -319,7 +358,7 @@ client.on('messageCreate', message => {
         .setDescription('Kinda cool hybrid moderation-fun bot')
         .addFields(
           { name: "Creator", value: "**raina#7847** - bot developer" },
-          { name: "Version Support", value: "**Older Stable**: given some updates from newer version"}
+          { name: "Version Support", value: "**Previous Stable**: given some updates from newer version"}
         )
         .setColor("BLUE")
         .setFooter({ text: 'Precipitation ' + version });
@@ -527,6 +566,69 @@ client.on('messageCreate', message => {
           break;
       }
     }
+  } else if (command.startsWith("help ")) {
+    let cmdHelp = command.slice(5).toLowerCase()
+    switch(cmdHelp) {
+      case "ping":
+      case "help":
+      case "ver":
+      case "version":
+      case "about":
+      case "name":
+      case "gender":
+      case "birthday":
+      case "location":
+      case 'gtest':
+      case "btest":
+      case "ltest":
+      case "placevalue":
+        let commandHelpEmbed = new MessageEmbed()
+        .setTitle("Precipitation Index || " + prefix + cmdHelp)
+        .addFields(
+          { name: "Description", value: commands[cmdHelp].description},
+          { name: "Syntax", value: prefix + cmdHelp + " " + commands[cmdHelp].syntax}
+        )
+        .setColor("BLUE")
+        .setFooter({ text: 'Precipitation ' + version + " || [] denotes a parameter, () denotes an argument, bolded is REQUIRED."});
+        message.channel.send({embeds: [commandHelpEmbed]})
+    }
+  } else if(command.startsWith('ping')) {
+    let user = name(message.author)
+    let startTime = Date.now();
+    let raelynnTooCute = Math.floor(Math.random() * 6)
+    let pingMessage;
+    switch (raelynnTooCute) {
+      case 0:
+        pingMessage = "Pinging..."
+        break;
+      case 1:
+        pingMessage = "yeah i got you"
+        break;
+      case 2:
+        pingMessage = "awooga"
+        break;
+      case 3:
+        pingMessage = "i'm so random and quirky!!!"
+        break;
+      case 4:
+        pingMessage = "ew are you a pisces? that makes you satan!"
+        break;
+      case 5:
+        pingMessage = "i'm a scorpio so it makes sense for me to kill my whole family"
+        break;
+    }
+    message.channel.send("<:ping_receive:502755206841237505> " + pingMessage).then(function(message) {
+      switch(parameters[1]) { // I'm aware you cannot combine the two. I'm sorry, that's how it is for now.
+        case "no-name":
+          message.edit("<:ping_transmit:502755300017700865> (" + (Date.now() - startTime) + "ms) Hey!")
+          break;
+        case "client-ping":
+          message.edit("<:ping_transmit:502755300017700865> (" + Math.round(client.ws.ping) + "ms) Hey, " + user + "!");
+          break;
+        default:
+          message.edit("<:ping_transmit:502755300017700865> (" + (Date.now() - startTime) + "ms) Hey, " + user + "!");
+      }
+    })
   }
   }
 })
