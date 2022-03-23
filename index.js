@@ -1,5 +1,5 @@
 const { Client, Intents, MessageEmbed } = require('discord.js');
-const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
+const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_PRESENCES] });
 const fs = require('fs');
 const colors = require('colors'); // yes, you can do this within the node.js console using the weird thingies. however, im lazy, i do this later lol, i just want to get this done quickly
 const readline = require('readline');
@@ -11,7 +11,7 @@ const rl = readline.createInterface({
 
 
 var prefix = "pr:"
-var version = "v0.2.1"
+var version = "v0.2.2"
 var verText = "in a flash"
 
 var debugging = 0;
@@ -81,6 +81,11 @@ var commands = {
     "name": "placevalue",
     "description": "Temporary alpha command to see that the placevalue function works as intended.",
     "syntax": "**(number)**"
+  },
+  "find": {
+    "name": "find",
+    "description": "Find a user.",
+    "syntax": "**(user)**"
   }
 }
 
@@ -295,6 +300,7 @@ function toProperUSFormat(month, day, year) {
 
 function getLocationFormat(user) {
   if(!config.users[user.id].location.continent) return "Please set a continent first."
+  if(config.users[user.id].location.state) return config.users[user.id].location.state + ", " + config.users[user.id].location.country
   if(config.users[user.id].location.country) {
     if(config.users[user.id].location.country == "Western" || config.users[user.id].location.country == "Eastern") {
       return config.users[user.id].location.country + " " + config.users[user.id].location.continent;
@@ -302,6 +308,50 @@ function getLocationFormat(user) {
     return config.users[user.id].location.country
   } else {
     return config.users[user.id].location.continent
+  }
+}
+
+function find(query, when, many, whatToReturn) {
+  if(when == "list") {
+    let users = client.users.cache
+    let list = "";
+    let amount = 0;
+    let returnValue = 0;
+    users.each(user => {
+      if(user.username.toLowerCase().startsWith(query)) {
+        if(amount < many) {
+          list = list + user.username + "\n"
+          amount = amount + 1;
+        } else {
+          returnValue++;
+        }
+      }
+    })
+    if(whatToReturn == "list") {
+      if(list == "") {
+        return "No results were found."
+      } else {
+        return list;
+      }
+    } else if(whatToReturn == "amount") {
+      if(returnValue == 0) {
+        return "";
+      } else {
+        return " || There are " + returnValue + " results not shown -- please narrow your query."
+      }
+    }
+  } else if (when == "first") {
+    let users = client.users.cache
+    let userReturn;
+    let amount = 0;
+    users.each(user => {
+      if(user.username.toLowerCase().startsWith(query)) {
+        if(amount < 1) {
+          userReturn = user;
+        }
+      }
+    })
+    return userReturn;
   }
 }
 
@@ -317,7 +367,7 @@ if(!fs.existsSync('./config.json')) {
   var config = {
     "guilds": {
 
-    },﻿
+    },
     "users": {
 
     }
@@ -397,6 +447,7 @@ client.on('messageCreate', message => {
           case "btest":
           case "ltest":
           case "placevalue":
+          case "find":
             let commandHelpEmbed = new MessageEmbed()
             .setTitle("Precipitation Index || " + prefix + cmdHelp)
             .addFields(
@@ -411,7 +462,7 @@ client.on('messageCreate', message => {
             .setTitle("Precipitation Index")
             .setDescription('List of all commands -- use `' + prefix + '` before all commands!')
             .addFields(
-              { name: "General", value: "ping\nhelp\nversion\nabout", inline: true },
+              { name: "General", value: "ping\nhelp\nversion\nabout\nfind", inline: true },
               { name: "Personalization", value: "name\ngender\nbirthday\nlocation", inline: true },
               { name: "Alpha", value: "gtest\nbtest\nltest\nplacevalue", inline: true }
             )
@@ -502,9 +553,10 @@ client.on('messageCreate', message => {
         // ORIGINAL LINE THAT DIDNT WORK WHEN I CHANGED SOME SHIT ^^^^^
 
 
-      // easter egg!
-      // kind hint: how bout you go ___ some bitches?
-      
+      // bitches easter egg i love you raelynn
+      case "bitches":
+        if(args == "") return message.channel.send("Sorry, but it appears this command is unknown."); // nobody has to know ;)
+        return message.channel.send("how bout you go " + args + " some bitches?")
 
       // birthday command
       case "birthday":
@@ -579,6 +631,7 @@ client.on('messageCreate', message => {
               continent = "n/a"
           }
           if(continent == "n/a") return message.channel.send("Please enter a valid continent.")
+          config.users[message.author.id].location.state = null;
           config.users[message.author.id].location.country = null;
           config.users[message.author.id].location.continent = continent;
           return message.channel.send("Okay, I'm setting your continent to **" + continent + "**.")
@@ -591,28 +644,60 @@ client.on('messageCreate', message => {
             case "usa":
               config.users[message.author.id].location.continent = "North America";
               config.users[message.author.id].location.country = "United States";
+              config.users[message.author.id].location.state = null;
               return message.channel.send("Okay, I'm setting your country to **United States**.")
             case "west":
             case "western":
               if(!config.users[message.author.id].location.continent) return message.channel.send("Please set your continent first.")
               config.users[message.author.id].location.country = "Western";
+              config.users[message.author.id].location.state = null;
               break;
             case "east":
             case "eastern":
               if(!config.users[message.author.id].location.continent) return message.channel.send("Please set your continent first.")
               config.users[message.author.id].location.country = "Eastern";
+              config.users[message.author.id].location.state = null;
               break;
+            case "australia":
+            case "au":
+              config.users[message.author.id].location.continent = "Oceania";
+              config.users[message.author.id].location.country = "Australia";
+              config.users[message.author.id].location.state = null;
+              return message.channel.send("Okay, I'm setting your country to **Australia**.")
+            case "germany":
+            case "german":
+              config.users[message.author.id].location.continent = "Europe";
+              config.users[message.author.id].location.country = "Germany";
+              config.users[message.author.id].location.state = null;
+              return message.channel.send("Okay, I'm setting your country to **Germany**.")
+            case "norway":
+              config.users[message.author.id].location.continent = "Europe";
+              config.users[message.author.id].location.country = "Norway";
+              config.users[message.author.id].location.state = null;
+              return message.channel.send("Okay, I'm setting your country to **Norway**.")
             default:
               return message.channel.send("Please enter a valid country.")
           }
           return message.channel.send("Okay, I've set it so you are from **" + config.users[message.author.id].location.country + " " + config.users[message.author.id].location.continent + "**.")
+        } else if (fCommand[1] == "state") {
+          switch(doubleArgs.toLowerCase()) {
+            case "arizona":
+            case "az":
+              config.users[message.author.id].location.continent = "North America";
+              config.users[message.author.id].location.country = "United States";
+              config.users[message.author.id].location.state = "Arizona";
+              return message.channel.send("Okay, I'm setting your state to **Arizona**.")
+            default:
+              return message.channel.send("Please enter a valid state.")
+          }
         }
         let locationHelp = new MessageEmbed()
         .setTitle("Precipitation " + version + " Locations")
         .setDescription('Just use ' + prefix + 'location continent [location] to set!')
         .addFields(
           { name: "Continents", value: "North America\nSouth America\nEurope\nAfrica\nAsia\nOceania\nAntarctica", inline: true },
-          { name: "Countries", value: prefix + "location country [country name]. If you do not live in the US, you can use west or east to denote Western or Eastern." }
+          { name: "Countries", value: prefix + "location country [country name]. If you do not live in the US, you can use west or east to denote Western or Eastern." },
+          { name: "States", value: "Arizona", inline: true }
         )
         .setColor("BLUE")
         .setFooter({ text: 'Precipitation ' + version });
@@ -622,6 +707,18 @@ client.on('messageCreate', message => {
       case "ltest":
         if(!config.users[message.author.id].location.continent) return message.channel.send("Please set a continent first, using " + prefix + "location continent [set].");
         return message.channel.send(getLocationFormat(message.author));
+
+      // find command
+      case "find":
+        if(!args) return message.channel.send("Please input a parameter.")
+        let findList = new MessageEmbed()
+        .setTitle("Precipitation " + version + " Query")
+        .addFields(
+          { name: "Results", value: find(args.toLowerCase(), "list", 10, "list")}
+        )
+        .setColor("BLUE")
+        .setFooter({ text: 'Precipitation ' + version  + find(args.toLowerCase(), "list", 10, "amount")});
+        return message.channel.send({embeds: [findList]})
 
       default:
         message.channel.send("Sorry, but it appears this command is unknown.");
