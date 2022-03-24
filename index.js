@@ -415,7 +415,7 @@ client.on('messageCreate', message => {
             pingMessage = "i'm a scorpio so it makes sense for me to kill my whole family"
             break;
           case 6:
-            pingMessage = "pay my only fans"  // Why only lowercase?
+            pingMessage = "pay my onlyfans"  // Why only lowercase?
             break;
         }
         let startTime = Date.now();
