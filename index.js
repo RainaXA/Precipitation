@@ -414,6 +414,9 @@ client.on('messageCreate', message => {
           case 5:
             pingMessage = "i'm a scorpio so it makes sense for me to kill my whole family"
             break;
+          case 6:
+            pingMessage = "pay my only fans"  // Why only lowercase?
+            break;
         }
         let startTime = Date.now();
         message.channel.send("<:ping_receive:502755206841237505> " + pingMessage).then(function(message) {
