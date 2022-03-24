@@ -393,7 +393,7 @@ client.on('messageCreate', message => {
       // ping command
       case "ping":
         let user = name(message.author)
-        let raelynnTooCute = Math.floor(Math.random() * 6)
+        let raelynnTooCute = Math.floor(Math.random() * 7)
         let pingMessage;
         switch (raelynnTooCute) {
           case 0:
@@ -413,6 +413,9 @@ client.on('messageCreate', message => {
             break;
           case 5:
             pingMessage = "i'm a scorpio so it makes sense for me to kill my whole family"
+            break;
+          case 6:
+            pingMessage = "pay my onlyfans"  // Why only lowercase?
             break;
         }
         let startTime = Date.now();
