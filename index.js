@@ -393,7 +393,7 @@ client.on('messageCreate', message => {
       // ping command
       case "ping":
         let user = name(message.author)
-        let raelynnTooCute = Math.floor(Math.random() * 6)
+        let raelynnTooCute = Math.floor(Math.random() * 7)
         let pingMessage;
         switch (raelynnTooCute) {
           case 0:
