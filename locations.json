@@ -29,6 +29,12 @@
     },
     "Philippines": {
       "continent": "Asia"
+    },
+    "Indonesia": {
+      "continent": "Asia"
+    },
+    "United Kingdom": {
+      "continent": "Europe"
     }
   },
   "states": {
@@ -51,6 +57,26 @@
     "Oregon": {
       "continent": "North America",
       "country": "United States"
+    },
+    "Banten": {
+      "continent": "Asia",
+      "country": "Indonesia"
+    },
+    "New Jersey": {
+      "continent": "North America",
+      "country": "United States"
+    },
+    "New Hampshire": {
+      "continent": "North America",
+      "country": "United States"
+    },
+    "Vasdø": {
+      "continent": "Europe",
+      "country": "Norway"
+    },
+    "Queensland": {
+      "continent": "Oceania",
+      "country": "Australia"
     }
   },
   "cities": {
