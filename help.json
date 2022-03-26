@@ -1,0 +1,90 @@
+{
+  "commandList": {
+    "General": {
+      "commands": "ping\nhelp\nversion\nabout\nfind\nuinfo"
+    },
+    "Personalization": {
+      "commands": "name\ngender\nbirthday\nlocation"
+    },
+    "Alpha": {
+      "commands": "placevalue"
+    }
+  },
+  "commandHelp": {
+    "ping": {
+      "name": "ping",
+      "description": "Gets the current latency of the bot.",
+      "syntax": "[--no-name / --client-ping]"
+    },
+    "help": {
+      "name": "help",
+      "description": "Gets a list of commands, or shows information about a command.",
+      "syntax": "(command)"
+    },
+    "version": {
+      "name": "version",
+      "description": "Shows the current bot version (of the prefix used.)",
+      "syntax": "[--no-ver-text]"
+    },
+    "ver": {
+      "name": "version",
+      "description": "Shows the current bot version (of the prefix used.)",
+      "syntax": "[--no-ver-text]"
+    },
+    "about": {
+      "name": "about",
+      "description": "Gives information and credits, as well as the current version support for the bot.",
+      "syntax" : ""
+    },
+    "name": {
+      "name": "name",
+      "description": "Sets the name for the bot to refer to you as.",
+      "syntax": "(name)"
+    },
+    "gender": {
+      "name": "gender",
+      "description": "Sets the gender for the bot to refer to you as.",
+      "syntax": "(**male / female** / other)"
+    },
+    "birthday": {
+      "name": "birthday",
+      "description": "Sets your birthday.",
+      "syntax": "**(mm/dd/yyyy)**"
+    },
+    "location": {
+      "name": "location",
+      "description": "Sets your current location.",
+      "syntax": "**(continent / country / state / city)** **(value)**"
+    },
+    "placevalue": {
+      "name": "placevalue",
+      "description": "Temporary alpha command to see that the placevalue function works as intended.",
+      "syntax": "**(number)**"
+    },
+    "find": {
+      "name": "find",
+      "description": "Find a user.",
+      "syntax": "**(user)**"
+    },
+    "uinfo": {
+      "name": "uinfo",
+      "description": "Get information on a particular user.",
+      "syntax": "(user)"
+    },
+    "rm": {
+      "name": "rm",
+      "description": "Bulk delete messages.",
+      "syntax": "**(number, 1-99)**"
+    },
+    "purge": {
+      "name": "rm",
+      "description": "Bulk delete messages.",
+      "syntax": "**(number)**"
+    },
+    "uptime": {
+      "name": "uptime",
+      "description": "See how long Precipitation has been online.",
+      "syntax": ""
+    }
+  }
+}
