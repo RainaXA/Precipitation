@@ -318,17 +318,25 @@ if(!fs.existsSync('./config.json')) {
   var config = {
     "guilds": {
 
-    },
+    },﻿
     "users": {
 
+    },
+    "general": {
+      "token": ""
     }
   };
   fs.writeFile('config.json', JSON.stringify(config), function (err) {
     if (err) throw err;
     log('config.json has been created.', "success", 0, null)
   })
+  rl.question("Please paste the token: ", (answer) => {
+    config.general.token = answer;
+    client.login(config.general.token) // let's not leak the token again ;)
+  });
 } else {
   var config = JSON.parse(fs.readFileSync("./config.json"));
+  client.login(config.general.token)
 }
 
 client.on('messageCreate', message => {
