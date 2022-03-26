@@ -1,0 +1,88 @@
+{
+  "continents": {
+    "North America": {},
+    "South America": {},
+    "Europe": {},
+    "Asia": {},
+    "Africa": {},
+    "Oceania": {},
+    "Antarctica": {}
+  },
+  "countries": {
+    "United States": {
+      "continent": "North America"
+    },
+    "Australia": {
+      "continent": "Oceania"
+    },
+    "Germany": {
+      "continent": "Europe"
+    },
+    "Norway": {
+      "continent": "Europe"
+    },
+    "Canada": {
+      "continent": "North America"
+    },
+    "Colombia": {
+      "continent": "South America"
+    },
+    "Philippines": {
+      "continent": "Asia"
+    }
+  },
+  "states": {
+    "Arizona": {
+      "continent": "North America",
+      "country": "United States"
+    },
+    "Texas": {
+      "continent": "North America",
+      "country": "United States"
+    },
+    "California": {
+      "continent": "North America",
+      "country": "United States"
+    },
+    "Bavaria": {
+      "continent": "Europe",
+      "country": "Germany"
+    },
+    "Oregon": {
+      "continent": "North America",
+      "country": "United States"
+    }
+  },
+  "cities": {
+    "Phoenix": {
+      "continent": "North America",
+      "country": "United States",
+      "state": "Arizona"
+    },
+    "Glendale": {
+      "continent": "North America",
+      "country": "United States",
+      "state": "Arizona"
+    },
+    "Surprise": {
+      "continent": "North America",
+      "country": "United States",
+      "state": "Arizona"
+    },
+    "Los Angeles": {
+      "continent": "North America",
+      "country": "United States",
+      "state": "California"
+    },
+    "Ontario": {
+      "continent": "North America",
+      "country": "United States",
+      "state": "California"
+    },
+    "Munich": {
+      "continent": "Europe",
+      "country": "Germany",
+      "state": "Bavaria"
+    }
+  }
+}
