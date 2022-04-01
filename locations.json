@@ -35,6 +35,9 @@
     },
     "United Kingdom": {
       "continent": "Europe"
+    },
+    "Metaverse": {
+      "continent":"North America"
     }
   },
   "states": {
