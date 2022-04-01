@@ -417,6 +417,9 @@ client.on('messageCreate', message => {
           case 6:
             pingMessage = "pay my onlyfans"  // Why only lowercase?
             break;
+          case 7:
+            pingMessage = "I'm gonna cancel you on my twitter!"
+            break;
         }
         let startTime = Date.now();
         message.channel.send("<:ping_receive:502755206841237505> " + pingMessage).then(function(message) {
