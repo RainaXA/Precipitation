@@ -1,8 +1,10 @@
-const { Client, Intents, MessageEmbed } = require('discord.js');
+const { Client, Intents, MessageEmbed, Permissions } = require('discord.js');
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_PRESENCES] });
 const fs = require('fs');
 const colors = require('colors'); // yes, you can do this within the node.js console using the weird thingies. however, im lazy, i do this later lol, i just want to get this done quickly
 const readline = require('readline');
+const locations = require("./locations.json")
+const help = require("./help.json")
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -11,85 +13,25 @@ const rl = readline.createInterface({
 
 
 var prefix = "pr:"
-var version = "v0.2.2"
+var version = "v0.2.4"
 var verText = "in a flash"
 
 var debugging = 0;
 
-var commands = {
-  "ping": {
-    "name": "ping",
-    "description": "Gets the current latency of the bot.",
-    "syntax": "[--no-name / --client-ping]"
-  },
-  "help": {
-    "name": "help",
-    "description": "Gets a list of commands, or shows information about a command.",
-    "syntax": "(command)"
-  },
-  "version": {
-    "name": "version",
-    "description": "Shows the current bot version (of the prefix used.)",
-    "syntax": "[--no-ver-text]"
-  },
-  "ver": {
-    "name": "version",
-    "description": "Shows the current bot version (of the prefix used.)",
-    "syntax": "[--no-ver-text]"
-  },
-  "about": {
-    "name": "about",
-    "description": "Gives information and credits, as well as the current version support for the bot.",
-    "syntax" : ""
-  },
-  "name": {
-    "name": "name", // topical
-    "description": "Sets the name for the bot to refer to you as.",
-    "syntax": "(name)"
-  },
-  "gender": {
-    "name": "gender",
-    "description": "Sets the gender for the bot to refer to you as.",
-    "syntax": "(**male / female** / other)"
-  },
-  "birthday": {
-    "name": "birthday",
-    "description": "Sets your birthday.",
-    "syntax": "**(mm/dd/yyyy)**"
-  },
-  "location": {
-    "name": "location",
-    "description": "Sets your current location.",
-    "syntax": "**(continent / country)** **(continent / west / east / united states)**"
-  },
-  "gtest": {
-    "name": "gtest",
-    "description": "Temporary alpha command to see that gender works as intended.",
-    "syntax": ""
-  },
-  "btest": {
-    "name": "btest",
-    "description": "Temporary alpha command to see that birthday works as intended.",
-    "syntax": ""
-  },
-  "ltest": {
-    "name": "ltest",
-    "description": "Temporary alpha command to see that location works as intended.",
-    "syntax": ""
-  },
-  "placevalue": {
-    "name": "placevalue",
-    "description": "Temporary alpha command to see that the placevalue function works as intended.",
-    "syntax": "**(number)**"
-  },
-  "find": {
-    "name": "find",
-    "description": "Find a user.",
-    "syntax": "**(user)**"
-  }
+var privilegedUsers = {
+  "319858536328724481": {},
+  "297201585090723841": {}
 }
 
-client.login('[token]')
+client.login('MzIyMzk3ODM1NzE2ODUzNzcx.WTluYQ.04bI44qs4FRLx5ZUNUSuC4m-xkw')
+
+function getTextInput(text) {
+  var slurs = ["nigger", "nigga", "retard", "fag", "faggot"] // I still feel bad for typing these, but I suppose it'll prevent more.
+  for(let i = 0; i < slurs.length; i++) {
+    if(text.toLowerCase().includes(slurs[i])) return true;
+  }
+  return false;
+}
 
 function processConsoleCommand() {
   rl.question('', (answer) => {
@@ -189,7 +131,6 @@ function initUser(au) {
   if(!config.users[au.id].location) {
     config.users[au.id].location = {};
   }
-  // removed debugging based on user interaction
 }
 
 function name(user) {
@@ -200,11 +141,18 @@ function name(user) {
   }
 }
 
-function gender(user, mMessage, fMessage, oMessage) { // male first, female second, others third
+function gender(user, mMessage, fMessage, oMessage, naMessage) { // male first, female second, others third
   if(mMessage && fMessage && oMessage) {
-    if(config.users[user.id].gender == "male") return mMessage;
-    if(config.users[user.id].gender == "female") return fMessage;
-    if(!config.users[user.id].gender || config.users[user.id].gender == "other") return oMessage;
+    if(naMessage) {
+      if(config.users[user.id].gender == "male") return mMessage;
+      if(config.users[user.id].gender == "female") return fMessage;
+      if(config.users[user.id].gender == "other") return oMessage;
+      if(!config.users[user.id].gender) return naMessage;
+    } else {
+      if(config.users[user.id].gender == "male") return mMessage;
+      if(config.users[user.id].gender == "female") return fMessage;
+      if(!config.users[user.id].gender || config.users[user.id].gender == "other") return oMessage;
+    }
   } else {
     if(config.users[user.id].gender) {
       return config.users[user.id].gender
@@ -300,6 +248,7 @@ function toProperUSFormat(month, day, year) {
 
 function getLocationFormat(user) {
   if(!config.users[user.id].location.continent) return "Please set a continent first."
+  if(config.users[user.id].location.city) return config.users[user.id].location.city + ", " + config.users[user.id].location.state + ", " + config.users[user.id].location.country
   if(config.users[user.id].location.state) return config.users[user.id].location.state + ", " + config.users[user.id].location.country
   if(config.users[user.id].location.country) {
     if(config.users[user.id].location.country == "Western" || config.users[user.id].location.country == "Eastern") {
@@ -318,7 +267,7 @@ function find(query, when, many, whatToReturn) {
     let amount = 0;
     let returnValue = 0;
     users.each(user => {
-      if(user.username.toLowerCase().startsWith(query)) {
+      if(user.tag.toLowerCase().startsWith(query)) {
         if(amount < many) {
           list = list + user.username + "\n"
           amount = amount + 1;
@@ -345,12 +294,14 @@ function find(query, when, many, whatToReturn) {
     let userReturn;
     let amount = 0;
     users.each(user => {
-      if(user.username.toLowerCase().startsWith(query)) {
+      if(user.tag.toLowerCase().startsWith(query)) {
         if(amount < 1) {
           userReturn = user;
+          amount++;
         }
       }
     })
+    if(userReturn == null) return null;
     return userReturn;
   }
 }
@@ -367,17 +318,25 @@ if(!fs.existsSync('./config.json')) {
   var config = {
     "guilds": {
 
-    },
+    },﻿
     "users": {
 
+    },
+    "general": {
+      "token": ""
     }
   };
   fs.writeFile('config.json', JSON.stringify(config), function (err) {
     if (err) throw err;
     log('config.json has been created.', "success", 0, null)
   })
+  rl.question("Please paste the token: ", (answer) => {
+    config.general.token = answer;
+    client.login(config.general.token) // let's not leak the token again ;)
+  });
 } else {
   var config = JSON.parse(fs.readFileSync("./config.json"));
+  client.login(config.general.token)
 }
 
 client.on('messageCreate', message => {
@@ -449,31 +408,38 @@ client.on('messageCreate', message => {
           case "gender":
           case "birthday":
           case "location":
-          case 'gtest':
-          case "btest":
-          case "ltest":
           case "placevalue":
           case "find":
+          case "uinfo":
+          case "rm":
+          case "purge":
+          case "uptime":
             let commandHelpEmbed = new MessageEmbed()
             .setTitle("Precipitation Index || " + prefix + cmdHelp)
             .addFields(
-              { name: "Description", value: commands[cmdHelp].description},
-              { name: "Syntax", value: prefix + cmdHelp + " " + commands[cmdHelp].syntax}
+              { name: "Description", value: help.commandHelp[cmdHelp].description},
+              { name: "Syntax", value: prefix + cmdHelp + " " + help.commandHelp[cmdHelp].syntax}
             )
             .setColor("BLUE")
             .setFooter({ text: 'Precipitation ' + version + " || [] denotes a parameter, () denotes an argument, bolded is REQUIRED."});
             return message.channel.send({embeds: [commandHelpEmbed]})
           default:
             let helpEmbed = new MessageEmbed()
-            .setTitle("Precipitation Index")
-            .setDescription('List of all commands -- use `' + prefix + '` before all commands!')
+            helpEmbed.setTitle("Precipitation Index")
+            helpEmbed.setDescription('List of all commands -- use `' + prefix + '` before all commands!')
+            /*for(section in help.commandList) {
+              console.log(section)
+              helpEmbed.addField(section, section.commands, true)
+            }*/
+            // if anyone can figure this out, please make a pr :D
             .addFields(
-              { name: "General", value: "ping\nhelp\nversion\nabout\nfind", inline: true },
+              { name: "General", value: "ping\nhelp\nversion\nabout\nuptime", inline: true },
               { name: "Personalization", value: "name\ngender\nbirthday\nlocation", inline: true },
-              { name: "Alpha", value: "gtest\nbtest\nltest\nplacevalue", inline: true }
+              { name: "Alpha", value: "placevalue", inline: true },
+              { name: "Moderation", "value": "find\nuinfo\nrm", inline: true}
             )
-            .setColor("BLUE")
-            .setFooter({ text: 'Precipitation ' + version });
+            helpEmbed.setColor("BLUE")
+            helpEmbed.setFooter({ text: 'Precipitation ' + version });
             return message.channel.send({embeds: [helpEmbed]})
         }
 
@@ -489,7 +455,7 @@ client.on('messageCreate', message => {
         .setTitle("Precipitation " + version)
         .setDescription('Kinda cool hybrid moderation-fun bot')
         .addFields(
-          { name: "Creator", value: "**raina#7847** - bot developer" },
+          { name: "Creator", value: "**raina#7847** - bot developer\narcelo#8442 - bug finder" },
           { name: "Version Support", value: "**Current Stable**: gets all updates after dev build"}
         )
         .setColor("BLUE")
@@ -508,8 +474,9 @@ client.on('messageCreate', message => {
 
       // name command
       case "name":
-        if(args.length >= 75) return message.channel.send("Your name isn't that long.")
+        if(args.length >= 75) return message.channel.send("That's too long of a name.")
         if((args.includes("<@") && args.includes(">")) || args.includes("@everyone") || args.includes("@here")) return message.channel.send("Nice try.")
+        if(getTextInput(args) == true) return message.channel.send("Hey, I'm not going to yell out offensive words.")
         if(args == "") {
           config.users[message.author.id].name = null;
           return message.channel.send("Sure, I'll refer to you by your username.")
@@ -519,53 +486,41 @@ client.on('messageCreate', message => {
 
       // gender command
       case "gender":
-        let gender;
+        let cmdGender;
         switch(args) {
           case "female":
           case "she/her":
           case "f":
-            gender = "female";
+            cmdGender = "female";
             break;
           case "male":
           case "he/him":
           case "m":
-            gender = "male";
+            cmdGender = "male";
             break;
           case "other":
           case "they/them":
           case "o":
-            gender = "other";
+            cmdGender = "other";
             break;
           default:
-            gender = "n/a"
+            cmdGender = "n/a"
         }
-        if (gender == "n/a") {
-          gender = "other";
+        if (cmdGender == "n/a") {
+          cmdGender = "other";
           message.channel.send("I'll just set your gender to **other**. If you'd rather not be, please use \"female\" or \"male.\"")
         } else {
-          message.channel.send("Sure thing, I'll refer to you as **" + gender + "**.")
+          message.channel.send("Sure thing, I'll refer to you as **" + cmdGender + "**.")
         }
-        config.users[message.author.id].gender = gender;
+        config.users[message.author.id].gender = cmdGender;
         break;
-
-      // gtest command
-      case "gtest":
-        if (config.users[message.author.id].gender == 'male') return message.channel.send("hey, you a dude to me <3");
-        if (config.users[message.author.id].gender == 'female') return message.channel.send("hey, you a girl to me <3");
-        if (config.users[message.author.id].gender == 'other') return message.channel.send("hey, you a real one to me <3");
-        if (!config.users[message.author.id].gender) return message.channel.send("hey, you a real one to me <3");
-
-        // this is how i did it in an earlier version... im sorry but apparently barely changing shit makes this thing not want to do what you want, THIS COULD BE JUST ONE LINE...
-        // THIS LANGUAGE IS SO FUCKING STUPID. "Can't access 'gender' before initialization" HOW BOUT YOU GO INITALIZE SOME BITCHES???
-        // for real, I'm getting this error from a function that's worked perfectly for ages, when I've changed practically nothing here...
-
-        //return message.channel.send("hey, you a " + gender(message.author, "dude", "girl", "real one") + " to me <3");
-        // ORIGINAL LINE THAT DIDNT WORK WHEN I CHANGED SOME SHIT ^^^^^
-
 
       // bitches easter egg i love you raelynn
       case "bitches":
         if(args == "") return message.channel.send("Sorry, but it appears this command is unknown."); // nobody has to know ;)
+        if(args.length >= 50) return message.channel.send("Sorry, but it appears this command is unknown.");
+        if((args.includes("<@") && args.includes(">")) || args.includes("@everyone") || args.includes("@here")) return message.channel.send("Sorry, but it appears this command is unknown.");
+        if(getTextInput(args) == true) return message.channel.send("I think that's a little too far..")
         return message.channel.send("how bout you go " + args + " some bitches?")
 
       // birthday command
@@ -575,21 +530,21 @@ client.on('messageCreate', message => {
         if(!message.content.includes("/")) {
           message.channel.send("Currently, you must separate your birthday with slashes, and it must be in mm/dd/yyyy format.")  // two Europeans who have used this bot said it's better to keep it in one format.
         } else if(cmd.length != 3) {
-          message.channel.send("That's not how dates work. It's mm/dd/yyyy.") // two Europeans who have used this bot said it's better to keep it in one format.
+          message.channel.send("It's mm/dd/yyyy.") // two Europeans who have used this bot said it's better to keep it in one format.
         } else if(isNaN(parseInt(cmd[0])) || isNaN(parseInt(cmd[1])) || isNaN(parseInt(cmd[2]))) {
-          message.channel.send("You have to, you know, put just numbers in a birthday.")
+          message.channel.send("Birthdays can only include numbers")
         } else if(cmd[0].includes("-") || cmd[1].includes("-") || cmd[2].includes("-")) {
-          message.channel.send("Please exclude the negative sign. That's not how birthdays work.")
+          message.channel.send("Please exclude the negative sign.")
         } else if(cmd[0].includes(".") || cmd[1].includes(".") || cmd[2].includes(".")) {
-          message.channel.send("Please take out the decimal, I don't believe birthdays work like that.")
+          message.channel.send("Please take out the decimal place.")
         } else if(getDaysInMonth(parseInt(cmd[0]), cmd[2]) == "invalid month") {
-          message.channel.send("Please give me a valid month. If you put a 0 at the beginning, please exclude this for now.")
+          message.channel.send("Please give me a valid month.")
         } else if(getDaysInMonth(parseInt(cmd[0]), parseInt(cmd[2])) < parseInt(cmd[1])) {
-          message.channel.send("Your birthday is not past when the month ended.")
+          message.channel.send("The month ended!")
         } else if(parseInt(cmd[2]) > year) {
           message.channel.send("Nice try, time traveler.")
         } else if(parseInt(cmd[2]) < 1903) {
-          message.channel.send("So you're trying to tell me you're older than the oldest alive person on Earth? I doubt that.")
+          message.channel.send("The oldest person was born in 1903, and you're not the oldest person.")
         } else {
           message.channel.send("Okay, I will set your birthday as " + toProperUSFormat(parseInt(cmd[0]), parseInt(cmd[1]), cmd[2]) + ".")
           config.users[message.author.id].birthday.month = parseInt(cmd[0]);
@@ -598,15 +553,10 @@ client.on('messageCreate', message => {
         }
         break;
 
-      // btest command
-      case "btest":
-        if(!config.users[message.author.id].birthday.month) return message.channel.send("Please set your birthday first.")
-        return message.channel.send(toProperUSFormat(config.users[message.author.id].birthday.month, config.users[message.author.id].birthday.day, config.users[message.author.id].birthday.year));
-
       // location command
       case "location":
         if(args == "continent") return message.channel.send("Please re-run the command with your continent afterwards.")
-        if(args == "country") return message.channel.send("Please re-run the command with United States, East, or West.")
+        if(args == "country") return message.channel.send("Please re-run the command with a country.")
         let doubleArgs;
         if(fCommand[1]) doubleArgs = message.content.slice(prefix.length + fCommand[1].length + fCommand[0].length + 2)
         if(fCommand[1] == "continent") {
@@ -641,6 +591,7 @@ client.on('messageCreate', message => {
               continent = "n/a"
           }
           if(continent == "n/a") return message.channel.send("Please enter a valid continent.")
+          config.users[message.author.id].location.city = null;
           config.users[message.author.id].location.state = null;
           config.users[message.author.id].location.country = null;
           config.users[message.author.id].location.continent = continent;
@@ -652,71 +603,156 @@ client.on('messageCreate', message => {
             case "america":
             case "united states of america":
             case "usa":
-              config.users[message.author.id].location.continent = "North America";
               config.users[message.author.id].location.country = "United States";
-              config.users[message.author.id].location.state = null;
-              return message.channel.send("Okay, I'm setting your country to **United States**.")
+              break;
             case "west":
             case "western":
               if(!config.users[message.author.id].location.continent) return message.channel.send("Please set your continent first.")
               config.users[message.author.id].location.country = "Western";
-              config.users[message.author.id].location.state = null;
               break;
             case "east":
             case "eastern":
               if(!config.users[message.author.id].location.continent) return message.channel.send("Please set your continent first.")
               config.users[message.author.id].location.country = "Eastern";
-              config.users[message.author.id].location.state = null;
               break;
             case "australia":
             case "au":
-              config.users[message.author.id].location.continent = "Oceania";
               config.users[message.author.id].location.country = "Australia";
-              config.users[message.author.id].location.state = null;
-              return message.channel.send("Okay, I'm setting your country to **Australia**.")
+              break;
             case "germany":
             case "german":
-              config.users[message.author.id].location.continent = "Europe";
               config.users[message.author.id].location.country = "Germany";
-              config.users[message.author.id].location.state = null;
-              return message.channel.send("Okay, I'm setting your country to **Germany**.")
+              break;
             case "norway":
-              config.users[message.author.id].location.continent = "Europe";
               config.users[message.author.id].location.country = "Norway";
-              config.users[message.author.id].location.state = null;
-              return message.channel.send("Okay, I'm setting your country to **Norway**.")
+              break;
+            case "canada":
+              config.users[message.author.id].location.country = "Canada";
+              break;
+            case "colombia":
+              config.users[message.author.id].location.country = "Colombia";
+              break;
+            case "philippines":
+              config.users[message.author.id].location.country = "Philippines";
+              break;
+            case "indonesia":
+              config.users[message.author.id].location.country = "Indonesia";
+              break;
+            case "united kingdom":
+            case "uk":
+            case "britain":
+            case "britian":
+            case "gb":
+            case "great britain":
+              config.users[message.author.id].location.country = "United Kingdom";
+              break;
             default:
               return message.channel.send("Please enter a valid country.")
           }
-          return message.channel.send("Okay, I've set it so you are from **" + config.users[message.author.id].location.country + " " + config.users[message.author.id].location.continent + "**.")
+          config.users[message.author.id].location.city = null;
+          config.users[message.author.id].location.state = null;
+          if(config.users[message.author.id].location.country == "Western" || config.users[message.author.id].location.country == "Eastern") return message.channel.send("Okay, I've set it so you are from **" + config.users[message.author.id].location.country + " " + config.users[message.author.id].location.continent + "**.")
+          if(config.users[message.author.id].location.country != "Western" && config.users[message.author.id].location.country != "Eastern") config.users[message.author.id].location.continent = locations.countries[config.users[message.author.id].location.country].continent
+          return message.channel.send("Okay, I'm setting your country to **" + config.users[message.author.id].location.country + "**.")
         } else if (fCommand[1] == "state") {
           switch(doubleArgs.toLowerCase()) {
             case "arizona":
             case "az":
-              config.users[message.author.id].location.continent = "North America";
-              config.users[message.author.id].location.country = "United States";
               config.users[message.author.id].location.state = "Arizona";
-              return message.channel.send("Okay, I'm setting your state to **Arizona**.")
+              break;
+            case "texas":
+            case "tx":
+              config.users[message.author.id].location.state = "Texas";
+              break;
+            case "california":
+            case "ca":
+              config.users[message.author.id].location.state = "California";
+              break;
+            case "oregon":
+            case "or":
+              config.users[message.author.id].location.state = "Oregon";
+              break;
+            case "bavaria":
+            // case "az":
+              config.users[message.author.id].location.state = "Bavaria";
+              break;
+            case "nj":
+            case "new jersey":
+              config.users[message.author.id].location.state = "New Jersey";
+              break;
+            case "nh":
+            case "new hampshire":
+              config.users[message.author.id].location.state = "New Hampshire";
+              break;
+            case "vasdo":
+            case "vasdø":
+              config.users[message.author.id].location.state = "Vasdø";
+              break;
+            case "queensland":
+              config.users[message.author.id].location.state = "Queensland";
+              break;
             default:
               return message.channel.send("Please enter a valid state.")
           }
+          config.users[message.author.id].location.city = null;
+          config.users[message.author.id].location.continent = locations.states[config.users[message.author.id].location.state].continent
+          config.users[message.author.id].location.country = locations.states[config.users[message.author.id].location.state].country
+          return message.channel.send("Okay, I'm setting your state to **" + config.users[message.author.id].location.state + "**.")
+        } else if (fCommand[1] == "city") {
+          switch(doubleArgs.toLowerCase()) {
+            case "phoenix":
+            case "px":
+              config.users[message.author.id].location.city = "Phoenix"
+              break;
+            case "glendale":
+              config.users[message.author.id].location.city = "Glendale"
+              break;
+            case "surprise":
+              config.users[message.author.id].location.city = "Surprise"
+              break;
+            case "munich":
+              config.users[message.author.id].location.city = "Munich";
+              break;
+            case "los angeles":
+            case "la":
+              config.users[message.author.id].location.city = "Los Angeles"
+              break;
+            case "ontario":
+              config.users[message.author.id].location.city = "Ontario"
+              break;
+            default:
+              return message.channel.send("Please enter a valid city.")
+          }
+          config.users[message.author.id].location.continent = locations.cities[config.users[message.author.id].location.city].continent
+          config.users[message.author.id].location.country = locations.cities[config.users[message.author.id].location.city].country
+          config.users[message.author.id].location.state = locations.cities[config.users[message.author.id].location.city].state
+          return message.channel.send("Okay, I'm setting your city to **" + config.users[message.author.id].location.city + "**.")
+        } else if(fCommand[1] == "province") {
+          switch(doubleArgs.toLowerCase()) {
+            case "banten":
+              config.users[message.author.id].location.state = "Banten"
+              break;
+            default:
+              return message.channel.send("Please enter a valid province.")
+          }
+          config.users[message.author.id].location.city = null;
+          config.users[message.author.id].location.continent = locations.states[config.users[message.author.id].location.state].continent
+          config.users[message.author.id].location.country = locations.states[config.users[message.author.id].location.state].country
+          return message.channel.send("Okay, I'm setting your province to **" + config.users[message.author.id].location.state + "**.")
         }
         let locationHelp = new MessageEmbed()
         .setTitle("Precipitation " + version + " Locations")
         .setDescription('Just use ' + prefix + 'location continent [location] to set!')
         .addFields(
           { name: "Continents", value: "North America\nSouth America\nEurope\nAfrica\nAsia\nOceania\nAntarctica", inline: true },
-          { name: "Countries", value: prefix + "location country [country name]. If you do not live in the US, you can use west or east to denote Western or Eastern." },
-          { name: "States", value: "Arizona", inline: true }
+          { name: "Countries", value: "United States\nAustralia\nNorway\nGermany\nCanada\nColombia\nPhilippines", inline: true },
+          { name: "States", value: "Arizona\nTexas\nCalifornia\nOregon\nBavaria", inline: true },
+          { name: "Cities", value: "Phoenix\nGlendale\nSurprise\nMunich\nLos Angeles\nOntario", inline: true },
+          { name: "Provinces", value: "Banten"}
         )
         .setColor("BLUE")
         .setFooter({ text: 'Precipitation ' + version });
         return message.channel.send({embeds: [locationHelp]})
-
-      // ltest command
-      case "ltest":
-        if(!config.users[message.author.id].location.continent) return message.channel.send("Please set a continent first, using " + prefix + "location continent [set].");
-        return message.channel.send(getLocationFormat(message.author));
 
       // find command
       case "find":
@@ -729,6 +765,97 @@ client.on('messageCreate', message => {
         .setColor("BLUE")
         .setFooter({ text: 'Precipitation ' + version  + find(args.toLowerCase(), "list", 10, "amount")});
         return message.channel.send({embeds: [findList]})
+
+      // uinfo command
+      case "uinfo":
+        let uinfoUser;
+        if(!args) uinfoUser = message.author;
+        if(args) uinfoUser = find(args.toLowerCase(), "first", null, "list")
+        if(uinfoUser == null) return message.channel.send("Please type a valid user.")
+        initUser(uinfoUser)
+        let userBirthday;
+        if(config.users[uinfoUser.id].birthday.month == undefined) {
+          userBirthday = "*not set*"
+        } else {
+            userBirthday = toProperUSFormat(config.users[uinfoUser.id].birthday.month, config.users[uinfoUser.id].birthday.day, config.users[uinfoUser.id].birthday.year)
+        }
+        let userLocation;
+        if(config.users[uinfoUser.id].location.continent == undefined) {
+          userLocation = "*not set*";
+        } else {
+          userLocation = getLocationFormat(uinfoUser)
+        }
+        let uinfoMember;
+        message.guild.members.cache.each(member => {
+          if(uinfoUser.id == member.id) {
+            return uinfoMember = member;
+          }
+        })
+        let joinedAt;
+        let nickname;
+        if (!uinfoMember) {
+          joinedAt = "*not in server*"
+          nickname = "*not in server*"
+        } else {
+          joinedAt = uinfoMember.joinedAt;
+          if(uinfoMember.nickname) {
+            nickname = uinfoMember.nickname;
+          } else {
+            nickname = "*not set*"
+          }
+        }
+        let uinfo = new MessageEmbed()
+        .setTitle("User Information || " + uinfoUser.tag)
+        .addFields(
+          { name: "Account Dates", value: "**Creation Date**: " + uinfoUser.createdAt + "\n**Join Date**: " + joinedAt, inline: true },
+          { name: "Names", value: "**Username**: " + uinfoUser.username + "\n**Nickname**: " + nickname },
+          { name: "Bot Info", value: "**Name**: " + name(uinfoUser) + "\n**Gender**: " + gender(uinfoUser, "Male", "Female", "Other", "*not set*") + "\n**Birthday**: " + userBirthday + "\n**Location**: " + userLocation }
+        )
+        .setColor("BLUE")
+        .setFooter({ text: 'Precipitation ' + version });
+        return message.channel.send({embeds: [uinfo]})
+
+      // uptime command
+      case "uptime":
+        var time;
+        var uptime = parseInt(client.uptime);
+        uptime = Math.floor(uptime / 1000);
+        var minutes = Math.floor(uptime / 60);
+        var seconds = Math.floor(uptime);
+        var hours = 0;
+        var days = 0;
+        while (seconds >= 60) {
+            seconds = seconds - 60;
+        }
+        while (minutes >= 60) {
+            hours++;
+            minutes = minutes - 60;
+        }
+        while (hours >= 24) {
+          days++;
+          hours = hours - 24;
+        }
+        if (minutes < 10) {
+            time = hours + ":0" + minutes + ":0"
+        } else {
+            time = hours + ":" + minutes
+        }
+        return message.channel.send("Precipitation has been online for " + days + " days, " + hours + " hours, " + minutes + " minutes, and " + seconds + " seconds.");
+
+      case "rm":
+      case "purge":
+        if(parseInt(args) == 0) return message.channel.send("Okay, I didn't delete any messages.")
+        if(!message.member.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES)) return message.channel.send("You don't have the proper permissions to perform this action.")
+        if(isNaN(parseInt(args))) return message.channel.send("Please input a number.")
+        if(parseInt(args) > 99) return message.channel.send("Please select an amount between 1-99.")
+        if(parseInt(args) == 1) {
+          return message.channel.bulkDelete(parseInt(2)).then(() => {
+            message.channel.send("Okay, I've deleted the above message. (really?)")
+          })
+        }
+        return message.channel.bulkDelete(parseInt(args) + 1).then(() => {
+          message.channel.send("Okay, I've deleted " + args + " messages.")
+        })
 
       default:
         message.channel.send("Sorry, but it appears this command is unknown.");
