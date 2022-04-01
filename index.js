@@ -496,6 +496,10 @@ client.on('messageCreate', message => {
         .setFooter({ text: 'Precipitation ' + version });
         return message.channel.send({embeds: [aboutEmbed]});
 
+      // Best Waifu Command Easter Egg
+      case "Waifu":
+        if (args == "")return message.channel.send("Taiga Aisaka (The legal loli, of couse.)"); // Yes.
+
       // placevalue command
       case "placevalue":
         if(isNaN(parseInt(args))) return message.channel.send("Please input a number.")
