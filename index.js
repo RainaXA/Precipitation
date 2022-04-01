@@ -498,7 +498,7 @@ client.on('messageCreate', message => {
 
       // Best Waifu Command Easter Egg
       case "Waifu":
-        if (args == "")return message.channel.send("Taiga Aisaka (The legal loli, of couse.)"); // Yes.
+        if (args == "")return message.channel.send("Taiga Aisaka (The legal loli, of course.)"); // Yes.
 
       // placevalue command
       case "placevalue":
