@@ -1,10 +1,10 @@
-const { Client, Intents, MessageEmbed } = require('discord.js');
+﻿const { Client, Intents, MessageEmbed } = require('discord.js');
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 const colors = require('colors'); // yes, you can do this within the node.js console using the weird thingies. however, im lazy, i do this later lol, i just want to get this done quickly
 const readline = require('readline');
 
-var prefix = "pr:" // pr; in the official Precipitation, modified for the source code
-var version = "v0.0.2.2"
+var prefix = "pr:" // pr- in the official Precipitation, adjusted for source code
+var version = "v0.0.2.3"
 var verText = "the robot revolution"
 
 var debugging = 0;
@@ -37,7 +37,7 @@ function processConsoleCommand() {
   });
 }
 
-function log(message, type, level) { // not much of a place in here, might get rid of it on final update
+function log(message, type, level) {
   // debug level: will only display if the current debugging level is >= the level set on the log
 
   // rule of thumb:
@@ -65,7 +65,7 @@ function log(message, type, level) { // not much of a place in here, might get r
     case "output":
       msg = (message).brightWhite
       break;
-    case "debug": // we are intentionally not going to be able to identify someone -- there is no database for their consent!!
+    case "debug":
       msg = ("[-] " + message).brightMagenta
       break;
   }
@@ -96,24 +96,8 @@ function log(message, type, level) { // not much of a place in here, might get r
   }
 }
 
-function placeValue(num) { // no place in here, but it's a feature in v0.1, which doesn't require a database
-  let number = num.toString()
-  if(number.endsWith("11") || number.endsWith("12") || number.endsWith("13")) {
-    return number + "th";
-  } else if(number.endsWith("1")) {
-    return number + "st";
-  } else if(number.endsWith("2")) {
-    return number + "nd";
-  } else if(number.endsWith("3")) {
-    return number + "rd";
-  } else {
-    return number + "th";
-  }
-}
-
 client.on('ready', () => {
   log('Precipitation has started!', 'success', 1)
-  client.user.setActivity(version + " || " + prefix + "help")
   processConsoleCommand();
 })
 
@@ -135,7 +119,7 @@ client.on('messageCreate', message => {
             pingMessage = "yeah i got you"
             break;
           case 2:
-            pingMessage ﻿= "awooga"
+            pingMessage = "awooga"
             break;
           case 3:
             pingMessage = "i'm so random and quirky!!!"
@@ -157,7 +141,7 @@ client.on('messageCreate', message => {
         .setTitle("Precipitation Index")
         .setDescription('List of all commands -- use `' + prefix + '` before all commands!')
         .addFields(
-          { name: "General", value: "ping\nhelp\nversion\nabout\nplacevalue" }
+          { name: "General", value: "ping\nhelp\nversion\nabout" }
         )
         .setColor("BLUE")
         .setFooter({ text: 'Precipitation ' + version });
@@ -169,31 +153,38 @@ client.on('messageCreate', message => {
         .setDescription('Kinda cool hybrid moderation-fun bot')
         .addFields(
           { name: "Creator", value: "**raina#7847** - bot developer" },
-          { name: "Version Support", value: "**Older Stable**: given some updates from newer version"}
+          { name: "Version Support", value: "**Old Stable**: given some bug fixes"}
         )
         .setColor("BLUE")
         .setFooter({ text: 'Precipitation ' + version });
         message.channel.send({embeds: [aboutEmbed]})
         break;
-      case "gtest":
-      case "btest":
-      case "location":
-      case "ltest":
-        // message.channel.send("Please use the prefix, `pr:` -- Precipitation v0.0.2.2 does not support databases.");
-        // this is for use in the official Precipitation, where v0.0.2.2 is hosted alongside v0.1
-        // Adding a database to Precipitation v0.0.2.2 would just mean that it's v0.1.0
+      case "uptime":
+        var time;
+        var uptime = parseInt(client.uptime);
+        uptime = Math.floor(uptime / 1000);
+        var minutes = Math.floor(uptime / 60);
+        var seconds = Math.floor(uptime);
+        var hours = 0;
+        var days = 0;
+        while (seconds >= 60) {
+          seconds = seconds - 60;
+        }
+        while (minutes >= 60) {
+          hours++;
+          minutes = minutes - 60;
+        }
+        while (hours >= 24) {
+          days++;
+          hours = hours - 24;
+        }
+        return message.channel.send("Precipitation v0.0.2.3 has been online for " + days + " days, " + hours + " hours, " + minutes + " minutes, and " + seconds + " seconds.");
     }
-    if(command.startsWith("name") || command.startsWith("gender ") || command.startsWith("location ") || command.startsWith("birthday ")) {
-        // message.channel.send("Please use the prefix, `pr:` -- Precipitation v0.0.2.2 does not support databases.");
-        // this is for use in the official Precipitation, where v0.0.2.2 is hosted alongside v0.1
-        // Adding a database to Precipitation v0.0.2.2 would just mean that it's v0.1.0
-    } else if(command.startsWith("placevalue ")) {
-      let cmd = command.slice(11)
-      if(isNaN(parseInt(cmd))) return message.channel.send("Please input a number.")
-      if(cmd.includes(".")) return message.channel.send("This will still work with the decimal, but please exclude it. I'm picky, okay?")
-      message.channel.send(placeValue(cmd))
-    } else if (command.startsWith("ver") || command.startsWith("version")) {
-      if(parameters[1] == "no-ver-text") {
+    if(command.toLowerCase().startsWith("name") || command.toLowerCase().startsWith("gender") || command.toLowerCase().startsWith("location") || command.toLowerCase().startsWith("birthday")) {
+      message.channel.send("Please use the prefix, `pr:` -- Precipitation v0.0.2.3 does not support databases.");
+    } else if (command.toLowerCase().startsWith("ver") || command.toLowerCase().startsWith("version")) {
+      if(parameters[1]) var parameter = parameters[1].toLowerCase()
+      if(parameter == "no-ver-text") {
         message.channel.send("Precipitation " + version)
       } else {
         message.channel.send("Precipitation " + version + ": " + verText + ".");
