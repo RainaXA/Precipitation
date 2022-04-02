@@ -12,6 +12,9 @@
     "United States": {
       "continent": "North America"
     },
+    "Mexico": {
+      "continent": "North America"
+    },
     "Australia": {
       "continent": "Oceania"
     },
@@ -21,10 +24,16 @@
     "Norway": {
       "continent": "Europe"
     },
+    "Sweden": {
+      "continent": "Europe"
+    },
     "Canada": {
       "continent": "North America"
     },
     "Colombia": {
+      "continent": "South America"
+    },
+    "Argentina": {
       "continent": "South America"
     },
     "Philippines": {
@@ -47,6 +56,18 @@
       "country": "United States"
     },
     "California": {
+      "continent": "North America",
+      "country": "United States"
+    },
+    "New Mexico": {
+      "continent": "North America",
+      "country": "United States"
+    },
+    "Ohio": {
+      "continent": "North America",
+      "country": "United States"
+    },
+    "Pennsylvania": {
       "continent": "North America",
       "country": "United States"
     },
@@ -77,6 +98,14 @@
     "Queensland": {
       "continent": "Oceania",
       "country": "Australia"
+    },
+    "London": {
+      "continent": "Europe",
+      "country": "United Kingdom"
+    },
+    "England": {
+      "continent": "Europe",
+      "country": "United Kingdom"
     }
   },
   "cities": {
@@ -94,6 +123,16 @@
       "continent": "North America",
       "country": "United States",
       "state": "Arizona"
+    },
+    "Buckeye": {
+      "continent": "North America",
+      "country": "United States",
+      "state": "Arizona"
+    },
+    "Portland": {
+      "continent": "North America",
+      "country": "United States",
+      "state": "Oregon"
     },
     "Los Angeles": {
       "continent": "North America",
