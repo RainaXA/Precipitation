@@ -10,8 +10,8 @@ const rl = readline.createInterface({
 });
 
 
-var prefix = "pr;"
-var version = "v0.1.8"
+var prefix = "pr:" // pr; in the official Precipitation, modified for source
+var version = "v0.1.9"
 var verText = "just for you"
 
 var debugging = 0;
@@ -205,11 +205,18 @@ function name(user) {
   }
 }
 
-function gender(user, mMessage, fMessage, oMessage) { // male first, female second, others third
+function gender(user, mMessage, fMessage, oMessage, naMessage) { // male first, female second, others third
   if(mMessage && fMessage && oMessage) {
-    if(config.users[user.id].gender == "male") return mMessage;
-    if(config.users[user.id].gender == "female") return fMessage;
-    if(!config.users[user.id].gender || config.users[user.id].gender == "other") return oMessage;
+    if(naMessage) {
+      if(config.users[user.id].gender == "male") return mMessage;
+      if(config.users[user.id].gender == "female") return fMessage;
+      if(config.users[user.id].gender == "other") return oMessage;
+      if(!config.users[user.id].gender) return naMessage;
+    } else {
+      if(config.users[user.id].gender == "male") return mMessage;
+      if(config.users[user.id].gender == "female") return fMessage;
+      if(!config.users[user.id].gender || config.users[user.id].gender == "other") return oMessage;
+    }
   } else {
     if(config.users[user.id].gender) {
       return config.users[user.id].gender
@@ -502,235 +509,446 @@ client.on('messageCreate', message => {
       config.users[message.author.id].name = cmd;
       message.channel.send("Sure, I'll refer to you by \"" + name(message.author) + "\".")
     }
-  } else if(command.startsWith("gender ")) {
-    let cmd = command.slice(7).toLowerCase();
-    let gender;
-    switch(cmd) {
-      case "female":
-      case "she/her":
-      case "f":
-        gender = "female";
-        break;
-      case "male":
-      case "he/him":
-      case "m":
-        gender = "male";
-        break;
-      case "other":
-      case "they/them":
-      case "o":
-        gender = "other";
-        break;
-      default:
-        gender = "n/a"
-    }
-    if (gender == "n/a") {
-      message.channel.send("I'll just set your gender to **other**. If you'd rather not be, please use \"female\" or \"male.\"")
-    } else {
-      message.channel.send("Sure thing, I'll refer to you as **" + gender + "**.")
-    }
-    if (gender == "n/a") gender = "other";
-    config.users[message.author.id].gender = gender;
-  } else if (command.startsWith("birthday ")) {
-    let cmd = command.slice(9).split("/");
-    let year = new Date().getFullYear();
-    if(!command.includes("/")) {
-      message.channel.send("Currently, you must separate your birthday with slashes, and it must be in mm/dd/yyyy format.")  // two Europeans who have used this bot said it's better to keep it in one format.
-    } else if(cmd.length != 3) {
-      message.channel.send("That's not how dates work. It's mm/dd/yyyy.") // two Europeans who have used this bot said it's better to keep it in one format.
-    } else if(isNaN(parseInt(cmd[0])) || isNaN(parseInt(cmd[1])) || isNaN(parseInt(cmd[2]))) {
-      message.channel.send("You have to, you know, put just numbers in a birthday.")
-    } else if(cmd[0].includes("-") || cmd[1].includes("-") || cmd[2].includes("-")) {
-      message.channel.send("Please exclude the negative sign. That's not how birthdays work.")
-    } else if(cmd[0].includes(".") || cmd[1].includes(".") || cmd[2].includes(".")) {
-      message.channel.send("Please take out the decimal, I don't believe birthdays work like that.")
-    } else if(getDaysInMonth(parseInt(cmd[0]), cmd[2]) == "invalid month") {
-      message.channel.send("Please give me a valid month. If you put a 0 at the beginning, please exclude this for now.")
-    } else if(getDaysInMonth(parseInt(cmd[0]), parseInt(cmd[2])) < parseInt(cmd[1])) {
-      message.channel.send("Your birthday is not past when the month ended.")
-    } else if(parseInt(cmd[2]) > year) {
-      message.channel.send("Nice try, time traveler.")
-    } else if(parseInt(cmd[2]) < 1903) {
-      message.channel.send("So you're trying to tell me you're older than the oldest alive person on Earth? I doubt that.")
-    } else {
-      message.channel.send("Okay, I will set your birthday as " + toProperUSFormat(parseInt(cmd[0]), parseInt(cmd[1]), cmd[2]) + ".")
-      config.users[message.author.id].birthday.month = parseInt(cmd[0]);
-      config.users[message.author.id].birthday.day = parseInt(cmd[1]);
-      config.users[message.author.id].birthday.year = parseInt(cmd[2]);
-    }
-  } else if (command.startsWith("placevalue ")) {
-    let cmd = command.slice(11)
-    if(isNaN(parseInt(cmd))) return message.channel.send("Please input a number.")
-    if(cmd.includes(".")) return message.channel.send("This will still work with the decimal, but please exclude it. I'm picky, okay?")
-    message.channel.send(placeValue(cmd))
-  } else if (command.startsWith("location ")) {
-    let cmd = command.slice(9).toLowerCase();
-    if (cmd == "list") {
-      let locationList = new MessageEmbed()
-      .setTitle("Precipitation " + version + " Locations")
-      .setDescription('Just use ' + prefix + 'location continent [location] to set!')
+    } else if(command.startsWith("gender ")) {
+      let cmd = command.slice(7).toLowerCase();
+      let gender;
+      switch(cmd) {
+        case "female":
+        case "she/her":
+        case "f":
+          gender = "female";
+          break;
+        case "male":
+        case "he/him":
+        case "m":
+          gender = "male";
+          break;
+        case "other":
+        case "they/them":
+        case "o":
+          gender = "other";
+          break;
+        default:
+          gender = "n/a"
+      }
+      if (gender == "n/a") {
+        message.channel.send("I'll just set your gender to **other**. If you'd rather not be, please use \"female\" or \"male.\"")
+      } else {
+        message.channel.send("Sure thing, I'll refer to you as **" + gender + "**.")
+      }
+      if (gender == "n/a") gender = "other";
+      config.users[message.author.id].gender = gender;
+    } else if (command.startsWith("birthday")) {
+      let cmd = command.slice(9).split("/");
+      let year = new Date().getFullYear();
+      let list = "Please:\n";
+      if(!cmd[0] || !cmd[1] || !cmd[2]) {
+        if(!cmd[0]) {
+          list = list + "- input an argument"
+        } else {
+          list = list + "- separate your birthday with slashes\n"
+        }
+      } else {
+        if(isNaN(parseInt(cmd[0])) || isNaN(parseInt(cmd[1])) || isNaN(parseInt(cmd[2]))) {
+          list = list + "- only include numbers\n"
+        }
+        if(cmd.length != 3) {
+          list = list + "- only have three numbers separated by slashes\n"
+        }
+        if(cmd[0].includes("-") || cmd[1].includes("-") || cmd[2].includes("-")) {
+          list = list + "- remove the negative sign\n"
+        }
+        if(cmd[0].includes(".") || cmd[1].includes(".") || cmd[2].includes(".")) {
+          list = list + "- remove the decimal\n"
+        }
+        if(getDaysInMonth(parseInt(cmd[0]), cmd[2]) == "invalid month") {
+          list = list + "- give a valid month between 1-12\n"
+        }
+        if(getDaysInMonth(parseInt(cmd[0]), parseInt(cmd[2])) < parseInt(cmd[1])) {
+          list = list + "- make sure the month hasn't already ended\n"
+        }
+        if(parseInt(cmd[2]) > year || parseInt(cmd[2]) < 1903) {
+          list = list + "- ensure you input the correct birthday\n"
+        }
+      }
+      if(list == "Please:\n") {
+        message.channel.send("Okay, I will set your birthday as " + toProperUSFormat(parseInt(cmd[0]), parseInt(cmd[1]), parseInt(cmd[2])) + ".")
+        config.users[message.author.id].birthday.month = parseInt(cmd[0]);
+        config.users[message.author.id].birthday.day = parseInt(cmd[1]);
+        config.users[message.author.id].birthday.year = parseInt(cmd[2]);
+      } else {
+        message.channel.send(list)
+      }
+    } else if (command.startsWith("placevalue ")) {
+      let cmd = command.slice(11)
+      if(isNaN(parseInt(cmd))) return message.channel.send("Please input a number.")
+      if(cmd.includes(".")) return message.channel.send("This will still work with the decimal, but please exclude it. I'm picky, okay?")
+      message.channel.send(placeValue(cmd))
+    } else if (command.startsWith("location ")) {
+      let cmd = command.slice(9).toLowerCase();
+      if (cmd == "list") {
+        let locationList = new MessageEmbed()
+        .setTitle("Precipitation " + version + " Locations")
+        .setDescription('Just use ' + prefix + 'location continent [location] to set!')
+        .addFields(
+          { name: "Continents", value: "North America\nSouth America\nEurope\nAfrica\nAsia\nOceania\nAntarctica", inline: true },
+          { name: "Countries", value: prefix + "location country [country name]. If you do not live in the US, you can use west or east to denote Western or Eastern." }
+        )
+        .setColor("BLUE")
+        .setFooter({ text: 'Precipitation ' + version });
+        message.channel.send({embeds: [locationList]})
+      }
+      if (cmd == "continent") {
+        message.channel.send("Please re-run the command with your continent afterwards.")
+      } else if (cmd.startsWith("continent ")) {
+        let continent;
+        cmd = cmd.slice(10)
+        switch(cmd) {
+          case "north america":
+          case "na":
+            message.channel.send("Okay, I'm setting your continent to **North America**.")
+            continent = "North America";
+            break;
+          case "south america":
+          case "sa":
+            message.channel.send("Okay, I'm setting your continent to **South America**.")
+            continent = "South America";
+            break;
+          case "europe":
+          case "eu":
+            message.channel.send("Okay, I'm setting your continent to **Europe**.")
+            continent = "Europe";
+            break;
+          case "africa":
+            message.channel.send("Okay, I'm setting your continent to **Africa**.")
+            continent = "Africa";
+            break;
+          case "asia":
+            message.channel.send("Okay, I'm setting your continent to **Asia**.")
+            continent = "Asia";
+            break;
+          case "oceania":
+          case "australia":
+            message.channel.send("Okay, I'm setting your continent to **Oceania**.")
+            continent = "Oceania";
+            break;
+          case "antarctica":
+            message.channel.send("Okay, I'm setting your continent to **Antarctica**.")
+            continent = "Antarctica";
+            break;
+          default:
+            continent = "n/a"
+        }
+        if(continent != "n/a") {
+          config.users[message.author.id].location.country = null;
+          config.users[message.author.id].location.continent = continent;
+        } else {
+          message.channel.send("Please enter a valid continent.")
+        }
+      } else if (cmd.startsWith("country ")) {
+        cmd = cmd.slice(8)
+        switch (cmd) {
+          case "us":
+          case "united states":
+          case "america":
+          case "united states of america":
+            config.users[message.author.id].location.continent = "North America";
+            config.users[message.author.id].location.country = "United States";
+            message.channel.send("Okay, I'm setting your country to **United States**.")
+            break;
+          case "west":
+            if(config.users[message.author.id].location.continent) {
+              config.users[message.author.id].location.country = "Western";
+              message.channel.send("Okay, I've set it so you are from **Western " + config.users[message.author.id].location.continent + "**.")
+            } else {
+              message.channel.send("Please set your continent first.")
+            }
+            break;
+          case "east":
+            if(config.users[message.author.id].location.continent) {
+              config.users[message.author.id].location.country = "Eastern";
+              message.channel.send("Okay, I've set it so you are from **Eastern " + config.users[message.author.id].location.continent + "**.")
+            } else {
+              message.channel.send("Please set your continent first.")
+            }
+            break;
+          case "australia":
+          case "au":
+            config.users[message.author.id].location.country = "Australia";
+            config.users[message.author.id].location.continent = "Oceania";
+            message.channel.send("Okay, I'm setting your country to **Australia**.")
+            break;
+          case "germany":
+          case "german":
+            config.users[message.author.id].location.country = "Germany";
+            config.users[message.author.id].location.continent = "Europe";
+            message.channel.send("Okay, I'm setting your country to **Germany**.")
+            break;
+          case "norway":
+            config.users[message.author.id].location.country = "Norway";
+            config.users[message.author.id].location.continent = "Europe";
+            message.channel.send("Okay, I'm setting your country to **Norway**.")
+            break;
+          case "canada":
+            config.users[message.author.id].location.country = "Canada";
+            config.users[message.author.id].location.continent = "North America";
+            message.channel.send("Okay, I'm setting your country to **Canada**.")
+            break;
+          case "colombia":
+            config.users[message.author.id].location.country = "Colombia";
+            config.users[message.author.id].location.continent = "South America";
+            message.channel.send("Okay, I'm setting your country to **Colombia**.")
+            break;
+          case "philippines":
+            config.users[message.author.id].location.country = "Philippines";
+            config.users[message.author.id].location.continent = "Asia";
+            message.channel.send("Okay, I'm setting your country to **Philippines**.")
+            break;
+          case "indonesia":
+            config.users[message.author.id].location.country = "Indonesia";
+            config.users[message.author.id].location.continent = "Asia";
+            message.channel.send("Okay, I'm setting your country to **Indonesia**.")
+            break;
+          case "united kingdom":
+          case "uk":
+          case "britain":
+          case "britian":
+          case "gb":
+          case "great britain":
+            config.users[message.author.id].location.country = "United Kingdom";
+            config.users[message.author.id].location.continent = "Europe";
+            message.channel.send("Okay, I'm setting your country to **United Kingdom**.")
+            break;
+          case "sweden":
+            config.users[message.author.id].location.country = "Sweden";
+            config.users[message.author.id].location.continent = "Europe";
+            message.channel.send("Okay, I'm setting your country to **Sweden**.")
+            break;
+          case "mexico":
+            config.users[message.author.id].location.country = "Mexico";
+            config.users[message.author.id].location.continent = "North America";
+            message.channel.send("Okay, I'm setting your country to **Mexico**.")
+            break;
+          case "argentina":
+            config.users[message.author.id].location.country = "Argentina";
+            config.users[message.author.id].location.continent = "South America";
+            message.channel.send("Okay, I'm setting your country to **Argentina**.")
+            break;
+        }
+      /*} else if (cmd.startsWith("state ")) {
+        cmd = cmd.slice(6)
+        switch (cmd) {
+          case "us":
+          case "united states":
+          case "america":
+          case "united states of america":
+            config.users[message.author.id].location.continent = "North America";
+            config.users[message.author.id].location.country = "United States";
+            message.channel.send("Okay, I'm setting your country to **United States**.")
+            break;
+          case "west":
+            if(config.users[message.author.id].location.continent) {
+              config.users[message.author.id].location.country = "Western";
+              message.channel.send("Okay, I've set it so you are from **Western " + config.users[message.author.id].location.continent + "**.")
+            } else {
+              message.channel.send("Please set your continent first.")
+            }
+            break;
+          case "east":
+            if(config.users[message.author.id].location.continent) {
+              config.users[message.author.id].location.country = "Eastern";
+              message.channel.send("Okay, I've set it so you are from **Eastern " + config.users[message.author.id].location.continent + "**.")
+            } else {
+              message.channel.send("Please set your continent first.")
+            }
+            break;
+          case "australia":
+          case "au":
+            config.users[message.author.id].location.country = "Australia";
+            config.users[message.author.id].location.continent = "Oceania";
+            message.channel.send("Okay, I'm setting your country to **Australia**.")
+            break;
+          case "germany":
+          case "german":
+            config.users[message.author.id].location.country = "Germany";
+            config.users[message.author.id].location.continent = "Europe";
+            message.channel.send("Okay, I'm setting your country to **Germany**.")
+            break;
+          case "norway":
+            config.users[message.author.id].location.country = "Norway";
+            config.users[message.author.id].location.continent = "Europe";
+            message.channel.send("Okay, I'm setting your country to **Norway**.")
+            break;
+          case "canada":
+            config.users[message.author.id].location.country = "Canada";
+            config.users[message.author.id].location.continent = "North America";
+            message.channel.send("Okay, I'm setting your country to **Canada**.")
+            break;
+          case "colombia":
+            config.users[message.author.id].location.country = "Colombia";
+            config.users[message.author.id].location.continent = "South America";
+            message.channel.send("Okay, I'm setting your country to **Colombia**.")
+            break;
+          case "philippines":
+            config.users[message.author.id].location.country = "Philippines";
+            config.users[message.author.id].location.continent = "Asia";
+            message.channel.send("Okay, I'm setting your country to **Philippines**.")
+            break;
+          case "indonesia":
+            config.users[message.author.id].location.country = "Indonesia";
+            config.users[message.author.id].location.continent = "Asia";
+            message.channel.send("Okay, I'm setting your country to **Indonesia**.")
+            break;
+          case "united kingdom":
+          case "uk":
+          case "britain":
+          case "britian":
+          case "gb":
+          case "great britain":
+            config.users[message.author.id].location.country = "United Kingdom";
+            config.users[message.author.id].location.continent = "Europe";
+            message.channel.send("Okay, I'm setting your country to **United Kingdom**.")
+            break;
+          case "sweden":
+            config.users[message.author.id].location.country = "Sweden";
+            config.users[message.author.id].location.continent = "Europe";
+            message.channel.send("Okay, I'm setting your country to **Sweden**.")
+            break;
+          case "mexico":
+            config.users[message.author.id].location.country = "Mexico";
+            config.users[message.author.id].location.continent = "North America";
+            message.channel.send("Okay, I'm setting your country to **Mexico**.")
+            break;
+          case "argentina":
+            config.users[message.author.id].location.country = "Argentina";
+            config.users[message.author.id].location.continent = "South America";
+            message.channel.send("Okay, I'm setting your country to **Argentina**.")
+            break;
+        }*/
+      }
+    } else if (command.startsWith("help ")) {
+      let cmdHelp = command.slice(5).toLowerCase()
+      switch(cmdHelp) {
+        case "ping":
+        case "help":
+        case "ver":
+        case "version":
+        case "about":
+        case "name":
+        case "gender":
+        case "birthday":
+        case "location":
+        case "placevalue":
+        case "find":
+        case "uinfo":
+        case "uptime":
+          let commandHelpEmbed = new MessageEmbed()
+          .setTitle("Precipitation Index || " + prefix + cmdHelp)
+          .addFields(
+            { name: "Description", value: commands[cmdHelp].description},
+            { name: "Syntax", value: prefix + cmdHelp + " " + commands[cmdHelp].syntax}
+          )
+          .setColor("BLUE")
+          .setFooter({ text: 'Precipitation ' + version + " || [] denotes a parameter, () denotes an argument, bolded is REQUIRED."});
+          message.channel.send({embeds: [commandHelpEmbed]})
+      }
+    } else if(command.startsWith('ping')) {
+      let user = name(message.author)
+      let startTime = Date.now();
+      let raelynnTooCute = Math.floor(Math.random() * 7)
+      let pingMessage;
+      switch (raelynnTooCute) {
+        case 0:
+          pingMessage = "Pinging..."
+          break;
+        case 1:
+          pingMessage = "yeah i got you"
+          break;
+        case 2:
+          pingMessage = "awooga"
+          break;
+        case 3:
+          pingMessage = "i'm so random and quirky!!!"
+          break;
+        case 4:
+          pingMessage = "ew are you a pisces? that makes you satan!"
+          break;
+        case 5:
+          pingMessage = "i'm a scorpio so it makes sense for me to kill my whole family"
+          break;
+        case 6:
+          pingMessage = "pay my onlyfans"  // Why only lowercase?
+          break;
+      }
+      message.channel.send("<:ping_receive:502755206841237505> " + pingMessage).then(function(message) {
+        switch(parameters[1]) { // I'm aware you cannot combine the two. I'm sorry, that's how it is for now.
+          case "no-name":
+            message.edit("<:ping_transmit:502755300017700865> (" + (Date.now() - startTime) + "ms) Hey!")
+            break;
+          case "client-ping":
+            message.edit("<:ping_transmit:502755300017700865> (" + Math.round(client.ws.ping) + "ms) Hey, " + user + "!");
+            break;
+          default:
+            message.edit("<:ping_transmit:502755300017700865> (" + (Date.now() - startTime) + "ms) Hey, " + user + "!");
+        }
+      })
+    } else if (command.startsWith("find ")) {
+      let args = command.slice(5)
+      if(!args) return message.channel.send("Please input a parameter.")
+      let findList = new MessageEmbed()
+      .setTitle("Precipitation " + version + " Query")
       .addFields(
-        { name: "Continents", value: "North America\nSouth America\nEurope\nAfrica\nAsia\nOceania\nAntarctica", inline: true },
-        { name: "Countries", value: prefix + "location country [country name]. If you do not live in the US, you can use west or east to denote Western or Eastern." }
+        { name: "Results", value: find(args.toLowerCase(), "list", 10, "list")}
+      )
+      .setColor("BLUE")
+      .setFooter({ text: 'Precipitation ' + version  + find(args.toLowerCase(), "list", 10, "amount")});
+      return message.channel.send({embeds: [findList]})
+    } else if (command.startsWith("uinfo ")) {
+      let args = command.slice(6)
+      let uinfoUser = find(args.toLowerCase(), "first", null, "list")
+      if(uinfoUser == null) return message.channel.send("Please type a valid user.")
+      initUser(uinfoUser)
+      let userBirthday;
+      if(config.users[uinfoUser.id].birthday.month == undefined) {
+        userBirthday = "*not set*"
+      } else {
+          userBirthday = toProperUSFormat(config.users[uinfoUser.id].birthday.month, config.users[uinfoUser.id].birthday.day, config.users[uinfoUser.id].birthday.year)
+      }
+      let userLocation;
+      if(config.users[uinfoUser.id].location.continent == undefined) {
+        userLocation = "*not set*";
+      } else {
+        userLocation = getLocationFormat(uinfoUser)
+      }
+      let uinfoMember;
+      message.guild.members.cache.each(member => {
+        if(uinfoUser.id == member.id) {
+          return uinfoMember = member;
+        }
+      })
+      let joinedAt;
+      let nickname;
+      if (!uinfoMember) {
+        joinedAt = "*not in server*"
+        nickname = "*not in server*"
+      } else {
+        joinedAt = uinfoMember.joinedAt;
+        if(uinfoMember.nickname) {
+          nickname = uinfoMember.nickname;
+        } else {
+          nickname = "*not set*"
+        }
+      }
+      let uinfo = new MessageEmbed()
+      .setTitle("User Information || " + uinfoUser.tag)
+      .addFields(
+        { name: "Account Dates", value: "**Creation Date**: " + uinfoUser.createdAt + "\n**Join Date**: " + joinedAt, inline: true },
+        { name: "Names", value: "**Username**: " + uinfoUser.username + "\n**Nickname**: " + nickname },
+        { name: "Bot Info", value: "**Name**: " + name(uinfoUser) + "\n**Gender**: " + gender(uinfoUser, "Male", "Female", "Other", "*not set*") + "\n**Birthday**: " + userBirthday + "\n**Location**: " + userLocation }
       )
       .setColor("BLUE")
       .setFooter({ text: 'Precipitation ' + version });
-      message.channel.send({embeds: [locationList]})
+      return message.channel.send({embeds: [uinfo]})
     }
-    if (cmd == "continent") {
-      message.channel.send("Please re-run the command with your continent afterwards.")
-    }
-    if (cmd.startsWith("continent ")) {
-      let continent;
-      cmd = cmd.slice(10)
-      switch(cmd) {
-        case "north america":
-        case "na":
-          message.channel.send("Okay, I'm setting your continent to **North America**.")
-          continent = "North America";
-          break;
-        case "south america":
-        case "sa":
-          message.channel.send("Okay, I'm setting your continent to **South America**.")
-          continent = "South America";
-          break;
-        case "europe":
-        case "eu":
-          message.channel.send("Okay, I'm setting your continent to **Europe**.")
-          continent = "Europe";
-          break;
-        case "africa":
-          message.channel.send("Okay, I'm setting your continent to **Africa**.")
-          continent = "Africa";
-          break;
-        case "asia":
-          message.channel.send("Okay, I'm setting your continent to **Asia**.")
-          continent = "Asia";
-          break;
-        case "oceania":
-        case "australia":
-          message.channel.send("Okay, I'm setting your continent to **Oceania**.")
-          continent = "Oceania";
-          break;
-        case "antarctica":
-          message.channel.send("Okay, I'm setting your continent to **Antarctica**.")
-          continent = "Antarctica";
-          break;
-        default:
-          continent = "n/a"
-      }
-      if(continent != "n/a") {
-        config.users[message.author.id].location.country = null;
-        config.users[message.author.id].location.continent = continent;
-      } else {
-        message.channel.send("Please enter a valid continent.")
-      }
-    } else if (cmd.startsWith("country ")) {
-      cmd = cmd.slice(8)
-      switch (cmd) {
-        case "us":
-        case "united states":
-        case "america":
-        case "united states of america":
-          config.users[message.author.id].location.continent = "North America";
-          config.users[message.author.id].location.country = "United States";
-          message.channel.send("Okay, I'm setting your country to **United States**, which also sets your continent to **North America**.")
-          break;
-        case "west":
-          if(config.users[message.author.id].location.continent) {
-            config.users[message.author.id].location.country = "Western";
-            message.channel.send("Okay, I've set it so you are from **Western " + config.users[message.author.id].location.continent + "**.")
-          } else {
-            message.channel.send("Please set your continent first.")
-          }
-          break;
-        case "east":
-          if(config.users[message.author.id].location.continent) {
-            config.users[message.author.id].location.country = "Eastern";
-            message.channel.send("Okay, I've set it so you are from **Eastern " + config.users[message.author.id].location.continent + "**.")
-          } else {
-            message.channel.send("Please set your continent first.")
-          }
-          break;
-      }
-    }
-  } else if (command.startsWith("help ")) {
-    let cmdHelp = command.slice(5).toLowerCase()
-    switch(cmdHelp) {
-      case "ping":
-      case "help":
-      case "ver":
-      case "version":
-      case "about":
-      case "name":
-      case "gender":
-      case "birthday":
-      case "location":
-      case "placevalue":
-      case "find":
-      case "uinfo":
-      case "uptime":
-        let commandHelpEmbed = new MessageEmbed()
-        .setTitle("Precipitation Index || " + prefix + cmdHelp)
-        .addFields(
-          { name: "Description", value: commands[cmdHelp].description},
-          { name: "Syntax", value: prefix + cmdHelp + " " + commands[cmdHelp].syntax}
-        )
-        .setColor("BLUE")
-        .setFooter({ text: 'Precipitation ' + version + " || [] denotes a parameter, () denotes an argument, bolded is REQUIRED."});
-        message.channel.send({embeds: [commandHelpEmbed]})
-    }
-  } else if(command.startsWith('ping')) {
-    let user = name(message.author)
-    let startTime = Date.now();
-    let raelynnTooCute = Math.floor(Math.random() * 7)
-    let pingMessage;
-    switch (raelynnTooCute) {
-      case 0:
-        pingMessage = "Pinging..."
-        break;
-      case 1:
-        pingMessage = "yeah i got you"
-        break;
-      case 2:
-        pingMessage = "awooga"
-        break;
-      case 3:
-        pingMessage = "i'm so random and quirky!!!"
-        break;
-      case 4:
-        pingMessage = "ew are you a pisces? that makes you satan!"
-        break;
-      case 5:
-        pingMessage = "i'm a scorpio so it makes sense for me to kill my whole family"
-        break;
-      case 6:
-        pingMessage = "pay my onlyfans"  // Why only lowercase?
-        break;
-    }
-    message.channel.send("<:ping_receive:502755206841237505> " + pingMessage).then(function(message) {
-      switch(parameters[1]) { // I'm aware you cannot combine the two. I'm sorry, that's how it is for now.
-        case "no-name":
-          message.edit("<:ping_transmit:502755300017700865> (" + (Date.now() - startTime) + "ms) Hey!")
-          break;
-        case "client-ping":
-          message.edit("<:ping_transmit:502755300017700865> (" + Math.round(client.ws.ping) + "ms) Hey, " + user + "!");
-          break;
-        default:
-          message.edit("<:ping_transmit:502755300017700865> (" + (Date.now() - startTime) + "ms) Hey, " + user + "!");
-      }
-    })
-  } else if (command.startsWith("find ")) {
-    let args = command.slice(5)
-    if(!args) return message.channel.send("Please input a parameter.")
-    let findList = new MessageEmbed()
-    .setTitle("Precipitation " + version + " Query")
-    .addFields(
-      { name: "Results", value: find(args.toLowerCase(), "list", 10, "list")}
-    )
-    .setColor("BLUE")
-    .setFooter({ text: 'Precipitation ' + version  + find(args.toLowerCase(), "list", 10, "amount")});
-    return message.channel.send({embeds: [findList]})
-  }
   }
 })
