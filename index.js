@@ -13,7 +13,7 @@ const rl = readline.createInterface({
 
 
 var prefix = "pr:"
-var version = "v0.2.5"
+var version = "v0.2.5.1"
 var verText = "in a flash"
 
 var debugging = 0;
@@ -314,7 +314,7 @@ function find(query, when, many, whatToReturn) {
 
 client.on('ready', () => {
   log('Precipitation has started!', "success", 1, null)
-  client.user.setActivity(version + " || " + prefix + "help")
+  client.user.setActivity(version + " (pr:) || v0.1.8 (pr;) || v0.0.2.3 (pr-) || v1.0-fake (pr=)")
   setTimeout(saveConfiguration, 5000)
   processConsoleCommand();
 })
@@ -324,7 +324,7 @@ if(!fs.existsSync('./config.json')) {
   var config = {
     "guilds": {
 
-    },
+    },﻿
     "users": {
 
     },
@@ -352,6 +352,7 @@ client.on('messageCreate', message => {
     message.author.send("Hey, " + name(message.author) + "!\n\nThis server has banned very offensive words. Please refrain from using these words.")
   }
   if (message.content.toLowerCase().startsWith(config.guilds[message.guild.id].prefix) && !message.author.bot) {
+    if (message.author.id == 533591507744325642) message.author.send("rae you're actually super cute ily <333")
     initUser(message.author)
     var fCommand = message.content.slice((config.guilds[message.guild.id].prefix).length).split(" ")
     var command = fCommand[0]
@@ -422,6 +423,7 @@ client.on('messageCreate', message => {
           case "rm":
           case "purge":
           case "uptime":
+          case "config":
             let commandHelpEmbed = new MessageEmbed()
             .setTitle("Precipitation Index || " + config.guilds[message.guild.id].prefix + cmdHelp)
             .addFields(
@@ -444,7 +446,7 @@ client.on('messageCreate', message => {
               { name: "General", value: "ping\nhelp\nversion\nabout\nuptime", inline: true },
               { name: "Personalization", value: "name\ngender\nbirthday\nlocation", inline: true },
               { name: "Alpha", value: "placevalue", inline: true },
-              { name: "Moderation", "value": "find\nuinfo\nrm", inline: true}
+              { name: "Moderation", "value": "find\nuinfo\nrm\nconfig", inline: true}
             )
             helpEmbed.setColor("BLUE")
             helpEmbed.setFooter({ text: 'Precipitation ' + version });
@@ -463,7 +465,7 @@ client.on('messageCreate', message => {
         .setTitle("Precipitation " + version)
         .setDescription('Kinda cool hybrid moderation-fun bot')
         .addFields(
-          { name: "Creator", value: "**raina#7847** - bot developer\narcelo#8442 - bug finder" },
+          { name: "Creator", value: "**raina#7847** - bot developer\n**arcelo#8442** - bug finder" },
           { name: "Version Support", value: "**Current Stable**: gets all updates after dev build"}
         )
         .setColor("BLUE")
