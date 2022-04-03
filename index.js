@@ -1,5 +1,5 @@
 const { Client, Intents, MessageEmbed } = require('discord.js');
-const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
+const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_PRESENCES] });
 const fs = require('fs');
 const colors = require('colors'); // yes, you can do this within the node.js console using the weird thingies. however, im lazy, i do this later lol, i just want to get this done quickly
 const readline = require('readline');
@@ -10,8 +10,8 @@ const rl = readline.createInterface({
 });
 
 
-var prefix = "pr:" // pr; in official Precipitation, changed for source
-var version = "v0.1.7"
+var prefix = "pr;"
+var version = "v0.1.8"
 var verText = "just for you"
 
 var debugging = 0;
@@ -43,7 +43,7 @@ var commands = {
     "syntax" : ""
   },
   "name": {
-    "name": "name", // topical
+    "name": "name",
     "description": "Sets the name for the bot to refer to you as.",
     "syntax": "(name)"
   },
@@ -60,28 +60,36 @@ var commands = {
   "location": {
     "name": "location",
     "description": "Sets your current location.",
-    "syntax": "**(continent / country)** **(continent / west / east / united states)**"
-  },
-  "gtest": {
-    "name": "gtest",
-    "description": "Temporary alpha command to see that gender works as intended.",
-    "syntax": ""
-  },
-  "btest": {
-    "name": "btest",
-    "description": "Temporary alpha command to see that birthday works as intended.",
-    "syntax": ""
-  },
-  "ltest": {
-    "name": "ltest",
-    "description": "Temporary alpha command to see that location works as intended.",
-    "syntax": ""
+    "syntax": "**(continent / country / state / city)** **(value)**"
   },
   "placevalue": {
     "name": "placevalue",
     "description": "Temporary alpha command to see that the placevalue function works as intended.",
     "syntax": "**(number)**"
+  },
+  "find": {
+    "name": "find",
+    "description": "Find a user.",
+    "syntax": "**(user)**"
+  },
+  "uinfo": {
+    "name": "uinfo",
+    "description": "Get information on a particular user.",
+    "syntax": "(user)"
+  },
+  "uptime": {
+    "name": "uptime",
+    "description": "See how long Precipitation has been online.",
+    "syntax": ""
   }
+}
+
+function getTextInput(text) {
+  var slurs = ["nigger", "nigga", "retard", "fag", "faggot"]
+  for(let i = 0; i < slurs.length; i++) {
+    if(text.toLowerCase().includes(slurs[i])) return true;
+  }
+  return false;
 }
 
 client.login('[token]')
@@ -307,6 +315,52 @@ function getLocationFormat(user) {
   }
 }
 
+function find(query, when, many, whatToReturn) {
+  if(when == "list") {
+    let users = client.users.cache
+    let list = "";
+    let amount = 0;
+    let returnValue = 0;
+    users.each(user => {
+      if(user.tag.toLowerCase().startsWith(query)) {
+        if(amount < many) {
+          list = list + user.username + "\n"
+          amount = amount + 1;
+        } else {
+          returnValue++;
+        }
+      }
+    })
+    if(whatToReturn == "list") {
+      if(list == "") {
+        return "No results were found."
+      } else {
+        return list;
+      }
+    } else if(whatToReturn == "amount") {
+      if(returnValue == 0) {
+        return "";
+      } else {
+        return " || There are " + returnValue + " results not shown -- please narrow your query."
+      }
+    }
+  } else if (when == "first") {
+    let users = client.users.cache
+    let userReturn;
+    let amount = 0;
+    users.each(user => {
+      if(user.tag.toLowerCase().startsWith(query)) {
+        if(amount < 1) {
+          userReturn = user;
+          amount++;
+        }
+      }
+    })
+    if(userReturn == null) return null;
+    return userReturn;
+  }
+}
+
 client.on('ready', () => {
   log('Precipitation has started!', "success", 1)
   client.user.setActivity(version + " || " + prefix + "help")
@@ -364,26 +418,9 @@ client.on('messageCreate', message => {
         .setFooter({ text: 'Precipitation ' + version });
         message.channel.send({embeds: [aboutEmbed]})
         break;
-      case "gtest": // this command only stays until there is a command that utilizes gender
-        message.channel.send("hey, you a " + gender(message.author, "dude", "girl", "real one") + " to me <3"); // why the fuck does this break in v0.2??? please someone make a PR
-        break;
       case "name":
         config.users[message.author.id].name = null;
         message.channel.send("Sure, I will refer to you by your username.")
-        break;
-      case "btest":
-        if(!config.users[message.author.id].birthday.month) {
-          message.channel.send("Please set your birthday first.")
-        } else {
-          message.channel.send(toProperUSFormat(config.users[message.author.id].birthday.month, config.users[message.author.id].birthday.day, config.users[message.author.id].birthday.year))
-        }
-        break;
-      case "ltest":
-        if(!config.users[message.author.id].location.continent) {
-          message.channel.send("Please set a continent first, using " + prefix + "location continent [set].")
-        } else {
-          message.channel.send(getLocationFormat(message.author))
-        }
         break;
       case "location":
         let locationHelp = new MessageEmbed()
@@ -397,6 +434,55 @@ client.on('messageCreate', message => {
         .setFooter({ text: 'Precipitation ' + version });
         message.channel.send({embeds: [locationHelp]})
       break;
+      case "uptime":
+        var time;
+        var uptime = parseInt(client.uptime);
+        uptime = Math.floor(uptime / 1000);
+        var minutes = Math.floor(uptime / 60);
+        var seconds = Math.floor(uptime);
+        var hours = 0;
+        var days = 0;
+        while (seconds >= 60) {
+            seconds = seconds - 60;
+        }
+        while (minutes >= 60) {
+            hours++;
+            minutes = minutes - 60;
+        }
+        while (hours >= 24) {
+          days++;
+          hours = hours - 24;
+        }
+        if (minutes < 10) {
+            time = hours + ":0" + minutes + ":0"
+        } else {
+            time = hours + ":" + minutes
+        }
+        return message.channel.send("Precipitation has been online for " + days + " days, " + hours + " hours, " + minutes + " minutes, and " + seconds + " seconds.");
+      case "uinfo":
+        console.log("bruh")
+        let userBirthday = "*not set*"
+        if(config.users[message.author.id].birthday.month != undefined) {
+          userBirthday = toProperUSFormat(config.users[message.author.id].birthday.month, config.users[message.author.id].birthday.day, config.users[message.author.id].birthday.year)
+        }
+        let userLocation = "*not set*";
+        if(config.users[message.author.id].location.continent != undefined) {
+          userLocation = getLocationFormat(message.author)
+        }
+        let nickname = "*not set*";
+        if(message.member.nickname) {
+          nickname = message.member.nickname;
+        }
+        let uinfo = new MessageEmbed()
+        .setTitle("User Information || " + message.author.tag)
+        .addFields(
+          { name: "Account Dates", value: "**Creation Date**: " + message.author.createdAt + "\n**Join Date**: " + message.member.joinedAt, inline: true },
+          { name: "Names", value: "**Username**: " + message.author.username + "\n**Nickname**: " + nickname },
+          { name: "Bot Info", value: "**Name**: " + name(message.author) + "\n**Gender**: " + gender(message.author, "Male", "Female", "Other", "*not set*") + "\n**Birthday**: " + userBirthday + "\n**Location**: " + userLocation }
+        )
+        .setColor("BLUE")
+        .setFooter({ text: 'Precipitation ' + version });
+        return message.channel.send({embeds: [uinfo]})
     }
     if(command.toLowerCase().startsWith("ver") || command.toLowerCase().startsWith("version")) {
       if(parameters[1] == "no-ver-text") {
@@ -410,6 +496,8 @@ client.on('messageCreate', message => {
         message.channel.send("Your name isn't that long.")
       } else if((cmd.includes("<@") && cmd.includes(">")) || cmd.includes("@everyone") || cmd.includes("@here")) {
         message.channel.send("Nice try.")
+      } else if(getTextInput(cmd) == true) {
+        message.channel.send("Hey, I'm not going to yell out offensive words.")
       } else {
       config.users[message.author.id].name = cmd;
       message.channel.send("Sure, I'll refer to you by \"" + name(message.author) + "\".")
@@ -578,10 +666,10 @@ client.on('messageCreate', message => {
       case "gender":
       case "birthday":
       case "location":
-      case 'gtest':
-      case "btest":
-      case "ltest":
       case "placevalue":
+      case "find":
+      case "uinfo":
+      case "uptime":
         let commandHelpEmbed = new MessageEmbed()
         .setTitle("Precipitation Index || " + prefix + cmdHelp)
         .addFields(
@@ -595,7 +683,7 @@ client.on('messageCreate', message => {
   } else if(command.startsWith('ping')) {
     let user = name(message.author)
     let startTime = Date.now();
-    let raelynnTooCute = Math.floor(Math.random() * 6)
+    let raelynnTooCute = Math.floor(Math.random() * 7)
     let pingMessage;
     switch (raelynnTooCute) {
       case 0:
@@ -616,6 +704,9 @@ client.on('messageCreate', message => {
       case 5:
         pingMessage = "i'm a scorpio so it makes sense for me to kill my whole family"
         break;
+      case 6:
+        pingMessage = "pay my onlyfans"  // Why only lowercase?
+        break;
     }
     message.channel.send("<:ping_receive:502755206841237505> " + pingMessage).then(function(message) {
       switch(parameters[1]) { // I'm aware you cannot combine the two. I'm sorry, that's how it is for now.
@@ -629,6 +720,17 @@ client.on('messageCreate', message => {
           message.edit("<:ping_transmit:502755300017700865> (" + (Date.now() - startTime) + "ms) Hey, " + user + "!");
       }
     })
+  } else if (command.startsWith("find ")) {
+    let args = command.slice(5)
+    if(!args) return message.channel.send("Please input a parameter.")
+    let findList = new MessageEmbed()
+    .setTitle("Precipitation " + version + " Query")
+    .addFields(
+      { name: "Results", value: find(args.toLowerCase(), "list", 10, "list")}
+    )
+    .setColor("BLUE")
+    .setFooter({ text: 'Precipitation ' + version  + find(args.toLowerCase(), "list", 10, "amount")});
+    return message.channel.send({embeds: [findList]})
   }
   }
 })
