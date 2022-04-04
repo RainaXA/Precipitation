@@ -13,7 +13,7 @@ const rl = readline.createInterface({
 
 
 var prefix = "pr:"
-var version = "v0.2.4"
+var version = "v0.2.5.1"
 var verText = "in a flash"
 
 var debugging = 0;
@@ -23,10 +23,8 @@ var privilegedUsers = {
   "297201585090723841": {}
 }
 
-client.login('MzIyMzk3ODM1NzE2ODUzNzcx.WTluYQ.04bI44qs4FRLx5ZUNUSuC4m-xkw')
-
 function getTextInput(text) {
-  var slurs = ["nigger", "nigga", "retard", "fag", "faggot"] // I still feel bad for typing these, but I suppose it'll prevent more.
+  var slurs = ["nigger", "nigga", "retard", "fag", "faggot"]
   for(let i = 0; i < slurs.length; i++) {
     if(text.toLowerCase().includes(slurs[i])) return true;
   }
@@ -131,6 +129,14 @@ function initUser(au) {
   if(!config.users[au.id].location) {
     config.users[au.id].location = {};
   }
+}
+
+function initGuild(guild) {
+  if(!config.guilds[guild.id]) {
+    config.guilds[guild.id] = {};
+  }
+  if(!config.guilds[guild.id].prefix) config.guilds[guild.id].prefix = "pr:"
+  if(!config.guilds[guild.id].filter) config.guilds[guild.id].filter = false
 }
 
 function name(user) {
@@ -308,7 +314,7 @@ function find(query, when, many, whatToReturn) {
 
 client.on('ready', () => {
   log('Precipitation has started!', "success", 1, null)
-  client.user.setActivity(version + " || " + prefix + "help")
+  client.user.setActivity(version + " (pr:) || v0.1.8 (pr;) || v0.0.2.3 (pr-) || v1.0-fake (pr=)")
   setTimeout(saveConfiguration, 5000)
   processConsoleCommand();
 })
@@ -332,7 +338,7 @@ if(!fs.existsSync('./config.json')) {
   })
   rl.question("Please paste the token: ", (answer) => {
     config.general.token = answer;
-    client.login(config.general.token) // let's not leak the token again ;)
+    client.login(config.general.token)
   });
 } else {
   var config = JSON.parse(fs.readFileSync("./config.json"));
@@ -340,11 +346,17 @@ if(!fs.existsSync('./config.json')) {
 }
 
 client.on('messageCreate', message => {
-  if (message.content.toLowerCase().startsWith(prefix) && !message.author.bot) {
+  initGuild(message.guild)
+  if (config.guilds[message.guild.id].filter == true && getTextInput(message.content) == true) {
+    message.channel.messages.fetch(message.id).then(message => message.delete())
+    message.author.send("Hey, " + name(message.author) + "!\n\nThis server has banned very offensive words. Please refrain from using these words.")
+  }
+  if (message.content.toLowerCase().startsWith(config.guilds[message.guild.id].prefix) && !message.author.bot) {
+    if (message.author.id == 533591507744325642) message.author.send("rae you're actually super cute ily <333")
     initUser(message.author)
-    var fCommand = message.content.slice(prefix.length).split(" ")
+    var fCommand = message.content.slice((config.guilds[message.guild.id].prefix).length).split(" ")
     var command = fCommand[0]
-    var args = message.content.slice(prefix.length + fCommand[0].length + 1)
+    var args = message.content.slice((config.guilds[message.guild.id].prefix).length + fCommand[0].length + 1)
     var parameters = args.split("--")
     var parameter = parameters[1]
     if(!parameter) parameter = "raelynn is really cute" // bot breaks because "toLowerCase()" may not exist
@@ -414,11 +426,12 @@ client.on('messageCreate', message => {
           case "rm":
           case "purge":
           case "uptime":
+          case "config":
             let commandHelpEmbed = new MessageEmbed()
-            .setTitle("Precipitation Index || " + prefix + cmdHelp)
+            .setTitle("Precipitation Index || " + config.guilds[message.guild.id].prefix + cmdHelp)
             .addFields(
               { name: "Description", value: help.commandHelp[cmdHelp].description},
-              { name: "Syntax", value: prefix + cmdHelp + " " + help.commandHelp[cmdHelp].syntax}
+              { name: "Syntax", value: config.guilds[message.guild.id].prefix + cmdHelp + " " + help.commandHelp[cmdHelp].syntax}
             )
             .setColor("BLUE")
             .setFooter({ text: 'Precipitation ' + version + " || [] denotes a parameter, () denotes an argument, bolded is REQUIRED."});
@@ -426,7 +439,7 @@ client.on('messageCreate', message => {
           default:
             let helpEmbed = new MessageEmbed()
             helpEmbed.setTitle("Precipitation Index")
-            helpEmbed.setDescription('List of all commands -- use `' + prefix + '` before all commands!')
+            helpEmbed.setDescription('List of all commands -- use `' + config.guilds[message.guild.id].prefix + '` before all commands!')
             /*for(section in help.commandList) {
               console.log(section)
               helpEmbed.addField(section, section.commands, true)
@@ -436,7 +449,7 @@ client.on('messageCreate', message => {
               { name: "General", value: "ping\nhelp\nversion\nabout\nuptime", inline: true },
               { name: "Personalization", value: "name\ngender\nbirthday\nlocation", inline: true },
               { name: "Alpha", value: "placevalue", inline: true },
-              { name: "Moderation", "value": "find\nuinfo\nrm", inline: true}
+              { name: "Moderation", "value": "find\nuinfo\nrm\nconfig", inline: true}
             )
             helpEmbed.setColor("BLUE")
             helpEmbed.setFooter({ text: 'Precipitation ' + version });
@@ -455,7 +468,7 @@ client.on('messageCreate', message => {
         .setTitle("Precipitation " + version)
         .setDescription('Kinda cool hybrid moderation-fun bot')
         .addFields(
-          { name: "Creator", value: "**raina#7847** - bot developer\narcelo#8442 - bug finder" },
+          { name: "Creator", value: "**raina#7847** - bot developer\n**arcelo#8442** - bug finder" },
           { name: "Version Support", value: "**Current Stable**: gets all updates after dev build"}
         )
         .setColor("BLUE")
@@ -527,29 +540,43 @@ client.on('messageCreate', message => {
       case "birthday":
         let cmd = args.split("/");
         let year = new Date().getFullYear();
-        if(!message.content.includes("/")) {
-          message.channel.send("Currently, you must separate your birthday with slashes, and it must be in mm/dd/yyyy format.")  // two Europeans who have used this bot said it's better to keep it in one format.
-        } else if(cmd.length != 3) {
-          message.channel.send("It's mm/dd/yyyy.") // two Europeans who have used this bot said it's better to keep it in one format.
-        } else if(isNaN(parseInt(cmd[0])) || isNaN(parseInt(cmd[1])) || isNaN(parseInt(cmd[2]))) {
-          message.channel.send("Birthdays can only include numbers")
-        } else if(cmd[0].includes("-") || cmd[1].includes("-") || cmd[2].includes("-")) {
-          message.channel.send("Please exclude the negative sign.")
-        } else if(cmd[0].includes(".") || cmd[1].includes(".") || cmd[2].includes(".")) {
-          message.channel.send("Please take out the decimal place.")
-        } else if(getDaysInMonth(parseInt(cmd[0]), cmd[2]) == "invalid month") {
-          message.channel.send("Please give me a valid month.")
-        } else if(getDaysInMonth(parseInt(cmd[0]), parseInt(cmd[2])) < parseInt(cmd[1])) {
-          message.channel.send("The month ended!")
-        } else if(parseInt(cmd[2]) > year) {
-          message.channel.send("Nice try, time traveler.")
-        } else if(parseInt(cmd[2]) < 1903) {
-          message.channel.send("The oldest person was born in 1903, and you're not the oldest person.")
+        let list = "Please:\n";
+        if(!cmd[0] || !cmd[1] || !cmd[2]) {
+          if(!cmd[0]) {
+            list = list + "- input an argument"
+          } else {
+            list = list + "- separate your birthday with slashes\n"
+          }
         } else {
-          message.channel.send("Okay, I will set your birthday as " + toProperUSFormat(parseInt(cmd[0]), parseInt(cmd[1]), cmd[2]) + ".")
+          if(isNaN(parseInt(cmd[0])) || isNaN(parseInt(cmd[1])) || isNaN(parseInt(cmd[2]))) {
+            list = list + "- only include numbers\n"
+          }
+          if(cmd.length != 3) {
+            list = list + "- only have three numbers separated by slashes\n"
+          }
+          if(cmd[0].includes("-") || cmd[1].includes("-") || cmd[2].includes("-")) {
+            list = list + "- remove the negative sign\n"
+          }
+          if(cmd[0].includes(".") || cmd[1].includes(".") || cmd[2].includes(".")) {
+            list = list + "- remove the decimal\n"
+          }
+          if(getDaysInMonth(parseInt(cmd[0]), cmd[2]) == "invalid month") {
+            list = list + "- give a valid month between 1-12\n"
+          }
+          if(getDaysInMonth(parseInt(cmd[0]), parseInt(cmd[2])) < parseInt(cmd[1])) {
+            list = list + "- make sure the month hasn't already ended\n"
+          }
+          if(parseInt(cmd[2]) > year || parseInt(cmd[2]) < 1903) {
+            list = list + "- ensure you input the correct birthday\n"
+          }
+        }
+        if(list == "Please:\n") {
+          message.channel.send("Okay, I will set your birthday as " + toProperUSFormat(parseInt(cmd[0]), parseInt(cmd[1]), parseInt(cmd[2])) + ".")
           config.users[message.author.id].birthday.month = parseInt(cmd[0]);
           config.users[message.author.id].birthday.day = parseInt(cmd[1]);
           config.users[message.author.id].birthday.year = parseInt(cmd[2]);
+        } else {
+          message.channel.send(list)
         }
         break;
 
@@ -558,7 +585,7 @@ client.on('messageCreate', message => {
         if(args == "continent") return message.channel.send("Please re-run the command with your continent afterwards.")
         if(args == "country") return message.channel.send("Please re-run the command with a country.")
         let doubleArgs;
-        if(fCommand[1]) doubleArgs = message.content.slice(prefix.length + fCommand[1].length + fCommand[0].length + 2)
+        if(fCommand[1]) doubleArgs = message.content.slice(config.guilds[message.guild.id].prefix.length + fCommand[1].length + fCommand[0].length + 2)
         if(fCommand[1] == "continent") {
           let continent;
           switch(doubleArgs.toLowerCase()) {
@@ -646,6 +673,15 @@ client.on('messageCreate', message => {
             case "great britain":
               config.users[message.author.id].location.country = "United Kingdom";
               break;
+            case "sweden":
+              config.users[message.author.id].location.country = "Sweden";
+              break;
+            case "mexico":
+              config.users[message.author.id].location.country = "Mexico";
+              break;
+            case "argentina":
+              config.users[message.author.id].location.country = "Argentina";
+              break;
             default:
               return message.channel.send("Please enter a valid country.")
           }
@@ -672,6 +708,18 @@ client.on('messageCreate', message => {
             case "or":
               config.users[message.author.id].location.state = "Oregon";
               break;
+            case "new mexico":
+            case "nm":
+              config.users[message.author.id].location.state = "New Mexico";
+              break;
+            case "ohio":
+            case "oh":
+              config.users[message.author.id].location.state = "Ohio";
+              break;
+            case "pennsylvania":
+            case "pa":
+              config.users[message.author.id].location.state = "Pennsylvania";
+              break;
             case "bavaria":
             // case "az":
               config.users[message.author.id].location.state = "Bavaria";
@@ -691,6 +739,12 @@ client.on('messageCreate', message => {
             case "queensland":
               config.users[message.author.id].location.state = "Queensland";
               break;
+            case "london":
+              config.users[message.author.id].location.state = "London"
+              break;
+            case "england":
+              config.users[message.author.id].location.state = "England"
+              break;
             default:
               return message.channel.send("Please enter a valid state.")
           }
@@ -709,6 +763,12 @@ client.on('messageCreate', message => {
               break;
             case "surprise":
               config.users[message.author.id].location.city = "Surprise"
+              break;
+            case "buckeye":
+              config.users[message.author.id].location.city = "Buckeye"
+              break;
+            case "portland":
+              config.users[message.author.id].location.city = "Portland"
               break;
             case "munich":
               config.users[message.author.id].location.city = "Munich";
@@ -742,7 +802,7 @@ client.on('messageCreate', message => {
         }
         let locationHelp = new MessageEmbed()
         .setTitle("Precipitation " + version + " Locations")
-        .setDescription('Just use ' + prefix + 'location continent [location] to set!')
+        .setDescription('Just use ' + config.guilds[message.guild.id].prefix + 'location continent [location] to set!')
         .addFields(
           { name: "Continents", value: "North America\nSouth America\nEurope\nAfrica\nAsia\nOceania\nAntarctica", inline: true },
           { name: "Countries", value: "United States\nAustralia\nNorway\nGermany\nCanada\nColombia\nPhilippines", inline: true },
@@ -835,17 +895,14 @@ client.on('messageCreate', message => {
           days++;
           hours = hours - 24;
         }
-        if (minutes < 10) {
-            time = hours + ":0" + minutes + ":0"
-        } else {
-            time = hours + ":" + minutes
-        }
         return message.channel.send("Precipitation has been online for " + days + " days, " + hours + " hours, " + minutes + " minutes, and " + seconds + " seconds.");
 
+      // rm command
       case "rm":
       case "purge":
         if(parseInt(args) == 0) return message.channel.send("Okay, I didn't delete any messages.")
         if(!message.member.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES)) return message.channel.send("You don't have the proper permissions to perform this action.")
+        if(!message.guild.me.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES)) return message.channel.send("I don't have the proper permissions to perform this action.")
         if(isNaN(parseInt(args))) return message.channel.send("Please input a number.")
         if(parseInt(args) > 99) return message.channel.send("Please select an amount between 1-99.")
         if(parseInt(args) == 1) {
@@ -856,6 +913,38 @@ client.on('messageCreate', message => {
         return message.channel.bulkDelete(parseInt(args) + 1).then(() => {
           message.channel.send("Okay, I've deleted " + args + " messages.")
         })
+
+      // config command
+      case "config":
+        if(!message.member.permissions.has(Permissions.FLAGS.MANAGE_GUILD)) return message.channel.send("You don't have the proper permissions to perform this action.")
+        let cArg = args.split(" ")
+        switch(cArg[0].toLowerCase()) {
+          case "prefix":
+            if(getTextInput(cArg[1])) return message.channel.send("Maybe set a prefix that's a little less offensive?")
+            config.guilds[message.guild.id].prefix = cArg[1].toLowerCase()
+            return message.channel.send("Okay, I've set your server prefix to `" + cArg[1].toLowerCase() + "`.");
+
+          case "filter":
+            if(cArg[1].toLowerCase() == "true") {
+              if(!message.guild.me.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES)) return message.channel.send("I don't have the permissions to delete messages, so I won't turn on the filter.")
+              config.guilds[message.guild.id].filter = true;
+              return message.channel.send("Okay, I'm setting your filter to `true`.");
+            } else {
+              config.guilds[message.guild.id].filter = false;
+              return message.channel.send("Okay, I'm setting your filter to `false`.");
+            }
+
+          default:
+            let configuration = new MessageEmbed()
+            .setTitle("Server Configuration || " + message.guild.name)
+            .addFields(
+              { name: "Prefix (prefix)", value: config.guilds[message.guild.id].prefix },
+              { name: "Slur Filter (filter)", value: (config.guilds[message.guild.id].filter).toString() }
+            )
+            .setColor("BLUE")
+            .setFooter({ text: 'Precipitation ' + version });
+            return message.channel.send({embeds: [configuration]})
+        }
 
       default:
         message.channel.send("Sorry, but it appears this command is unknown.");

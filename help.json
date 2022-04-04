@@ -54,7 +54,7 @@
     "location": {
       "name": "location",
       "description": "Sets your current location.",
-      "syntax": "**(continent / country / state / city)** **(value)**"
+      "syntax": "**(continent / country / state / city / province)** **(value)**"
     },
     "placevalue": {
       "name": "placevalue",
@@ -79,12 +79,17 @@
     "purge": {
       "name": "rm",
       "description": "Bulk delete messages.",
-      "syntax": "**(number)**"
+      "syntax": "**(number, 1-99)**"
     },
     "uptime": {
       "name": "uptime",
       "description": "See how long Precipitation has been online.",
       "syntax": ""
+    },
+    "config": {
+      "name": "config",
+      "description": "Changes server-specific properties.",
+      "syntax": "**(prefix / filter)** **(value / true / false)**"
     }
   }
 }
