@@ -44,6 +44,12 @@
     },
     "United Kingdom": {
       "continent": "Europe"
+    },
+    "Czech Republic": {
+      "continent": "Europe"
+    },
+    "New Zealand": {
+      "continent": "Oceania"
     }
   },
   "states": {
@@ -91,6 +97,10 @@
       "continent": "North America",
       "country": "United States"
     },
+    "Connecticut": {
+      "continent": "North America",
+      "country": "United States"
+    },
     "Vasdø": {
       "continent": "Europe",
       "country": "Norway"
@@ -103,9 +113,9 @@
       "continent": "Europe",
       "country": "United Kingdom"
     },
-    "England": {
-      "continent": "Europe",
-      "country": "United Kingdom"
+    "Tasmania": {
+      "continent": "Oceania",
+      "country": "Australia"
     }
   },
   "cities": {
