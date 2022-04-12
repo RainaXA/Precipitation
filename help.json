@@ -90,6 +90,21 @@
       "name": "config",
       "description": "Changes server-specific properties.",
       "syntax": "**(prefix / filter)** **(value / true / false)**"
+    },
+    "warn": {
+      "name": "warn",
+      "description": "Warn a user.",
+      "syntax": "**(user)**"
+    },
+    "lswarn": {
+      "name": "lswarn",
+      "description": "See your current warnings, or see someone else's.",
+      "syntax": "(user)"
+    },
+    "rmwarn": {
+      "name": "rmwarn",
+      "description": "Remove a warning from a user.",
+      "syntax": "**(warning id)** **(user)**"
     }
   }
 }
