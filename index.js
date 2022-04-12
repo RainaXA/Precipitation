@@ -13,10 +13,14 @@ const rl = readline.createInterface({
 
 
 var prefix = "pr:"
-var version = "v0.2.6"
+var version = "v0.2.7"
 var verText = "in a flash"
 
 var debugging = 0;
+
+var warningStage = {};
+var warnedUser = {};
+var removeWarnNumber = {};
 
 var privilegedUsers = {
   "319858536328724481": {},
@@ -135,8 +139,9 @@ function initGuild(guild) {
   if(!config.guilds[guild.id]) {
     config.guilds[guild.id] = {};
   }
-  if(!config.guilds[guild.id].prefix) config.guilds[guild.id].prefix = "pr:"
-  if(!config.guilds[guild.id].filter) config.guilds[guild.id].filter = false
+  if(!config.guilds[guild.id].prefix) config.guilds[guild.id].prefix = prefix;
+  if(!config.guilds[guild.id].filter) config.guilds[guild.id].filter = false;
+  if(!config.guilds[guild.id].warnings) config.guilds[guild.id].warnings = {};
 }
 
 function name(user) {
@@ -314,7 +319,7 @@ function find(query, when, many, whatToReturn) {
 
 client.on('ready', () => {
   log('Precipitation has started!', "success", 1, null)
-  client.user.setActivity(version + " (pr:) || v0.1.10 (pr;) || v0.0.2.3 (pr-) || v1.0-fake (pr=)")
+  client.user.setActivity(version + " || " + prefix + "help")
   setTimeout(saveConfiguration, 5000)
   processConsoleCommand();
 })
@@ -324,7 +329,7 @@ if(!fs.existsSync('./config.json')) {
   var config = {
     "guilds": {
 
-    },
+    },﻿
     "users": {
 
     },
@@ -335,11 +340,11 @@ if(!fs.existsSync('./config.json')) {
   fs.writeFile('config.json', JSON.stringify(config), function (err) {
     if (err) throw err;
     log('config.json has been created.', "success", 0, null)
+    rl.question("Please paste the token: ", (answer) => {
+      config.general.token = answer;
+      client.login(config.general.token)
+    });
   })
-  rl.question("Please paste the token: ", (answer) => {
-    config.general.token = answer;
-    client.login(config.general.token)
-  });
 } else {
   var config = JSON.parse(fs.readFileSync("./config.json"));
   client.login(config.general.token)
@@ -347,6 +352,24 @@ if(!fs.existsSync('./config.json')) {
 
 client.on('messageCreate', message => {
   initGuild(message.guild)
+  if(warningStage[message.author.id] == 1) {
+    warningStage[message.author.id] = 0;
+    if(!Array.isArray(config.guilds[message.guild.id].warnings[warnedUser[message.author.id].id])) config.guilds[message.guild.id].warnings[warnedUser[message.author.id].id] = [];
+    if(message.content == "cancel") return message.channel.send("Okay, I won't warn " + gender(warnedUser[message.author.id], "him", "her", "them", "them") + ".")
+    if(getTextInput(message.content) == true) return message.channel.send("Sorry, but I personally won't warn for any offensive reason.")
+    if(message.content.length > 200) return message.channel.send("That's too long of a reason, please shorten it.")
+    console.log(config.guilds[message.guild.id].warnings[warnedUser[message.author.id].id])
+    config.guilds[message.guild.id].warnings[warnedUser[message.author.id].id].push(message.content)
+    return message.channel.send("Okay, I've warned " + gender(warnedUser[message.author.id], "him", "her", "them", "them") + " for \"" + message.content + "\".")
+  } else if(warningStage[message.author.id] == 2) {
+    if(message.content == "y" || message.content == "yes") {
+      config.guilds[message.guild.id].warnings[warnedUser[message.author.id].id].splice(removeWarnNumber[message.author.id] - 1, 1)
+      warningStage[message.author.id] = 0
+      return message.channel.send("Okay, I've removed this warning from " + gender(warnedUser[message.author.id], "him", "her", "them", "them") + ".")
+    }
+    warningStage[message.author.id] = 0;
+    return message.channel.send("Okay, cancelling.")
+  }
   if (config.guilds[message.guild.id].filter == true && getTextInput(message.content) == true) {
     message.channel.messages.fetch(message.id).then(message => message.delete())
     if(message.author.id != client.user.id) message.author.send("Hey, " + name(message.author) + "!\n\nThis server has banned very offensive words. Please refrain from using these words.")
@@ -433,6 +456,9 @@ client.on('messageCreate', message => {
           case "purge":
           case "uptime":
           case "config":
+          case "warn":
+          case "lswarn":
+          case "rmwarn":
             let commandHelpEmbed = new MessageEmbed()
             .setTitle("Precipitation Index || " + config.guilds[message.guild.id].prefix + cmdHelp)
             .addFields(
@@ -455,8 +481,9 @@ client.on('messageCreate', message => {
               { name: "General", value: "ping\nhelp\nversion\nabout\nuptime", inline: true },
               { name: "Personalization", value: "name\ngender\nbirthday\nlocation", inline: true },
               { name: "Alpha", value: "placevalue", inline: true },
-              { name: "Moderation", "value": "find\nuinfo\nrm\nconfig", inline: true}
+              { name: "Moderation", "value": "find\nuinfo\nrm\nconfig\nwarn\nlswarn\nrmwarn", inline: true }
             )
+            if(parameter == "easter-eggs") helpEmbed.addField("Secrets", "bitches", true)
             helpEmbed.setColor("BLUE")
             helpEmbed.setFooter({ text: 'Precipitation ' + version });
             return message.channel.send({embeds: [helpEmbed]})
@@ -770,6 +797,14 @@ client.on('messageCreate', message => {
             case "london":
               config.users[message.author.id].location.state = "London"
               break;
+            case "ny":
+            case "new york":
+              config.users[message.author.id].location.state = "New York"
+              break;
+            case "ma":
+            case "massachusetts":
+              config.users[message.author.id].location.state = "Massachusetts"
+              break;
             default:
               return message.channel.send("Please enter a valid state.")
           }
@@ -974,6 +1009,94 @@ client.on('messageCreate', message => {
             .setFooter({ text: 'Precipitation ' + version });
             return message.channel.send({embeds: [configuration]})
         }
+
+      case "warn":
+        if (!message.member.permissions.has(Permissions.FLAGS.MANAGE_NICKNAMES)) return message.channel.send("You don't have the required permissions to perform this action.")
+        if (!args) return message.channel.send("Please input a user.")
+        let uUser = find(args.toLowerCase(), "first", null, "list")
+        if (uUser == null) return message.channel.send("Please input a valid user.")
+        if(uUser.id == client.user.id) return message.channel.send("What did I do? :(")
+        let userMember;
+        message.guild.members.cache.each(member => {
+          if(uUser.id == member.id) {
+            return userMember = member;
+          }
+        })
+        initUser(uUser)
+        if(!config.guilds[message.guild.id].warnings[uUser.id]) config.guilds[message.guild.id].warnings[uUser.id] = [];
+        if(!userMember) return message.channel.send("This user does exist, but they are not in the server.")
+        if(config.guilds[message.guild.id].warnings[uUser.id].length > 9) return message.channel.send("Sorry, but Precipitation currently only supports up to 9 warnings. (this is because of lswarn...things will get spammy without pages real fast.)")
+        warningStage[message.author.id] = 1;
+        warnedUser[message.author.id] = uUser;
+        return message.channel.send("Please give a reason for warning " + uUser.tag + " (" + name(uUser) + ").");
+
+      case "lswarn":
+        if(!args) {
+          let warnings = config.guilds[message.guild.id].warnings[message.author.id];
+          if(warnings == undefined || warnings.length == 0) return message.channel.send("You have no warnings.")
+          let warningEmbed = new MessageEmbed()
+          .setTitle("Warnings List for " + message.author.tag)
+          .setColor("BLUE")
+          .setFooter({ text: 'Precipitation ' + version })
+          for(let i = 0; i < warnings.length; i++) {
+            warningEmbed.addField("Warning #" + (i + 1), "*" + warnings[i] + "*")
+          }
+          return message.channel.send({embeds: [warningEmbed]})
+        } else {
+          if (!message.member.permissions.has(Permissions.FLAGS.MANAGE_NICKNAMES)) return message.channel.send("You don't have the required permissions to perform this action.")
+          let listUser = find(args.toLowerCase(), "first", null, "list")
+          let warnings = config.guilds[message.guild.id].warnings[listUser.id];
+          if(warnings == undefined || warnings.length == 0) return message.channel.send("User does not exist, or they have no warnings.")
+          let getWarnings;
+          if(listUser) {
+            message.guild.members.cache.each(member => {
+              if(listUser.id == member.id) {
+                return getWarnings = member;
+              }
+            })
+            initUser(listUser)
+          }
+          if(!getWarnings) return message.channel.send("Please ensure the user is in the server.")
+          let warningEmbed = new MessageEmbed()
+          .setTitle("Warnings List for " + listUser.tag)
+          .setColor("BLUE")
+          .setFooter({ text: 'Precipitation ' + version })
+          for(let i = 0; i < warnings.length; i++) {
+            warningEmbed.addField("Warning #" + (i + 1), "*" + warnings[i] + "*")
+          }
+          return message.channel.send({embeds: [warningEmbed]})
+        }
+
+      case "rmwarn":
+        let purgeWarningList = "Please:\n";
+        if(!args) purgeWarningList = purgeWarningList + "- enter an argument\n"
+        let numArgs = (args.split(" "))[0]
+        let newArgs = args.slice(numArgs.length + 1)
+        if(!newArgs[0]) purgeWarningList = purgeWarningList + "- enter a user\n"
+        let removeUser = find(newArgs.toLowerCase(), "first", null, "first")
+        if (removeUser == null) purgeWarningList = purgeWarningList + "- ensure your user exists\n"
+        let rmMember;
+        if(removeUser) {
+          message.guild.members.cache.each(member => {
+            if(removeUser.id == member.id) {
+              return rmMember = member;
+            }
+          })
+          initUser(removeUser)
+        }
+        if(!rmMember) purgeWarningList = purgeWarningList + "- ensure your user is in the server\n"
+        if (!message.member.permissions.has(Permissions.FLAGS.MANAGE_NICKNAMES)) purgeWarningList = purgeWarningList + "- ensure you have the current permissions\n"
+        if(removeUser) {
+          if(!config.guilds[message.guild.id].warnings[removeUser.id]) config.guilds[message.guild.id].warnings[removeUser.id] = [];
+          if (isNaN(parseInt(numArgs)) || parseInt(numArgs) < 1 || parseInt(numArgs) > config.guilds[message.guild.id].warnings[removeUser.id].length) purgeWarningList = purgeWarningList + "- enter a valid number\n"
+        } else {
+          if (isNaN(parseInt(numArgs)) || parseInt(numArgs) < 1) purgeWarningList = purgeWarningList + "- enter a valid number\n"
+        }
+        if(purgeWarningList != "Please:\n") return message.channel.send(purgeWarningList)
+        warnedUser[message.author.id] = removeUser;
+        warningStage[message.author.id] = 2;
+        removeWarnNumber[message.author.id] = numArgs;
+        return message.channel.send("Removing warning #" + numArgs + " from " + removeUser.username + ". Are you sure?")
 
       default:
         message.channel.send("Sorry, but it appears this command is unknown.");
