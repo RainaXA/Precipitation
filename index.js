@@ -13,7 +13,7 @@ const rl = readline.createInterface({
 
 
 var prefix = "pr:"
-var version = "v0.2.5.1"
+var version = "v0.2.6"
 var verText = "in a flash"
 
 var debugging = 0;
@@ -169,17 +169,17 @@ function gender(user, mMessage, fMessage, oMessage, naMessage) { // male first, 
 }
 
 function placeValue(num) {
-  let number = num.toString()
-  if(number.endsWith("11") || number.endsWith("12") || number.endsWith("13")) {
-    return number + "th";
-  } else if(number.endsWith("1")) {
-    return number + "st";
-  } else if(number.endsWith("2")) {
-    return number + "nd";
-  } else if(number.endsWith("3")) {
-    return number + "rd";
+  let number = parseInt(num)
+  if(number.toString().endsWith("11") || number.toString().endsWith("12") || number.toString().endsWith("13")) {
+    return number.toString() + "th";
+  } else if(number.toString().endsWith("1")) {
+    return number.toString() + "st";
+  } else if(number.toString().endsWith("2")) {
+    return number.toString() + "nd";
+  } else if(number.toString().endsWith("3")) {
+    return number.toString() + "rd";
   } else {
-    return number + "th";
+    return number.toString() + "th";
   }
 }
 
@@ -257,7 +257,7 @@ function getLocationFormat(user) {
   if(config.users[user.id].location.city) return config.users[user.id].location.city + ", " + config.users[user.id].location.state + ", " + config.users[user.id].location.country
   if(config.users[user.id].location.state) return config.users[user.id].location.state + ", " + config.users[user.id].location.country
   if(config.users[user.id].location.country) {
-    if(config.users[user.id].location.country == "Western" || config.users[user.id].location.country == "Eastern") {
+    if(config.users[user.id].location.country == "Western" || config.users[user.id].location.country == "Eastern" || config.users[user.id].location.country == "Northern" || config.users[user.id].location.country == "Southern") {
       return config.users[user.id].location.country + " " + config.users[user.id].location.continent;
     }
     return config.users[user.id].location.country
@@ -314,7 +314,7 @@ function find(query, when, many, whatToReturn) {
 
 client.on('ready', () => {
   log('Precipitation has started!', "success", 1, null)
-  client.user.setActivity(version + " (pr:) || v0.1.8 (pr;) || v0.0.2.3 (pr-) || v1.0-fake (pr=)")
+  client.user.setActivity(version + " (pr:) || v0.1.10 (pr;) || v0.0.2.3 (pr-) || v1.0-fake (pr=)")
   setTimeout(saveConfiguration, 5000)
   processConsoleCommand();
 })
@@ -324,7 +324,7 @@ if(!fs.existsSync('./config.json')) {
   var config = {
     "guilds": {
 
-    },﻿
+    },
     "users": {
 
     },
@@ -349,14 +349,23 @@ client.on('messageCreate', message => {
   initGuild(message.guild)
   if (config.guilds[message.guild.id].filter == true && getTextInput(message.content) == true) {
     message.channel.messages.fetch(message.id).then(message => message.delete())
-    message.author.send("Hey, " + name(message.author) + "!\n\nThis server has banned very offensive words. Please refrain from using these words.")
+    if(message.author.id != client.user.id) message.author.send("Hey, " + name(message.author) + "!\n\nThis server has banned very offensive words. Please refrain from using these words.")
   }
-  if (message.content.toLowerCase().startsWith(config.guilds[message.guild.id].prefix) && !message.author.bot) {
-    if (message.author.id == 533591507744325642) message.author.send("rae you're actually super cute ily <333")
+  var messagePrefix;
+  if (message.content.startsWith("<@!" + client.user.id + ">")) {
+    messagePrefix = "<@!" + client.user.id + ">"
+  } else {
+    messagePrefix = config.guilds[message.guild.id].prefix
+  }
+  if (message.content.toLowerCase().startsWith(messagePrefix) && !message.author.bot) {
     initUser(message.author)
-    var fCommand = message.content.slice((config.guilds[message.guild.id].prefix).length).split(" ")
+    var fCommand = message.content.slice(messagePrefix.length).split(" ")
+    while(fCommand[0] == "") {
+      fCommand.shift();
+    }
     var command = fCommand[0]
-    var args = message.content.slice((config.guilds[message.guild.id].prefix).length + fCommand[0].length + 1)
+    if(command == undefined) return message.channel.send("Sorry, but it appears this command is unknown.") // crash otherwise
+    var args = message.content.slice(messagePrefix.length + fCommand[0].length + 1)
     var parameters = args.split("--")
     var parameter = parameters[1]
     if(!parameter) parameter = "raelynn is really cute" // bot breaks because "toLowerCase()" may not exist
@@ -578,7 +587,7 @@ client.on('messageCreate', message => {
         if(args == "continent") return message.channel.send("Please re-run the command with your continent afterwards.")
         if(args == "country") return message.channel.send("Please re-run the command with a country.")
         let doubleArgs;
-        if(fCommand[1]) doubleArgs = message.content.slice(config.guilds[message.guild.id].prefix.length + fCommand[1].length + fCommand[0].length + 2)
+        if(fCommand[1]) doubleArgs = message.content.slice(messagePrefix.length + fCommand[1].length + fCommand[0].length + 2)
         if(fCommand[1] == "continent") {
           let continent;
           switch(doubleArgs.toLowerCase()) {
@@ -635,6 +644,16 @@ client.on('messageCreate', message => {
               if(!config.users[message.author.id].location.continent) return message.channel.send("Please set your continent first.")
               config.users[message.author.id].location.country = "Eastern";
               break;
+            case "north":
+            case "northern":
+              if(!config.users[message.author.id].location.continent) return message.channel.send("Please set your continent first.")
+              config.users[message.author.id].location.country = "Northern";
+              break;
+            case "south":
+            case "southern":
+              if(!config.users[message.author.id].location.continent) return message.channel.send("Please set your continent first.")
+              config.users[message.author.id].location.country = "Southern";
+              break;
             case "australia":
             case "au":
               config.users[message.author.id].location.country = "Australia";
@@ -675,12 +694,21 @@ client.on('messageCreate', message => {
             case "argentina":
               config.users[message.author.id].location.country = "Argentina";
               break;
+            case "czech":
+            case "czech republic":
+            case "czechoslovakia":
+              config.users[message.author.id].location.country = "Czech Republic";
+              break;
+            case "new zealand":
+            case "nz":
+              config.users[message.author.id].location.country = "New Zealand";
+              break;
             default:
               return message.channel.send("Please enter a valid country.")
           }
           config.users[message.author.id].location.city = null;
           config.users[message.author.id].location.state = null;
-          if(config.users[message.author.id].location.country == "Western" || config.users[message.author.id].location.country == "Eastern") return message.channel.send("Okay, I've set it so you are from **" + config.users[message.author.id].location.country + " " + config.users[message.author.id].location.continent + "**.")
+          if(config.users[message.author.id].location.country == "Western" || config.users[message.author.id].location.country == "Eastern" || config.users[message.author.id].location.country == "Northern" || config.users[message.author.id].location.country == "Southern") return message.channel.send("Okay, I've set it so you are from **" + config.users[message.author.id].location.country + " " + config.users[message.author.id].location.continent + "**.")
           if(config.users[message.author.id].location.country != "Western" && config.users[message.author.id].location.country != "Eastern") config.users[message.author.id].location.continent = locations.countries[config.users[message.author.id].location.country].continent
           return message.channel.send("Okay, I'm setting your country to **" + config.users[message.author.id].location.country + "**.")
         } else if (fCommand[1] == "state") {
@@ -725,6 +753,10 @@ client.on('messageCreate', message => {
             case "new hampshire":
               config.users[message.author.id].location.state = "New Hampshire";
               break;
+            case "ct":
+            case "connecticut":
+              config.users[message.author.id].location.state = "Connecticut";
+              break;
             case "vasdo":
             case "vasdø":
               config.users[message.author.id].location.state = "Vasdø";
@@ -732,11 +764,11 @@ client.on('messageCreate', message => {
             case "queensland":
               config.users[message.author.id].location.state = "Queensland";
               break;
+            case "tasmania":
+              config.users[message.author.id].location.state = "Tasmania";
+              break;
             case "london":
               config.users[message.author.id].location.state = "London"
-              break;
-            case "england":
-              config.users[message.author.id].location.state = "England"
               break;
             default:
               return message.channel.send("Please enter a valid state.")
@@ -894,18 +926,22 @@ client.on('messageCreate', message => {
       case "rm":
       case "purge":
         if(parseInt(args) == 0) return message.channel.send("Okay, I didn't delete any messages.")
-        if(!message.member.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES)) return message.channel.send("You don't have the proper permissions to perform this action.")
-        if(!message.guild.me.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES)) return message.channel.send("I don't have the proper permissions to perform this action.")
-        if(isNaN(parseInt(args))) return message.channel.send("Please input a number.")
-        if(parseInt(args) > 99) return message.channel.send("Please select an amount between 1-99.")
-        if(parseInt(args) == 1) {
-          return message.channel.bulkDelete(parseInt(2)).then(() => {
-            message.channel.send("Okay, I've deleted the above message. (really?)")
+        let purgeList = "Please:\n";
+        if(!message.member.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES)) purgeList = purgeList + "- ensure you have permissions\n"
+        if(!message.guild.me.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES)) purgeList = purgeList + "- ensure I have permissions\n"
+        if(isNaN(parseInt(args))) purgeList = purgeList + "- insert a number\n"
+        if(parseInt(args) > 99) purgeList = purgeList + "- ensure the number you've inputted is between 1-99."
+        if(purgeList == "Please:\n") {
+          if(parseInt(args) == 1) {
+            return message.channel.bulkDelete(parseInt(2)).then(() => {
+              message.channel.send("Okay, I've deleted the above message. (really?)")
+            })
+          }
+          return message.channel.bulkDelete(parseInt(args) + 1).then(() => {
+            message.channel.send("Okay, I've deleted " + args + " messages.")
           })
         }
-        return message.channel.bulkDelete(parseInt(args) + 1).then(() => {
-          message.channel.send("Okay, I've deleted " + args + " messages.")
-        })
+        return message.channel.send(purgeList)
 
       // config command
       case "config":
