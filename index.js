@@ -436,6 +436,11 @@ client.on('messageCreate', message => {
         })
         break;
 
+        // An even BETTER Waifu command for some reason
+        case "waifu":
+          if (!args == "")return message.channel.send("All woman with breast, of course.")
+          // Don't question it.
+
       // help command
       case "help":
         let cmdHelp = args.toLowerCase()
