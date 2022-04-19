@@ -167,5 +167,241 @@
       "country": "Germany",
       "state": "Bavaria"
     }
+  },
+  "links": {
+    "north america": {
+      "continent": "North America"
+    },
+    "na": {
+      "continent": "North America"
+    },
+    "sa": {
+      "continent": "South America"
+    },
+    "south america": {
+      "continent": "South America"
+    },
+    "eu": {
+      "continent": "Europe"
+    },
+    "europe": {
+      "continent": "Europe"
+    },
+    "africa": {
+      "continent": "Africa"
+    },
+    "asia": {
+      "continent": "Asia"
+    },
+    "oceania": {
+      "continent": "Oceania"
+    },
+    "australia": {
+      "continent": "Australia"
+    },
+    "antarctica": {
+      "continent": "Antarctica"
+    },
+    "us": {
+      "country": "United States"
+    },
+    "usa": {
+      "country": "United States"
+    },
+    "united states": {
+      "country": "United States"
+    },
+    "united states of america": {
+      "country": "United States"
+    },
+    "america": {
+      "country": "United States"
+    },
+    "au": {
+      "country": "Australia"
+    },
+    "australia": {
+      "country": "Australia"
+    },
+    "germany": {
+      "country": "Germany"
+    },
+    "german": {
+      "country": "Germany"
+    },
+    "norway": {
+      "country": "Norway"
+    },
+    "canada": {
+      "country": "Canada"
+    },
+    "colombia": {
+      "country": "Colombia"
+    },
+    "philippines": {
+      "country": "Philippines"
+    },
+    "indonesia": {
+      "country": "Indonesia"
+    },
+    "sweden": {
+      "country": "Sweden"
+    },
+    "mexico": {
+      "country": "Mexico"
+    },
+    "argentina": {
+      "country": "Argentina"
+    },
+    "nz": {
+      "country": "New Zealand"
+    },
+    "new zealand": {
+      "country": "New Zealand"
+    },
+    "czech": {
+      "country": "Czech Republic"
+    },
+    "czechoslovakia": {
+      "country": "Czech Republic"
+    },
+    "czech republic": {
+      "country": "Czech Republic"
+    },
+    "uk": {
+      "country": "United Kingdom"
+    },
+    "gb": {
+      "country": "United Kingdom"
+    },
+    "britain": {
+      "country": "United Kingdom"
+    },
+    "britian": {
+      "country": "United Kingdom"
+    },
+    "united kingdom": {
+      "country": "United Kingdom"
+    },
+    "great britain": {
+      "country": "United Kingdom"
+    },
+    "az": {
+      "state": "Arizona"
+    },
+    "arizona": {
+      "state": "Arizona"
+    },
+    "tx": {
+      "state": "Texas"
+    },
+    "texas": {
+      "state": "Texas"
+    },
+    "ca": {
+      "state": "California"
+    },
+    "california": {
+      "state": "California"
+    },
+    "or": {
+      "state": "Oregon"
+    },
+    "oregon": {
+      "state": "Oregon"
+    },
+    "nm": {
+      "state": "New Mexico"
+    },
+    "new mexico": {
+      "state": "New Mexico"
+    },
+    "oh": {
+      "state": "Ohio"
+    },
+    "ohio": {
+      "state": "Ohio"
+    },
+    "pa": {
+      "state": "Pennsylvania"
+    },
+    "pennsylvania": {
+      "state": "Pennsylvania"
+    },
+    "ny": {
+      "state": "New York"
+    },
+    "new york": {
+      "state": "New York"
+    },
+    "ct": {
+      "state": "Connecticut"
+    },
+    "connecticut": {
+      "state": "Connecticut"
+    },
+    "new hampshire": {
+      "state": "New Hampshire"
+    },
+    "nh": {
+      "state": "New Hampshire"
+    },
+    "nj": {
+      "state": "New Jersey"
+    },
+    "new jersey": {
+      "state": "New Jersey"
+    },
+    "bavaria": {
+      "state": "Bavaria"
+    },
+    "queensland": {
+      "state": "Queensland"
+    },
+    "vasdo": {
+      "state": "Vasdø"
+    },
+    "vasdø": {
+      "state": "Vasdø"
+    },
+    "ma": {
+      "state": "Massachusetts"
+    },
+    "massachusetts": {
+      "state": "Massachusetts"
+    },
+    "tasmania": {
+      "state": "Tasmania"
+    },
+    "la": {
+      "city": "Los Angeles"
+    },
+    "los angeles": {
+      "city": "Los Angeles"
+    },
+    "px": {
+      "city": "Phoenix"
+    },
+    "phoenix": {
+      "city": "Phoenix"
+    },
+    "glendale": {
+      "city": "Glendale"
+    },
+    "surprise": {
+      "city": "Surprise"
+    },
+    "buckeye": {
+      "city": "Buckeye"
+    },
+    "portland": {
+      "city": "Portland"
+    },
+    "ontario": {
+      "city": "Ontario"
+    },
+    "munich": {
+      "city": "Munich"
+    }
   }
 }

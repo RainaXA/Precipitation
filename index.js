@@ -13,7 +13,7 @@ const rl = readline.createInterface({
 
 
 var prefix = "pr:"
-var version = "v0.2.7"
+var version = "v0.2.7.1"
 var verText = "in a flash"
 
 var debugging = 0;
@@ -319,7 +319,7 @@ function find(query, when, many, whatToReturn) {
 
 client.on('ready', () => {
   log('Precipitation has started!', "success", 1, null)
-  client.user.setActivity(version + " || " + prefix + "help")
+  client.user.setActivity(version + " (pr:) || v0.1.10 (pr;) || v0.0.2.3 (pr-)")
   setTimeout(saveConfiguration, 5000)
   processConsoleCommand();
 })
@@ -396,33 +396,10 @@ client.on('messageCreate', message => {
       // ping command
       case "ping":
         let user = name(message.author)
-        let raelynnTooCute = Math.floor(Math.random() * 7)
-        let pingMessage;
-        switch (raelynnTooCute) {
-          case 0:
-            pingMessage = "Pinging..."
-            break;
-          case 1:
-            pingMessage = "yeah i got you"
-            break;
-          case 2:
-            pingMessage = "awooga"
-            break;
-          case 3:
-            pingMessage = "i'm so random and quirky!!!"
-            break;
-          case 4:
-            pingMessage = "ew are you a pisces? that makes you satan!"
-            break;
-          case 5:
-            pingMessage = "i'm a scorpio so it makes sense for me to kill my whole family"
-            break;
-          case 6:
-            pingMessage = "pay my onlyfans"  // Why only lowercase?
-            break;
-        }
+        let pingMessages = ["Pinging...", "yeah i got you", "awooga", "i'm so random and quirky!!!", "ew are you a pisces? that makes you satan!", "i'm a scorpio so it makes sense for me to kill my whole family", "pay my onlyfans"];
+        let raelynnTooCute = Math.floor(Math.random() * pingMessages.length)
         let startTime = Date.now();
-        message.channel.send("<:ping_receive:502755206841237505> " + pingMessage).then(function(message) {
+        message.channel.send("<:ping_receive:502755206841237505> " + pingMessages[raelynnTooCute]).then(function(message) {
           switch(parameter) { // I'm aware you cannot combine the two. I'm sorry, that's how it is for now.
             case "no-name":
               message.edit("<:ping_transmit:502755300017700865> (" + (Date.now() - startTime) + "ms) Hey!")
@@ -616,263 +593,47 @@ client.on('messageCreate', message => {
         let doubleArgs;
         if(fCommand[1]) doubleArgs = message.content.slice(messagePrefix.length + fCommand[1].length + fCommand[0].length + 2)
         if(fCommand[1] == "continent") {
-          let continent;
-          switch(doubleArgs.toLowerCase()) {
-            case "north america":
-            case "na":
-              continent = "North America";
-              break;
-            case "south america":
-            case "sa":
-              continent = "South America";
-              break;
-            case "europe":
-            case "eu":
-              continent = "Europe";
-              break;
-            case "africa":
-              continent = "Africa";
-              break;
-            case "asia":
-              continent = "Asia";
-              break;
-            case "oceania":
-            case "australia":
-              continent = "Oceania";
-              break;
-            case "antarctica":
-              continent = "Antarctica";
-              break;
-            default:
-              continent = "n/a"
-          }
-          if(continent == "n/a") return message.channel.send("Please enter a valid continent.")
+          let continent = locations.links[doubleArgs.toLowerCase()]
+          if(continent == undefined) return message.channel.send("Please enter a valid continent.")
+          if(!continent.continent) return message.channel.send("This is a valid location, but this is not a continent.")
+          continent = continent.continent
           config.users[message.author.id].location.city = null;
           config.users[message.author.id].location.state = null;
           config.users[message.author.id].location.country = null;
           config.users[message.author.id].location.continent = continent;
           return message.channel.send("Okay, I'm setting your continent to **" + continent + "**.")
         } else if(fCommand[1] == "country") {
-          switch(doubleArgs.toLowerCase()) {
-            case "us":
-            case "united states":
-            case "america":
-            case "united states of america":
-            case "usa":
-              config.users[message.author.id].location.country = "United States";
-              break;
-            case "west":
-            case "western":
-              if(!config.users[message.author.id].location.continent) return message.channel.send("Please set your continent first.")
-              config.users[message.author.id].location.country = "Western";
-              break;
-            case "east":
-            case "eastern":
-              if(!config.users[message.author.id].location.continent) return message.channel.send("Please set your continent first.")
-              config.users[message.author.id].location.country = "Eastern";
-              break;
-            case "north":
-            case "northern":
-              if(!config.users[message.author.id].location.continent) return message.channel.send("Please set your continent first.")
-              config.users[message.author.id].location.country = "Northern";
-              break;
-            case "south":
-            case "southern":
-              if(!config.users[message.author.id].location.continent) return message.channel.send("Please set your continent first.")
-              config.users[message.author.id].location.country = "Southern";
-              break;
-            case "australia":
-            case "au":
-              config.users[message.author.id].location.country = "Australia";
-              break;
-            case "germany":
-            case "german":
-              config.users[message.author.id].location.country = "Germany";
-              break;
-            case "norway":
-              config.users[message.author.id].location.country = "Norway";
-              break;
-            case "canada":
-              config.users[message.author.id].location.country = "Canada";
-              break;
-            case "colombia":
-              config.users[message.author.id].location.country = "Colombia";
-              break;
-            case "philippines":
-              config.users[message.author.id].location.country = "Philippines";
-              break;
-            case "indonesia":
-              config.users[message.author.id].location.country = "Indonesia";
-              break;
-            case "united kingdom":
-            case "uk":
-            case "britain":
-            case "britian":
-            case "gb":
-            case "great britain":
-              config.users[message.author.id].location.country = "United Kingdom";
-              break;
-            case "sweden":
-              config.users[message.author.id].location.country = "Sweden";
-              break;
-            case "mexico":
-              config.users[message.author.id].location.country = "Mexico";
-              break;
-            case "argentina":
-              config.users[message.author.id].location.country = "Argentina";
-              break;
-            case "czech":
-            case "czech republic":
-            case "czechoslovakia":
-              config.users[message.author.id].location.country = "Czech Republic";
-              break;
-            case "new zealand":
-            case "nz":
-              config.users[message.author.id].location.country = "New Zealand";
-              break;
-            default:
-              return message.channel.send("Please enter a valid country.")
-          }
+          let country = locations.links[doubleArgs.toLowerCase()]
+          if(country == undefined) return message.channel.send("Please enter a valid country.")
+          if(!country.country) return message.channel.send("This is a valid location, but this is not a country.")
+          country = country.country
           config.users[message.author.id].location.city = null;
           config.users[message.author.id].location.state = null;
-          if(config.users[message.author.id].location.country == "Western" || config.users[message.author.id].location.country == "Eastern" || config.users[message.author.id].location.country == "Northern" || config.users[message.author.id].location.country == "Southern") return message.channel.send("Okay, I've set it so you are from **" + config.users[message.author.id].location.country + " " + config.users[message.author.id].location.continent + "**.")
-          if(config.users[message.author.id].location.country != "Western" && config.users[message.author.id].location.country != "Eastern") config.users[message.author.id].location.continent = locations.countries[config.users[message.author.id].location.country].continent
+          config.users[message.author.id].location.country = country;
+          config.users[message.author.id].location.continent = locations.countries[country].continent;
           return message.channel.send("Okay, I'm setting your country to **" + config.users[message.author.id].location.country + "**.")
         } else if (fCommand[1] == "state") {
-          switch(doubleArgs.toLowerCase()) {
-            case "arizona":
-            case "az":
-              config.users[message.author.id].location.state = "Arizona";
-              break;
-            case "texas":
-            case "tx":
-              config.users[message.author.id].location.state = "Texas";
-              break;
-            case "california":
-            case "ca":
-              config.users[message.author.id].location.state = "California";
-              break;
-            case "oregon":
-            case "or":
-              config.users[message.author.id].location.state = "Oregon";
-              break;
-            case "new mexico":
-            case "nm":
-              config.users[message.author.id].location.state = "New Mexico";
-              break;
-            case "ohio":
-            case "oh":
-              config.users[message.author.id].location.state = "Ohio";
-              break;
-            case "pennsylvania":
-            case "pa":
-              config.users[message.author.id].location.state = "Pennsylvania";
-              break;
-            case "bavaria":
-            // case "az":
-              config.users[message.author.id].location.state = "Bavaria";
-              break;
-            case "nj":
-            case "new jersey":
-              config.users[message.author.id].location.state = "New Jersey";
-              break;
-            case "nh":
-            case "new hampshire":
-              config.users[message.author.id].location.state = "New Hampshire";
-              break;
-            case "ct":
-            case "connecticut":
-              config.users[message.author.id].location.state = "Connecticut";
-              break;
-            case "vasdo":
-            case "vasdø":
-              config.users[message.author.id].location.state = "Vasdø";
-              break;
-            case "queensland":
-              config.users[message.author.id].location.state = "Queensland";
-              break;
-            case "tasmania":
-              config.users[message.author.id].location.state = "Tasmania";
-              break;
-            case "london":
-              config.users[message.author.id].location.state = "London"
-              break;
-            case "ny":
-            case "new york":
-              config.users[message.author.id].location.state = "New York"
-              break;
-            case "ma":
-            case "massachusetts":
-              config.users[message.author.id].location.state = "Massachusetts"
-              break;
-            default:
-              return message.channel.send("Please enter a valid state.")
-          }
+          let state = locations.links[doubleArgs.toLowerCase()]
+          if (state == undefined) return message.channel.send("Please enter a valid state.")
+          if(!state.state) return message.channel.send("This is a valid location, but this is not a state.")
+          state = state.state
           config.users[message.author.id].location.city = null;
-          config.users[message.author.id].location.continent = locations.states[config.users[message.author.id].location.state].continent
-          config.users[message.author.id].location.country = locations.states[config.users[message.author.id].location.state].country
+          config.users[message.author.id].location.state = state;
+          config.users[message.author.id].location.country = locations.states[state].country;
+          config.users[message.author.id].location.continent = locations.states[state].continent;
           return message.channel.send("Okay, I'm setting your state to **" + config.users[message.author.id].location.state + "**.")
         } else if (fCommand[1] == "city") {
-          switch(doubleArgs.toLowerCase()) {
-            case "phoenix":
-            case "px":
-              config.users[message.author.id].location.city = "Phoenix"
-              break;
-            case "glendale":
-              config.users[message.author.id].location.city = "Glendale"
-              break;
-            case "surprise":
-              config.users[message.author.id].location.city = "Surprise"
-              break;
-            case "buckeye":
-              config.users[message.author.id].location.city = "Buckeye"
-              break;
-            case "portland":
-              config.users[message.author.id].location.city = "Portland"
-              break;
-            case "munich":
-              config.users[message.author.id].location.city = "Munich";
-              break;
-            case "los angeles":
-            case "la":
-              config.users[message.author.id].location.city = "Los Angeles"
-              break;
-            case "ontario":
-              config.users[message.author.id].location.city = "Ontario"
-              break;
-            default:
-              return message.channel.send("Please enter a valid city.")
-          }
-          config.users[message.author.id].location.continent = locations.cities[config.users[message.author.id].location.city].continent
-          config.users[message.author.id].location.country = locations.cities[config.users[message.author.id].location.city].country
-          config.users[message.author.id].location.state = locations.cities[config.users[message.author.id].location.city].state
+          let city = locations.links[doubleArgs.toLowerCase()]
+          if (city == undefined) return message.channel.send("Please enter a valid state.")
+          if(!city.city) return message.channel.send("This is a valid location, but this is not a city.")
+          city = city.city
+          config.users[message.author.id].location.city = city;
+          config.users[message.author.id].location.state = locations.cities[city].state;
+          config.users[message.author.id].location.country = locations.cities[city].country;
+          config.users[message.author.id].location.continent = locations.cities[city].continent;
           return message.channel.send("Okay, I'm setting your city to **" + config.users[message.author.id].location.city + "**.")
-        } else if(fCommand[1] == "province") {
-          switch(doubleArgs.toLowerCase()) {
-            case "banten":
-              config.users[message.author.id].location.state = "Banten"
-              break;
-            default:
-              return message.channel.send("Please enter a valid province.")
-          }
-          config.users[message.author.id].location.city = null;
-          config.users[message.author.id].location.continent = locations.states[config.users[message.author.id].location.state].continent
-          config.users[message.author.id].location.country = locations.states[config.users[message.author.id].location.state].country
-          return message.channel.send("Okay, I'm setting your province to **" + config.users[message.author.id].location.state + "**.")
         }
-        let locationHelp = new MessageEmbed()
-        .setTitle("Precipitation " + version + " Locations")
-        .setDescription('Just use ' + config.guilds[message.guild.id].prefix + 'location continent [location] to set!')
-        .addFields(
-          { name: "Continents", value: "North America\nSouth America\nEurope\nAfrica\nAsia\nOceania\nAntarctica", inline: true },
-          { name: "Countries", value: "United States\nAustralia\nNorway\nGermany\nCanada\nColombia\nPhilippines", inline: true },
-          { name: "States", value: "Arizona\nTexas\nCalifornia\nOregon\nBavaria", inline: true },
-          { name: "Cities", value: "Phoenix\nGlendale\nSurprise\nMunich\nLos Angeles\nOntario", inline: true },
-          { name: "Provinces", value: "Banten"}
-        )
-        .setColor("BLUE")
-        .setFooter({ text: 'Precipitation ' + version });
-        return message.channel.send({embeds: [locationHelp]})
+        return message.channel.send("Just use `pr:location [type] [location]` to set! If it doesn't exist in the bot yet, please wait a little while!")
 
       // find command
       case "find":
