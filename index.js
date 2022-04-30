@@ -375,8 +375,8 @@ client.on('messageCreate', message => {
     if(message.author.id != client.user.id) message.author.send("Hey, " + name(message.author) + "!\n\nThis server has banned very offensive words. Please refrain from using these words.")
   }
   var messagePrefix;
-  if (message.content.startsWith("<@!" + client.user.id + ">")) {
-    messagePrefix = "<@!" + client.user.id + ">"
+  if (message.content.startsWith("<@" + client.user.id + ">")) {
+    messagePrefix = "<@" + client.user.id + ">"
   } else {
     messagePrefix = config.guilds[message.guild.id].prefix
   }
@@ -412,59 +412,40 @@ client.on('messageCreate', message => {
           }
         })
         break;
-
       // help command
       case "help":
         let cmdHelp = args.toLowerCase()
-        switch(cmdHelp) {
-          case "ping":
-          case "help":
-          case "ver":
-          case "version":
-          case "about":
-          case "name":
-          case "gender":
-          case "birthday":
-          case "location":
-          case "placevalue":
-          case "find":
-          case "uinfo":
-          case "rm":
-          case "purge":
-          case "uptime":
-          case "config":
-          case "warn":
-          case "lswarn":
-          case "rmwarn":
-            let commandHelpEmbed = new MessageEmbed()
-            .setTitle("Precipitation Index || " + config.guilds[message.guild.id].prefix + cmdHelp)
-            .addFields(
-              { name: "Description", value: help.commandHelp[cmdHelp].description},
-              { name: "Syntax", value: config.guilds[message.guild.id].prefix + cmdHelp + " " + help.commandHelp[cmdHelp].syntax}
-            )
-            .setColor("BLUE")
-            .setFooter({ text: 'Precipitation ' + version + " || [] denotes a parameter, () denotes an argument, bolded is REQUIRED."});
-            return message.channel.send({embeds: [commandHelpEmbed]})
-          default:
-            let helpEmbed = new MessageEmbed()
-            helpEmbed.setTitle("Precipitation Index")
-            helpEmbed.setDescription('List of all commands -- use `' + config.guilds[message.guild.id].prefix + '` before all commands!')
-            /*for(section in help.commandList) {
-              console.log(section)
-              helpEmbed.addField(section, section.commands, true)
-            }*/
-            // if anyone can figure this out, please make a pr :D
-            .addFields(
-              { name: "General", value: "ping\nhelp\nversion\nabout\nuptime", inline: true },
-              { name: "Personalization", value: "name\ngender\nbirthday\nlocation", inline: true },
-              { name: "Alpha", value: "placevalue", inline: true },
-              { name: "Moderation", "value": "find\nuinfo\nrm\nconfig\nwarn\nlswarn\nrmwarn", inline: true }
-            )
-            if(parameter == "easter-eggs") helpEmbed.addField("Secrets", "bitches", true)
-            helpEmbed.setColor("BLUE")
-            helpEmbed.setFooter({ text: 'Precipitation ' + version });
-            return message.channel.send({embeds: [helpEmbed]})
+        let test = false;
+        if(help.commandHelp[cmdHelp]) test = true;
+        if (test == true) {
+          let commandHelpEmbed = new MessageEmbed()
+          .setTitle("Precipitation Index || " + config.guilds[message.guild.id].prefix + cmdHelp)
+          .addFields(
+            { name: "Description", value: help.commandHelp[cmdHelp].description},
+            { name: "Syntax", value: config.guilds[message.guild.id].prefix + cmdHelp + " " + help.commandHelp[cmdHelp].syntax}
+          )
+          .setColor("BLUE")
+          .setFooter({ text: 'Precipitation ' + version + " || [] denotes a parameter, () denotes an argument, bolded is REQUIRED."});
+          return message.channel.send({embeds: [commandHelpEmbed]})
         }
+          let helpEmbed = new MessageEmbed()
+          helpEmbed.setTitle("Precipitation Index")
+          helpEmbed.setDescription('List of all commands -- use `' + config.guilds[message.guild.id].prefix + '` before all commands!')
+          /*for(section in help.commandList) {
+            console.log(section)
+            helpEmbed.addField(section, section.commands, true)
+          }*/
+          // if anyone can figure this out, please make a pr :D
+          .addFields(
+            { name: "General", value: "ping\nhelp\nversion\nabout\nuptime", inline: true },
+            { name: "Personalization", value: "name\ngender\nbirthday\nlocation", inline: true },
+            { name: "Alpha", value: "placevalue", inline: true },
+            { name: "Moderation", "value": "find\nuinfo\nrm\nconfig\nwarn\nlswarn\nrmwarn", inline: true }
+          )
+          if(parameter == "easter-eggs") helpEmbed.addField("Secrets", "bitches", true)
+          helpEmbed.setColor("BLUE")
+          helpEmbed.setFooter({ text: 'Precipitation ' + version });
+          return message.channel.send({embeds: [helpEmbed]})
 
       // version command
       case "ver":
@@ -588,50 +569,45 @@ client.on('messageCreate', message => {
 
       // location command
       case "location":
-        if(args == "continent") return message.channel.send("Please re-run the command with your continent afterwards.")
-        if(args == "country") return message.channel.send("Please re-run the command with a country.")
-        let doubleArgs;
-        if(fCommand[1]) doubleArgs = message.content.slice(messagePrefix.length + fCommand[1].length + fCommand[0].length + 2)
-        if(fCommand[1] == "continent") {
-          let continent = locations.links[doubleArgs.toLowerCase()]
-          if(continent == undefined) return message.channel.send("Please enter a valid continent.")
-          if(!continent.continent) return message.channel.send("This is a valid location, but this is not a continent.")
-          continent = continent.continent
-          config.users[message.author.id].location.city = null;
-          config.users[message.author.id].location.state = null;
-          config.users[message.author.id].location.country = null;
-          config.users[message.author.id].location.continent = continent;
-          return message.channel.send("Okay, I'm setting your continent to **" + continent + "**.")
-        } else if(fCommand[1] == "country") {
-          let country = locations.links[doubleArgs.toLowerCase()]
-          if(country == undefined) return message.channel.send("Please enter a valid country.")
-          if(!country.country) return message.channel.send("This is a valid location, but this is not a country.")
-          country = country.country
-          config.users[message.author.id].location.city = null;
-          config.users[message.author.id].location.state = null;
-          config.users[message.author.id].location.country = country;
-          config.users[message.author.id].location.continent = locations.countries[country].continent;
-          return message.channel.send("Okay, I'm setting your country to **" + config.users[message.author.id].location.country + "**.")
-        } else if (fCommand[1] == "state") {
-          let state = locations.links[doubleArgs.toLowerCase()]
-          if (state == undefined) return message.channel.send("Please enter a valid state.")
-          if(!state.state) return message.channel.send("This is a valid location, but this is not a state.")
-          state = state.state
-          config.users[message.author.id].location.city = null;
-          config.users[message.author.id].location.state = state;
-          config.users[message.author.id].location.country = locations.states[state].country;
-          config.users[message.author.id].location.continent = locations.states[state].continent;
-          return message.channel.send("Okay, I'm setting your state to **" + config.users[message.author.id].location.state + "**.")
-        } else if (fCommand[1] == "city") {
-          let city = locations.links[doubleArgs.toLowerCase()]
-          if (city == undefined) return message.channel.send("Please enter a valid state.")
-          if(!city.city) return message.channel.send("This is a valid location, but this is not a city.")
-          city = city.city
-          config.users[message.author.id].location.city = city;
-          config.users[message.author.id].location.state = locations.cities[city].state;
-          config.users[message.author.id].location.country = locations.cities[city].country;
-          config.users[message.author.id].location.continent = locations.cities[city].continent;
-          return message.channel.send("Okay, I'm setting your city to **" + config.users[message.author.id].location.city + "**.")
+        args = args.toLowerCase();
+        if(args == "continent" || args == "country" || args == "state" || args == "city") return message.channel.send("Please re-run the command with your " + args + " afterwards.")
+        if(fCommand[1]) var doubleArgs = message.content.slice(messagePrefix.length + fCommand[1].length + fCommand[0].length + 2).toLowerCase()
+        let cmdd = fCommand[1].toLowerCase()
+        let input = locations.links[doubleArgs]
+        if(input == undefined) return message.channel.send("Please enter a valid location.");
+        switch(fCommand[1].toLowerCase()) {
+          case "continent":
+            if(!input.continent) return message.channel.send("This is a valid location, but this is not a continent.")
+            input = input.continent
+            config.users[message.author.id].location.city = null;
+            config.users[message.author.id].location.state = null;
+            config.users[message.author.id].location.country = null;
+            config.users[message.author.id].location.continent = input;
+            return message.channel.send("Okay, I'm setting your continent to **" + input + "**.")
+          case "country":
+            if(!input.country) return message.channel.send("This is a valid location, but this is not a country.")
+            input = input.country
+            config.users[message.author.id].location.city = null;
+            config.users[message.author.id].location.state = null;
+            config.users[message.author.id].location.country = input;
+            config.users[message.author.id].location.continent = locations.countries[input].continent;
+            return message.channel.send("Okay, I'm setting your country to **" + input + "**.")
+          case "state":
+            if(!input.state) return message.channel.send("This is a valid location, but this is not a state.")
+            input = input.state
+            config.users[message.author.id].location.city = null;
+            config.users[message.author.id].location.state = input;
+            config.users[message.author.id].location.country = locations.states[input].country;
+            config.users[message.author.id].location.continent = locations.states[input].continent;
+            return message.channel.send("Okay, I'm setting your state to **" + input + "**.")
+          case "city":
+            if(!input.city) return message.channel.send("This is a valid location, but this is not a city.")
+            input = input.city
+            config.users[message.author.id].location.city = input;
+            config.users[message.author.id].location.state = locations.cities[input].state;
+            config.users[message.author.id].location.country = locations.cities[input].country;
+            config.users[message.author.id].location.continent = locations.cities[input].continent;
+            return message.channel.send("Okay, I'm setting your city to **" + input + "**.")
         }
         return message.channel.send("Just use `pr:location [type] [location]` to set! If it doesn't exist in the bot yet, please wait a little while!")
 
