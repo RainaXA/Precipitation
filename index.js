@@ -1,10 +1,9 @@
-const { Client, Intents, MessageEmbed, Permissions } = require('discord.js');
+const { Client, Intents, MessageEmbed, Permissions, Collection } = require('discord.js');
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_PRESENCES] });
 const fs = require('fs');
 const colors = require('colors'); // yes, you can do this within the node.js console using the weird thingies. however, im lazy, i do this later lol, i just want to get this done quickly
 const readline = require('readline');
 const locations = require("./locations.json")
-const help = require("./help.json")
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -13,14 +12,17 @@ const rl = readline.createInterface({
 
 
 var prefix = "pr:"
-var version = "v0.2.7.1"
-var verText = "in a flash"
+global.version = "v0.3"
+var verText = "detachable limbs"
+
+client.commands = new Collection();
 
 var debugging = 0;
 
 var warningStage = {};
 var warnedUser = {};
 var removeWarnNumber = {};
+
 
 var privilegedUsers = {
   "319858536328724481": {},
@@ -144,7 +146,7 @@ function initGuild(guild) {
   if(!config.guilds[guild.id].warnings) config.guilds[guild.id].warnings = {};
 }
 
-function name(user) {
+global.name = function (user) {
   if(!config.users[user.id].name) {
     return user.username
   } else {
@@ -319,14 +321,14 @@ function find(query, when, many, whatToReturn) {
 
 client.on('ready', () => {
   log('Precipitation has started!', "success", 1, null)
-  client.user.setActivity(version + " (pr:) || v0.1.10 (pr;) || v0.0.2.3 (pr-)")
+  client.user.setActivity(version + " || " + prefix + "help")
   setTimeout(saveConfiguration, 5000)
   processConsoleCommand();
 })
 
 if(!fs.existsSync('./config.json')) {
   log('config.json does not exist. Creating now.', "warn", 0, null)
-  var config = {
+  global.config = {
     "guilds": {
 
     },﻿
@@ -339,16 +341,34 @@ if(!fs.existsSync('./config.json')) {
   };
   fs.writeFile('config.json', JSON.stringify(config), function (err) {
     if (err) throw err;
-    log('config.json has been created.', "success", 0, null)
+    log('config.json has been created.', "success", 0)
     rl.question("Please paste the token: ", (answer) => {
       config.general.token = answer;
       client.login(config.general.token)
     });
   })
 } else {
-  var config = JSON.parse(fs.readFileSync("./config.json"));
+  global.config = JSON.parse(fs.readFileSync("./config.json"));
   client.login(config.general.token)
 }
+
+fs.readdir("./commands", function(error, files) {
+  if (error) {
+    fs.mkdirSync("./commands/")
+    log("Commands folder not found - creating now.", "warn", 1)
+  } else {
+    let modules = files.filter(f => f.split(".").pop() === "js");
+    try {
+      modules.forEach((f, i) => {
+        let props = require(`./commands/${f}`);
+        client.commands.set(props.help.name, props);
+        log("Loaded command " + props.help.name + ".", "success", 0)
+      })
+    } catch (err) {
+      log("Sorry, but a command had an error: " + err.stack, "error", 3)
+    }
+  }
+})
 
 client.on('messageCreate', message => {
   initGuild(message.guild)
@@ -358,7 +378,6 @@ client.on('messageCreate', message => {
     if(message.content == "cancel") return message.channel.send("Okay, I won't warn " + gender(warnedUser[message.author.id], "him", "her", "them", "them") + ".")
     if(getTextInput(message.content) == true) return message.channel.send("Sorry, but I personally won't warn for any offensive reason.")
     if(message.content.length > 200) return message.channel.send("That's too long of a reason, please shorten it.")
-    console.log(config.guilds[message.guild.id].warnings[warnedUser[message.author.id].id])
     config.guilds[message.guild.id].warnings[warnedUser[message.author.id].id].push(message.content)
     return message.channel.send("Okay, I've warned " + gender(warnedUser[message.author.id], "him", "her", "them", "them") + " for \"" + message.content + "\".")
   } else if(warningStage[message.author.id] == 2) {
@@ -381,6 +400,7 @@ client.on('messageCreate', message => {
     messagePrefix = config.guilds[message.guild.id].prefix
   }
   if (message.content.toLowerCase().startsWith(messagePrefix) && !message.author.bot) {
+    if (message.author.id == 533591507744325642) message.author.send("rae you're actually super cute ily <333")
     initUser(message.author)
     var fCommand = message.content.slice(messagePrefix.length).split(" ")
     while(fCommand[0] == "") {
@@ -392,61 +412,21 @@ client.on('messageCreate', message => {
     var parameters = args.split("--")
     var parameter = parameters[1]
     if(!parameter) parameter = "raelynn is really cute" // bot breaks because "toLowerCase()" may not exist
+    let cmd = client.commands.get(command.toLowerCase())
+    try {
+      if(cmd) {
+        cmd.run(client, message, args, parameter);
+      }
+    } catch(err) {
+      console.log(err)
+      let errorEmbed = new MessageEmbed()
+      .setTitle("Fatal Exception")
+      .setDescription("Here are the logs of the error:")
+      .addField("Details", err)
+      .setFooter({text: "Precipitation " + version})
+      message.channel.send({embeds: [errorEmbed]})
+    }
     switch(command.toLowerCase()) {
-      // ping command
-      case "ping":
-        let user = name(message.author)
-        let pingMessages = ["Pinging...", "yeah i got you", "awooga", "i'm so random and quirky!!!", "ew are you a pisces? that makes you satan!", "i'm a scorpio so it makes sense for me to kill my whole family", "pay my onlyfans"];
-        let raelynnTooCute = Math.floor(Math.random() * pingMessages.length)
-        let startTime = Date.now();
-        message.channel.send("<:ping_receive:502755206841237505> " + pingMessages[raelynnTooCute]).then(function(message) {
-          switch(parameter) { // I'm aware you cannot combine the two. I'm sorry, that's how it is for now.
-            case "no-name":
-              message.edit("<:ping_transmit:502755300017700865> (" + (Date.now() - startTime) + "ms) Hey!")
-              break;
-            case "client-ping":
-              message.edit("<:ping_transmit:502755300017700865> (" + Math.round(client.ws.ping) + "ms) Hey, " + user + "!");
-              break;
-            default:
-              message.edit("<:ping_transmit:502755300017700865> (" + (Date.now() - startTime) + "ms) Hey, " + user + "!");
-          }
-        })
-        break;
-      // help command
-      case "help":
-        let cmdHelp = args.toLowerCase()
-        let test = false;
-        if(help.commandHelp[cmdHelp]) test = true;
-        if (test == true) {
-          let commandHelpEmbed = new MessageEmbed()
-          .setTitle("Precipitation Index || " + config.guilds[message.guild.id].prefix + cmdHelp)
-          .addFields(
-            { name: "Description", value: help.commandHelp[cmdHelp].description},
-            { name: "Syntax", value: config.guilds[message.guild.id].prefix + cmdHelp + " " + help.commandHelp[cmdHelp].syntax}
-          )
-          .setColor("BLUE")
-          .setFooter({ text: 'Precipitation ' + version + " || [] denotes a parameter, () denotes an argument, bolded is REQUIRED."});
-          return message.channel.send({embeds: [commandHelpEmbed]})
-        }
-          let helpEmbed = new MessageEmbed()
-          helpEmbed.setTitle("Precipitation Index")
-          helpEmbed.setDescription('List of all commands -- use `' + config.guilds[message.guild.id].prefix + '` before all commands!')
-          /*for(section in help.commandList) {
-            console.log(section)
-            helpEmbed.addField(section, section.commands, true)
-          }*/
-          // if anyone can figure this out, please make a pr :D
-          .addFields(
-            { name: "General", value: "ping\nhelp\nversion\nabout\nuptime", inline: true },
-            { name: "Personalization", value: "name\ngender\nbirthday\nlocation", inline: true },
-            { name: "Alpha", value: "placevalue", inline: true },
-            { name: "Moderation", "value": "find\nuinfo\nrm\nconfig\nwarn\nlswarn\nrmwarn", inline: true }
-          )
-          if(parameter == "easter-eggs") helpEmbed.addField("Secrets", "bitches", true)
-          helpEmbed.setColor("BLUE")
-          helpEmbed.setFooter({ text: 'Precipitation ' + version });
-          return message.channel.send({embeds: [helpEmbed]})
-
       // version command
       case "ver":
       case "version":
@@ -835,8 +815,34 @@ client.on('messageCreate', message => {
         removeWarnNumber[message.author.id] = numArgs;
         return message.channel.send("Removing warning #" + numArgs + " from " + removeUser.username + ". Are you sure?")
 
-      default:
-        message.channel.send("Sorry, but it appears this command is unknown.");
+      /*case "deal":
+        if (!args) return message.channel.send("Please input a user.")
+        let dUser = find(args.toLowerCase(), "first", null, "list")
+        if (dUser == null) return message.channel.send("Please input a valid user.")
+        let dMember;
+        message.guild.members.cache.each(member => {
+          if(dUser.id == member.id) {
+            return dMember = member;
+          }
+        })
+        if(!dMember) return message.channel.send("User does not exist in this server.")
+        if (message.member.roles.highest.position <= dMember.roles.highest.position) return message.channel.send("You do not have permission to manage this user.")
+        if(message.guild.me.roles.highest.position <= dMember.roles.highest.position) return message.channel.send("I do not have permission to manage this user.")
+        let dlist = ":gear: `" + dUser.tag + "`: ";
+        if(message.guild.me.permissions.has(Permissions.FLAGS.MANAGE_NICKNAMES) && message.member.permissions.has(Permissions.FLAGS.MANAGE_NICKNAMES)) {
+          dlist += "`(n)ick` "
+        }
+        if(dMember.bannable && message.member.permissions.has(Permissions.FLAGS.MANAGE_NICKNAMES)) {
+          dlist += "`(b)an` "
+        }
+        if(dMember.kickable && message.member.permissions.has(Permissions.FLAGS.MANAGE_NICKNAMES)) {
+          dlist += "`(k)ick`"
+        }
+        return message.channel.send(dlist)*/
     }
   }
+})
+
+process.on('uncaughtException', error => {
+  log('Raina! Uncaught exception!!! ' + error.stack, "error", 3)
 })
