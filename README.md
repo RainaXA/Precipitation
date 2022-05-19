@@ -3,9 +3,9 @@ Probably the most controversial moderation-fun bot you will ever see
 
 ## Set up
 You need node.js
-Download the source
-Execute `node index.js` in the terminal
-Even without config, commands, or modules, the bot will create all of these automatically
+\nDownload the source
+\nExecute `node index.js` in the terminal
+\nEven without config, commands, or modules, the bot will create all of these automatically
 
 ## Making a command
 ```
