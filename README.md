@@ -2,10 +2,7 @@
 Probably the most controversial moderation-fun bot you will ever see
 
 ## Set up
-You need node.js
-\nDownload the source
-\nExecute `node index.js` in the terminal
-\nEven without config, commands, or modules, the bot will create all of these automatically
+Download the source, and ensure you have node.js installed. Once you have the source installed, navigate to the bot and execute `node index.js` in the terminal. The bot is now starting.
 
 ## Making a command
 ```
