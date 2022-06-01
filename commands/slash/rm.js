@@ -17,14 +17,18 @@ module.exports = {
         if(!interaction.guild.me.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES)) purgeList = purgeList + "- ensure I have permissions\n"
         if(int > 99) purgeList = purgeList + "- ensure the number you've input is between 1-99."
         if(purgeList == "Please:\n") {
-            if(int == 1) {
-                return interaction.channel.bulkDelete(1).then(() => {
-                    interaction.reply({ content: "Okay, I've deleted the above message. (really?)" })
+            try {
+                if(int == 1) {
+                    return interaction.channel.bulkDelete(1).then(() => {
+                        interaction.reply({ content: "Okay, I've deleted the above message. (really?)" })
+                    })
+                }
+                return interaction.channel.bulkDelete(int).then(() => {
+                    interaction.reply({ content: "Okay, I've deleted " + int + " messages." })
                 })
+            } catch(err) {
+                interaction.reply({ content: "Messages are too old to delete.", ephemeral: true })
             }
-            return interaction.channel.bulkDelete(int).then(() => {
-                interaction.reply({ content: "Okay, I've deleted " + int + " messages." })
-            })
         }
         return interaction.reply({ content: purgeList, ephemeral: true })
     }
