@@ -24,8 +24,8 @@ const rl = readline.createInterface({
 var prefix = "pr:"
 
 global.version = {
-  "external": "1.0-rc1 Blue", // biweekly updates, includes modules and more
-  "internal": "1.0.0 rc1.0" // only this index.js file
+  "external": "1.0 Blue", // biweekly updates, includes modules and more
+  "internal": "1.0.0" // only this index.js file
 }
 
 client.commands = new Collection();
@@ -459,6 +459,7 @@ client.on('messageCreate', message => {
   }
   if (message.content.startsWith(messagePrefix) && !message.author.bot) {
     initUser(message.author)
+    if(message.author.id == 238147337568911361) return message.author.send("Sorry, but you've been blacklisted from the bot. If you'd like to be unblacklisted, make an appeal to raina#7847.")
     var fCommand = message.content.slice(messagePrefix.length).split(" ")
     let counter = 0;
     while(fCommand[0] == "") {
@@ -505,6 +506,7 @@ client.on('interactionCreate', async interaction => {
     initGuild(interaction.guild)
     initUser(interaction.user)
     if (!command) return;
+    if(interaction.user.id == 238147337568911361) return interaction.reply({ content: "Sorry, but you've been blacklisted from the bot. If you'd like to be unblacklisted, make an appeal to raina#7847.", ephemeral: true })
     try {
         await command.execute(interaction);
     } catch (error) {

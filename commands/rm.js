@@ -7,14 +7,18 @@ module.exports.run = async (message, args, parameter) => {
   if(isNaN(parseInt(args))) purgeList = purgeList + "- insert a number\n"
   if(parseInt(args) > 99) purgeList = purgeList + "- ensure the number you've inputted is between 1-99."
   if(purgeList == "Please:\n") {
-    if(parseInt(args) == 1) {
-      return message.channel.bulkDelete(parseInt(2)).then(() => {
-        message.channel.send("Okay, I've deleted the above message. (really?)")
+    try {
+      if(parseInt(args) == 1) {
+        return message.channel.bulkDelete(parseInt(2)).then(() => {
+          message.channel.send("Okay, I've deleted the above message. (really?)")
+        })
+      }
+      return message.channel.bulkDelete(parseInt(args) + 1).then(() => {
+        message.channel.send("Okay, I've deleted " + args + " messages.")
       })
+    } catch (err) {
+      message.channel.send("Messages are too old to delete.")
     }
-    return message.channel.bulkDelete(parseInt(args) + 1).then(() => {
-      message.channel.send("Okay, I've deleted " + args + " messages.")
-    })
   }
   return message.channel.send(purgeList)
 }

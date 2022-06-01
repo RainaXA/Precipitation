@@ -18,12 +18,14 @@ module.exports.run = async (message, args, parameter) => {
     }
   })
   let joinedAt = "*not in server*";
-  if (uinfoMember) joinedAt = uinfoMember.joinedAt;
+  if (uinfoMember) joinedAt = uinfoMember.joinedAt.toUTCString();
+  let dName = uinfoUser.username;
+  if(uinfoMember) dName = uinfoMember.displayName;
   let uinfo = new MessageEmbed()
   .setTitle("User Information || " + uinfoUser.tag)
   .addFields(
-    { name: "Account Dates", value: "**Creation Date**: " + uinfoUser.createdAt.toUTCString() + "\n**Join Date**: " + joinedAt.toUTCString(), inline: true },
-    { name: "Names", value: "**Username**: " + uinfoUser.username + "\n**Display Name**: " + uinfoMember.displayName },
+    { name: "Account Dates", value: "**Creation Date**: " + uinfoUser.createdAt.toUTCString() + "\n**Join Date**: " + joinedAt, inline: true },
+    { name: "Names", value: "**Username**: " + uinfoUser.username + "\n**Display Name**: " + dName },
     { name: "Bot Info", value: "**Name**: " + name(uinfoUser) + "\n**Gender**: " + gender(uinfoUser, "Male", "Female", "Other", "*not set*") + "\n**Birthday**: " + userBirthday }
   )
   .setColor("BLUE")
