@@ -21,10 +21,10 @@ const rl = readline.createInterface({
 });
 
 
-var prefix = "pr:"
+var prefix = "pr#"
 
 global.version = {
-  "external": "1.0 Blue", // biweekly updates, includes modules and more
+  "external": "1.0.1 Blue", // biweekly updates, includes modules and more
   "internal": "1.0.0" // only this index.js file
 }
 
