@@ -19,12 +19,20 @@ module.exports = {
         if(purgeList == "Please:\n") {
             try {
                 if(int == 1) {
-                    return interaction.channel.bulkDelete(1).then(() => {
-                        interaction.reply({ content: "Okay, I've deleted the above message. (really?)" })
+                    return interaction.channel.bulkDelete(1, {filterOld: true}).then(messages => {
+                        if (messages.size == 1) {
+                            interaction.reply({ content: "Okay, I've deleted the above message. (really?)" })
+                        } else {
+                            interaction.reply({ content: "The message is over two weeks old - it cannot be deleted.", ephemeral: true })
+                        }
                     })
                 }
-                return interaction.channel.bulkDelete(int).then(() => {
-                    interaction.reply({ content: "Okay, I've deleted " + int + " messages." })
+                return interaction.channel.bulkDelete(int, {filterOld: true}).then(messages => {
+                    if (messages.size == int) {
+                        interaction.reply({ content: "Okay, I've deleted " + int + " messages." })
+                    } else {
+                        interaction.reply({ content: "The message is over two weeks old - I could only delete " + messages.size + " messages." })
+                    }
                 })
             } catch(err) {
                 interaction.reply({ content: "Messages are too old to delete.", ephemeral: true })
