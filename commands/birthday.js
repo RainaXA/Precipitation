@@ -1,3 +1,63 @@
+const { SlashCommandBuilder } = require('@discordjs/builders');
+
+function toProperUSFormat(month, day, year) {
+  let wMonth;
+  switch(month) {
+    case 1:
+      wMonth = "January";
+      break;
+    case 2:
+      wMonth = "February";
+      break;
+    case 3:
+      wMonth = "March";
+      break;
+    case 4:
+      wMonth = "April";
+      break;
+    case 5:
+      wMonth = "May";
+      break;
+    case 6:
+      wMonth = "June";
+      break;
+    case 7:
+      wMonth = "July";
+      break;
+    case 8:
+      wMonth = "August";
+      break;
+    case 9:
+      wMonth = "September";
+      break;
+    case 10:
+      wMonth = "October";
+      break;
+    case 11:
+      wMonth = "November";
+      break;
+    case 12:
+      wMonth = "December";
+      break;
+  }
+  return wMonth + " " + placeValue(day) + ", " + year;
+}
+
+function placeValue(num) {
+  let number = parseInt(num)
+  if(number.toString().endsWith("11") || number.toString().endsWith("12") || number.toString().endsWith("13")) {
+    return number.toString() + "th";
+  } else if(number.toString().endsWith("1")) {
+    return number.toString() + "st";
+  } else if(number.toString().endsWith("2")) {
+    return number.toString() + "nd";
+  } else if(number.toString().endsWith("3")) {
+    return number.toString() + "rd";
+  } else {
+    return number.toString() + "th";
+  }
+}
+
 function getDaysInMonth(month, year) {
   let leap = (year % 100 === 0) ? (year % 400 === 0) : (year % 4 === 0);
   switch(month) {
@@ -34,7 +94,42 @@ function getDaysInMonth(month, year) {
   }
 }
 
-module.exports.run = async (message, args, parameter) => {
+module.exports = {
+    data: new SlashCommandBuilder()
+        .setName('birthday')
+        .setDescription('Sets your birthday.')
+        .addStringOption(option =>
+            option.setName('month')
+            .setDescription('Month to be set')
+            .setRequired(true)
+            .addChoice("January", "1")
+            .addChoice("February", "2")
+            .addChoice("March", "3")
+            .addChoice("April", "4")
+            .addChoice("May", "5")
+            .addChoice("June", "6")
+            .addChoice("July", "7")
+            .addChoice("August", "8")
+            .addChoice("September", "9")
+            .addChoice("October", "10")
+            .addChoice("November", "11")
+            .addChoice("December", "12"))
+        .addIntegerOption(int =>
+          int.setName('day')
+          .setDescription("Day to be set")
+          .setRequired(true))
+        .addIntegerOption(int =>
+          int.setName('year')
+          .setDescription('Year to be set')
+          .setRequired(true)),
+};
+
+module.exports.placeValue = placeValue; // export
+module.exports.toProperUSFormat = toProperUSFormat;
+
+module.exports.default = async (message, args, parameter) => {
+  if(!config.users[message.author.id]) config.users[message.author.id] = {}
+  if(!config.users[message.author.id].birthday) config.users[message.author.id].birthday = {}
   let cmd = args.split("/");
   let year = new Date().getFullYear();
   let list = "Please:\n";
@@ -77,11 +172,80 @@ module.exports.run = async (message, args, parameter) => {
   }
 }
 
+module.exports.slash = async(interaction) => {
+  let month = interaction.options.getString('month');
+  let day = interaction.options.getInteger('day').toString();
+  let year = interaction.options.getInteger('year').toString()
+  switch(parseInt(month)) {
+    case 1:
+      wMonth = "January";
+      break;
+    case 2:
+      wMonth = "February";
+      break;
+    case 3:
+      wMonth = "March";
+      break;
+    case 4:
+      wMonth = "April";
+      break;
+    case 5:
+      wMonth = "May";
+      break;
+    case 6:
+      wMonth = "June";
+      break;
+    case 7:
+      wMonth = "July";
+      break;
+    case 8:
+      wMonth = "August";
+      break;
+    case 9:
+      wMonth = "September";
+      break;
+    case 10:
+      wMonth = "October";
+      break;
+    case 11:
+      wMonth = "November";
+      break;
+    case 12:
+      wMonth = "December";
+      break;
+    }
+    let currentYear = new Date().getFullYear();
+    if(day.includes("-") || year.includes("-")) interaction.reply({ content: "Please remove the negative sign.", ephemeral: true })
+    if(getDaysInMonth(parseInt(month), year) < day) interaction.reply({ content: "Please make sure the month hasn't already ended.", ephemeral: true })
+    if(currentYear < parseInt(year) || parseInt(year) < 1903) interaction.reply({ content: "Please keep the year within a reasonable frame.", ephemeral: true })
+    if(!config.users[interaction.user.id]) config.users[interaction.user.id] = {}
+    if(!config.users[interaction.user.id].birthday) config.users[interaction.user.id].birthday = {}
+    interaction.reply({ content: "Okay, I will set your birthday as " + toProperUSFormat(parseInt(month), parseInt(day), parseInt(year)) + "." })
+    config.users[interaction.user.id].birthday.month = parseInt(month);
+    config.users[interaction.user.id].birthday.day = parseInt(day);
+    config.users[interaction.user.id].birthday.year = parseInt(year);
+}
+
 module.exports.help = {
     name: "birthday",
     desc: "Sets your birthday.",
     args: "**(mm/dd/yyyy)**",
     parameters: "",
     category: "Personalization",
-    version: "1.0.0"
+}
+
+module.exports.metadata = {
+    allowDM: true,
+    version: "2.0.0",
+    types: {
+      "message": true,
+      "slash": true,
+      "console": false
+    },
+    permissions: {
+      "user": [],
+      "bot": []
+    },
+    unloadable: true,
+    requireOwner: false
 }

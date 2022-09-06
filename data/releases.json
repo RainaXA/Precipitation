@@ -1,0 +1,5 @@
+{
+  "stable": "September 15th, 2022 (2.0 => 2.1) [current: 2.0]",
+  "roll": "September 7th, 2022 (2.0 => 2.x) [current: 2.0]",
+  "bleed": "September 3rd, 2022 (2.0 => 2.0.1-dev22.09.03) [current: 2.0.1-dev22.09.02]"
+}

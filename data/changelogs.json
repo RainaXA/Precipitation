@@ -1,0 +1,114 @@
+{
+  "numerical": {
+    "2.0": {
+      "name": "Precipitation 2.0 Abyssinian",
+      "changes": "New improved command handler\nSwitch branches!\nButtons for some commands\nEdit command handler\nLegacy versions viewable through `pr:ver`\nEditing messages no longer appears in the message logging channel\nMore slash commands (`/corrupt` and `/sinfo` now exist)"
+    },
+    "1.3": {
+      "name": "Precipitation 1.3 Ocicat",
+      "changes": "New `corrupt` command\nFraud! Trick your friends :)"
+    },
+    "1.2": {
+      "name": "Precipitation 1.2 Burmilla",
+      "changes": "DMing the bot now works\n`pic` and `sinfo` commands\nAll embeds now show the Precipitation logo in the bottom left"
+    },
+    "1.1.1": {
+      "name": "Precipitation 1.1.1 Cymric",
+      "changes": "Fixed minor bug where uninitialized guilds would throw an error"
+    },
+    "1.1": {
+      "name": "Precipitation 1.1 Cymric",
+      "changes": "Better integration between the different builds\nRoll and Bleed invite links\nMessage and member logging\nMany bug fixes"
+    },
+    "1.0.2": {
+      "name": "Precipitation 1.0.2 Blue",
+      "changes": "Fixed ``[object Object]`` showing rather than the version number when using `pr:config`"
+    },
+    "1.0.1": {
+      "name": "Precipitation 1.0.1 Blue",
+      "changes": "Fixed a bug where `rm` would delete no messages if any messages were 2 weeks or older (Discord limitation - deletes the messages that are newer than 2 weeks)"
+    },
+    "1.0": {
+      "name": "Precipitation 1.0 Blue",
+      "changes": "About command links, shows next release, inital bot release"
+    },
+    "v0.5.0 b3.0": {
+      "name": "Precipitation v0.5.0 b3.0",
+      "changes": "- all commands (except help and find) are slash commands"
+    },
+    "v0.5.0 b2.0": {
+      "name": "Precipitation v0.5.0 b2.0",
+      "changes": "- all General (except help) are slash commands (modular too)"
+    },
+    "v0.4.0 b5.2": {
+      "name": "Precipitation v0.4.0 b5.2",
+      "changes": "- `uinfo` now reports dates in UTC time\n- console stuff"
+    },
+    "v0.4.0 b5.1": {
+      "name": "Precipitation v0.4.0 b5.1",
+      "changes": "- modular dependencies"
+    },
+    "v0.1": {
+      "name": "Precipitation v0.1: just for you.",
+      "changes": "- database creation\n- playing activity"
+    },
+    "v0.02": {
+      "name": "Precipitation v0.02: the robot revolution.",
+      "changes": "- about command\n- detailed ping (message editing, ms timer)"
+    },
+    "v0.01": {
+      "name": "Precipitation v0.01: the robot revolution.",
+      "changes": "- the bot can start\n- ping, help, ver commands"
+    }
+  },
+  "versionName": {
+    "abyssinian": {
+      "name": "Precipitation 2.0 Abyssinian",
+      "changes": {
+        "2.0.0": "New improved command handler\nSwitch branches!\nButtons for some commands\nEdit command handler\nLegacy versions viewable through `pr:ver`\nEditing messages no longer appears in the message logging channel\nMore slash commands (`/corrupt` and `/sinfo` now exist)"
+      }
+    },
+    "ocicat": {
+      "name": "Precipitation 1.3 Ocicat",
+      "changes": {
+        "1.3.0": "New `corrupt` command\nFraud! Trick your friends :)"
+      }
+    },
+    "burmilla": {
+      "name": "Precipitation 1.2 Burmilla",
+      "changes": {
+        "1.2.0": "DMing the bot now works\n`pic` and `sinfo` commands\nAll embeds now show the Precipitation logo in the bottom left"
+      }
+    },
+    "cymric": {
+      "name": "Precipitation 1.1 Cymric",
+      "changes": {
+        "1.1.0": "Better integration between the different builds\nRoll and Bleed invite links\nMessage and member logging\nMany bug fixes",
+        "1.1.1": "Fixed minor bug where uninitialized guilds would throw an error"
+      }
+    },
+    "blue": {
+      "name": "Precipitation 1.0 Blue",
+      "changes": {
+        "1.0.0": "About command links, shows next release, inital bot release",
+        "1.0.1": "Fixed a bug where `rm` would delete no messages if any messages were 2 weeks or older (Discord limitation - deletes the messages that are newer than 2 weeks)",
+        "1.0.2": "Fixed ``[object Object]`` showing rather than the version number when using `pr:config`"
+      }
+    },
+    "russian": {
+      "name": "Precipitation 0.9.0 Russian",
+      "changes": {
+        "0.9.0": "`pr:insult` easter egg and more ping messages (more likely, unknown)"
+      }
+    },
+    "the robot revolution": {
+      "name": "Precipitation v0.0x: the robot revolution.",
+      "changes": {
+        "v0.01": "- the bot can start\n- ping, help, ver commands",
+        "v0.02": "- about command\n- detailed ping (message editing, ms timer)",
+        "v0.0.2.1": "**This version was made available after the release of v0.1, as a result of old version support methods.**\n- switch to semi-semantic versioning\n- playing status\n- warning messages when attempting to run a command from the latest version",
+        "v0.0.2.2": "**This version was made available after the release of v0.1, as a result of old version support methods.**\n- ping now displays username\n-placevalue (probably useless, but if v0.1 is going to have it, we should too)\n- console colors!\n- console commands\n- debugging commands (nothing that can identify someone though! no database!!)\n- command parameters\n- commands can now be executed in uppercase"
+      }
+    }
+  }
+}
