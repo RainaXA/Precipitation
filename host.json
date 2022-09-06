@@ -1,0 +1,39 @@
+{
+  "version": {
+    "external": "2.0",
+    "name": "Abyssinian",
+    "internal": "2.0.0"
+  },
+  "developer": {
+    "startConnect": true,
+    "debugging": false,
+    "branch": "stable"
+  },
+  "prefix": {
+    "stable": "pr:",
+    "roll": "pr#",
+    "bleed": "pr?",
+    "other": "pr!"
+  },
+  "colors": {
+    "stable": "BLUE",
+    "roll": "YELLOW",
+    "bleed": "RED",
+    "other": "WHITE"
+  },
+  "slurs": ["nigger", "nigga", "retard", "fag"],
+  "tokens": {
+    "stable": "",
+    "roll": "",
+    "bleed": "",
+    "other": ""
+  },
+  "id": {
+    "owner": "297201585090723841",
+    "privilegedUsers": [],
+    "blacklisted": [],
+    "stable": "322397835716853771",
+    "roll": "982907885535236118",
+    "bleed": "982908116163260416"
+  }
+}

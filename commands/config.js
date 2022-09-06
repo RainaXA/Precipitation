@@ -1,41 +1,100 @@
-module.exports.run = async (message, args, parameter) => {
-  const { Permissions, MessageEmbed } = require('discord.js')
-  if(!message.member.permissions.has(Permissions.FLAGS.MANAGE_GUILD)) return message.channel.send("You don't have the proper permissions to perform this action.")
+const { Permissions, MessageEmbed, Collection } = require('discord.js')
+const { SlashCommandBuilder } = require('@discordjs/builders');
+
+module.exports = {
+    data: new SlashCommandBuilder()
+        .setName('config')
+        .setDescription('Changes server-specific properties.'),
+};
+
+
+client.on('ready', async() => { // init guilds on start
+  client.guilds.cache.each(guild => {
+    if(!config.guilds[guild.id].settings) { // allow for general settings
+      config.guilds[guild.id].settings = {};
+      log("Initialized " + guild.name + " as guild. (config.guilds[guild.id].settings)", logging.info, "CONFIG")
+    }
+    if(!config.guilds[guild.id].settings.logging) { // logging category
+      config.guilds[guild.id].settings.logging = {};
+      log("Initialized " + guild.name + " as guild. (config.guilds[guild.id].settings.logging)", logging.info, "CONFIG")
+    }
+  });
+})
+
+module.exports.default = async (message, args, parameter) => {
   let cArg = args.split(" ")
+  if(!cArg[1] && cArg[0]) return message.channel.send("Please add another argument.")
   switch(cArg[0].toLowerCase()) {
     case "prefix":
-      if(getTextInput(cArg[1])) return message.channel.send("Maybe set a prefix that's a little less offensive?")
+      if(getTextInput(cArg[1], host.slurs)) return message.channel.send("Sorry, but the chosen prefix contains offensive language and will not be used by Precipitation.")
       config.guilds[message.guild.id].prefix = cArg[1].toLowerCase()
       return message.channel.send("Okay, I've set your server prefix to `" + cArg[1].toLowerCase() + "`.");
-
     case "filter":
       if(cArg[1].toLowerCase() == "true") {
-        if(!message.guild.me.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES)) return message.channel.send("I don't have the permissions to delete messages, so I won't turn on the filter.")
-        config.guilds[message.guild.id].filter = true;
+        config.guilds[message.guild.id].settings.filter = true;
         return message.channel.send("Okay, I'm setting your filter to `true`.");
       } else {
-        config.guilds[message.guild.id].filter = false;
+        config.guilds[message.guild.id].settings.filter = false;
         return message.channel.send("Okay, I'm setting your filter to `false`.");
       }
-
+    case "mlog":
+      if(cArg[1].toLowerCase() == "none") {
+        config.guilds[message.guild.id].settings.logging.messages = null
+        return message.channel.send("Okay, you will no longer have messages logged.")
+      } else {
+        if(message.guild.channels.cache.get(cArg[1]) === undefined) return message.channel.send("This channel does not exist. Please use `none` to disable the feature.")
+        config.guilds[message.guild.id].settings.logging.messages = cArg[1]
+        return message.channel.send("Okay, I will log messages in " + message.guild.channels.cache.get(cArg[1]).name + ".")
+      }
+    case "mblog":
+      if(cArg[1].toLowerCase() == "none") {
+        config.guilds[message.guild.id].settings.logging.members = null
+        return message.channel.send("Okay, you will no longer have members logged.")
+      } else {
+        if(message.guild.channels.cache.get(cArg[1]) === undefined) return message.channel.send("This channel does not exist. Please use `none` to disable the feature.")
+        config.guilds[message.guild.id].settings.logging.members = cArg[1]
+        return message.channel.send("Okay, I will log members in " + message.guild.channels.cache.get(cArg[1]).name + ".")
+      }
     default:
       let configuration = new MessageEmbed()
       .setTitle("Server Configuration || " + message.guild.name)
-      .addFields(
-        { name: "Prefix (prefix)", value: config.guilds[message.guild.id].prefix },
-        { name: "Slur Filter (filter)", value: (config.guilds[message.guild.id].filter).toString() }
-      )
-      .setColor("BLUE")
-      .setFooter({ text: 'Precipitation ' + version });
+      .addField("Prefix (prefix)", config.guilds[message.guild.id].prefix)
+      .addField("Slur Filter (filter)", String(config.guilds[message.guild.id].settings.filter).replace("false", "Disabled").replace("true", "Enabled").replace("undefined", "Disabled"))
+      .addField("Message Logging (mlog)", String(config.guilds[message.guild.id].settings.logging.messages).replace("null", "Disabled").replace("undefined", "Disabled")) // set to string, if null or undefined, replace with Disabled. damn i feel cool!
+      .addField("Member Logging (mblog)", String(config.guilds[message.guild.id].settings.logging.members).replace("null", "Disabled").replace("undefined", "Disabled"))
+      .setColor(host.colors[branch])
+      .setFooter({ text: "Precipitation " + host.version.external, iconURL: client.user.displayAvatarURL() })
       return message.channel.send({embeds: [configuration]})
   }
+}
+
+module.exports.slash = async (interaction) => {
+  let rng = Math.floor(Math.random() * pingMessages.length)
+  let startTime = Date.now()
+  await interaction.reply({ content: "<:ping_receive:502755206841237505> " + pingMessages[rng] })
+  await interaction.editReply({ content: "<:ping_transmit:502755300017700865> (" + (Date.now() - startTime) + "ms) Hey, " + interaction.user.username + "!" })
 }
 
 module.exports.help = {
     name: "config",
     desc: "Changes server-specific properties.",
-    args: "**(setting) (value)**",
+    args: "",
     parameters: "",
     category: "Moderation",
-    version: "1.0.0"
+}
+
+module.exports.metadata = {
+    allowDM: false,
+    version: "2.0.0",
+    types: {
+      "message": true,
+      "slash": false,
+      "console": false
+    },
+    permissions: {
+      "user": [ Permissions.FLAGS.MANAGE_GUILD ],
+      "bot": [ Permissions.FLAGS.MANAGE_MESSAGES ]
+    },
+    unloadable: true,
+    requireOwner: false
 }

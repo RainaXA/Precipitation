@@ -1,21 +1,70 @@
-module.exports.run = async (message, args, parameter) => {
+const { MessageEmbed } = require('discord.js');
+
+function find(query, amount) {
+  let results = {};
+  results.amount = 0;
+  results.list = "";
+  let users = client.users.cache
+  if(amount == 1) { // get first user
+    users.each(user => {
+      if(user.tag.toLowerCase().startsWith(query)) {
+        if(results.amount == undefined) return; // don't go to the last in the alphabet, dont do anything else if we've found a user.
+        results = user;
+      }
+    })
+  } else { // get a list for more than one user
+    users.each(user => {
+      if(user.tag.toLowerCase().startsWith(query)) {
+        if(results.amount < amount) results.list += user.tag + "\n";
+        results.amount++;
+      }
+    })
+  }
+  if(results.amount == 0) return null;
+  return results;
+}
+
+module.exports.find = find;
+
+module.exports.default = async (message, args, parameter) => {
   const { MessageEmbed } = require('discord.js')
-  if(!args) return message.channel.send("Please input a parameter.")
-  let findList = new MessageEmbed()
+  if(!args) return message.channel.send("Please input an argument.")
+  let findList = find(args.toLowerCase(), 10);
+  if(!findList) return message.channel.send("No results were found - please try being more lenient with your search.")
+  let bottomText = host.version.external;
+  if(findList.amount >= 10) {
+    findList.amount -= 10;
+    bottomText += " || There are " + findList.amount + " results not shown -- please narrow your query."
+  }
+  let embed = new MessageEmbed()
   .setTitle("Precipitation Query")
   .addFields(
-    { name: "Results", value: find(args.toLowerCase(), "list", 10, "list")}
+    { name: "Results", value: findList.list}
   )
-  .setColor("BLUE")
-  .setFooter({ text: 'Precipitation ' + version.external  + find(args.toLowerCase(), "list", 10, "amount")});
-  return message.channel.send({embeds: [findList]})
+  .setColor(host.colors[branch])
+  .setFooter({ text: 'Precipitation ' + bottomText });
+  return message.channel.send({embeds: [embed]})
 }
 
 module.exports.help = {
     name: "find",
-    desc: "Finds a user",
+    desc: "Finds a user.",
     args: "**(user)**",
     parameters: "",
     category: "Moderation",
-    version: "1.0.0"
+}
+
+module.exports.metadata = {
+    allowDM: true,
+    version: "2.0.0",
+    types: {
+      "message": true,
+      "slash": false,
+      "console": false
+    },
+    permissions: {
+      "user": [],
+      "bot": []
+    },
+    unloadable: true
 }
