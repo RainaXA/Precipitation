@@ -200,6 +200,7 @@ client.on('messageCreate', function(message) {
 });
 
 client.on('messageUpdate', function(oldMessage, newMessage) {
+  if(oldMessage.content == newMessage.content) return;
   let guildBranch = "stable";
   if(newMessage.guild) {
     if(!config.guilds[newMessage.guild.id]) config.guilds[newMessage.guild.id] = {};
