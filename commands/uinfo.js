@@ -31,6 +31,13 @@ try {
   log("US Format function could not be obtained. Command will not properly show birthday.", logging.warn, "UINFO")
 }
 
+try {
+  var location = require('./location.js').location;
+} catch(err) {
+  var location = null;
+  log("Location function could not be obtained. Command will not show location.", logging.warn, "UINFO")
+}
+
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('uinfo')
@@ -64,7 +71,13 @@ module.exports.default = async (message, args, parameter) => {
   } else {
     birthday = "*not set*"
   }
-  let botInfo = "**Name**: " + name(uinfoUser) + "\n**Gender**: " + gender(uinfoUser, "Male", "Female", "Other", "*not set*") + "\n**Birthday**: " + birthday
+  let setloc;
+  if(config.users[uinfoUser.id].location && location) {
+    setloc = location(uinfoUser)
+  } else {
+    setloc = "*not set*"
+  }
+  let botInfo = "**Name**: " + name(uinfoUser) + "\n**Gender**: " + gender(uinfoUser, "Male", "Female", "Other", "*not set*") + "\n**Birthday**: " + birthday + "\n**Location**: " + setloc
   let uinfoMember;
   message.guild.members.cache.each(member => {
     if(uinfoUser.id == member.id) {
@@ -128,10 +141,10 @@ module.exports.help = {
 
 module.exports.metadata = {
     allowDM: true,
-    version: "2.0.0",
+    version: "2.1.0",
     types: {
       "message": true,
-      "slash": true,
+      "slash": false,
       "console": false
     },
     permissions: {
