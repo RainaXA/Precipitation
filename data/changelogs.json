@@ -1,5 +1,13 @@
 {
   "numerical": {
+    "2.1": {
+      "name": "Precipitation 2.1 Manx",
+      "changes": "RNG list\nNow wishes happy birthday on your birthday!\nLocation officially added, with all countries recognized"
+    },
+    "2.0.1": {
+      "name": "Precipitation 2.0.1 Abyssinian",
+      "changes": "Fraud lobby optimization\nLinks will no longer make the command run twice"
+    },
     "2.0": {
       "name": "Precipitation 2.0 Abyssinian",
       "changes": "New improved command handler\nSwitch branches!\nButtons for some commands\nEdit command handler\nLegacy versions viewable through `pr:ver`\nEditing messages no longer appears in the message logging channel\nMore slash commands (`/corrupt` and `/sinfo` now exist)"
@@ -62,10 +70,17 @@
     }
   },
   "versionName": {
+    "manx": {
+      "name": "Precipitation 2.1 Manx",
+      "changes": {
+        "2.1.0": "RNG list\nNow wishes happy birthday on your birthday!\nLocation officially added, with all countries recognized"
+      }
+    },
     "abyssinian": {
       "name": "Precipitation 2.0 Abyssinian",
       "changes": {
-        "2.0.0": "New improved command handler\nSwitch branches!\nButtons for some commands\nEdit command handler\nLegacy versions viewable through `pr:ver`\nEditing messages no longer appears in the message logging channel\nMore slash commands (`/corrupt` and `/sinfo` now exist)"
+        "2.0.0": "New improved command handler\nSwitch branches!\nButtons for some commands\nEdit command handler\nLegacy versions viewable through `pr:ver`\nEditing messages no longer appears in the message logging channel\nMore slash commands (`/corrupt` and `/sinfo` now exist)",
+        "2.0.1": "Fraud lobby optimization\nLinks will no longer make the command run twice"
       }
     },
     "ocicat": {
