@@ -10,7 +10,7 @@ client.on('messageDelete', async function(message) {
 	if(!message.guild) return;
   if(!config.guilds[message.guild.id].settings.logging.messages) return;
 	let reason = "This message was deleted by another user.";
-	if(config.guilds[message.guild.id].filter && getTextInput(message.content)) reason = "This message was automatically deleted by Precipitation due to the filter."
+	if(config.guilds[message.guild.id].settings.filter && getTextInput(message.content, host.slurs)) reason = "This message was automatically deleted by Precipitation due to the filter."
 	let deleteEmbed = new MessageEmbed()
 	.setTitle("Deleted Message")
 	.setDescription(message.author.tag + " - <#" + message.channel.id + ">")

@@ -129,7 +129,6 @@ module.exports.toProperUSFormat = toProperUSFormat;
 
 module.exports.default = async (message, args, parameter) => {
   if(!config.users[message.author.id]) config.users[message.author.id] = {}
-  if(!config.users[message.author.id].birthday) config.users[message.author.id].birthday = {}
   let cmd = args.split("/");
   let year = new Date().getFullYear();
   let list = "Please:\n";
@@ -164,6 +163,7 @@ module.exports.default = async (message, args, parameter) => {
   }
   if(list == "Please:\n") {
     message.channel.send("Okay, I will set your birthday as " + toProperUSFormat(parseInt(cmd[0]), parseInt(cmd[1]), parseInt(cmd[2])) + ".")
+    if(!config.users[message.author.id].birthday) config.users[message.author.id].birthday = {}
     config.users[message.author.id].birthday.month = parseInt(cmd[0]);
     config.users[message.author.id].birthday.day = parseInt(cmd[1]);
     config.users[message.author.id].birthday.year = parseInt(cmd[2]);

@@ -9,7 +9,7 @@ function playerList(message) {
   .setTitle("Fraud #" + gameInfo[message.guild.id].id + " | " + message.guild.name)
   .addField("Players (" + gameInfo[message.guild.id].players.length + "/12)", list)
   .setColor(host.colors[branch])
-  .setFooter({text: "Fraud v0.9"})
+  .setFooter({text: "Fraud v1.0"})
   message.channel.send({embeds: [embed]})
 }
 
@@ -25,9 +25,9 @@ module.exports.default = async (message, args, parameter) => {
       currentlyPlaying[message.author.id] = message.guild.id;
       gameInfo[message.guild.id].started = false;
       gameInfo[message.guild.id].fraud = null;
-      return message.channel.send("The game has been created, use `pr?fraud join` in this server to join!")
+      return message.channel.send("The game has been created, use `" + host.prefix[branch] + "fraud join` in this server to join!")
     case "join":
-      if(!gameInfo[message.guild.id]) return message.channel.send("The game does not exist yet, use `pr?fraud create` to create it.")
+      if(!gameInfo[message.guild.id]) return message.channel.send("The game does not exist yet, use `" + host.prefix[branch] + "fraud create` to create it.")
       if(gameInfo[message.guild.id].started) return message.channel.send("Sorry, but a game is ongoing in this server. You may not join a game in progress.")
       for (player of gameInfo[message.guild.id].players) {
           if(message.author.id == player.id) return message.channel.send("You've already joined this lobby.")
@@ -39,7 +39,7 @@ module.exports.default = async (message, args, parameter) => {
       playerList(message)
       break;
     case "start":
-      if(!gameInfo[message.guild.id]) return message.channel.send("The game does not exist yet, please use `pr?fraud create` to create it.")
+      if(!gameInfo[message.guild.id]) return message.channel.send("The game does not exist yet, please use `" + host.prefix[branch] + "fraud create` to create it.")
       if(gameInfo[message.guild.id].players[0].id != message.author.id) return message.channel.send("You are not the host, so you may not start the game.")
       if(gameInfo[message.guild.id].started) return message.channel.send("The game has already been started!")
       if(gameInfo[message.guild.id].players.length < 4) return message.channel.send("A minimum of 4 players are required for the game to start.")
@@ -48,7 +48,7 @@ module.exports.default = async (message, args, parameter) => {
       startGame(gameInfo[message.guild.id].players, message.guild.id)
       break;
     case "list":
-      if(!gameInfo[message.guild.id]) return message.channel.send("The game does not exist yet, use `pr?fraud create` to create it.")
+      if(!gameInfo[message.guild.id]) return message.channel.send("The game does not exist yet, use `" + host.prefix[branch] + "fraud create` to create it.")
       playerList(message)
       break;
     case "rules":
@@ -60,7 +60,7 @@ module.exports.default = async (message, args, parameter) => {
       .addField("Cheating", "It is against the rules to reveal to anyone outside of Fraud if you are impersonating someone else or if you are being impersonated.")
       .addField("Spamming", "Typing multiple messages in very short intervals of time is considered spamming. It's annoying, and sometimes the entire game will slow down because of it.")
       .setColor(host.colors[branch])
-      .setFooter({text: "Fraud v0.9"})
+      .setFooter({text: "Fraud v1.0"})
       return message.channel.send({embeds: [embed]})
     case "leave":
       if(!currentlyPlaying[message.author.id]) return message.channel.send("You are not in a game.")

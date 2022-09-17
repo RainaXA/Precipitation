@@ -1,8 +1,3 @@
-// dependencies
-// command :: warn.js      -- create a warning create event against a user (no new warnings can be created)
-// command :: rmwarn.js    -- create a warning remove event against a user (no warnings can be removed)
-// command :: lswarn.js    -- list all found warnings of a user (warnings cannot even be seen)
-
 let fs = require('fs')
 
 const { Collection } = require('discord.js');
@@ -10,6 +5,7 @@ const { Collection } = require('discord.js');
 client.commands = new Collection();
 client.commands.roll = new Collection();
 client.commands.bleed = new Collection();
+client.commands.cat = new Collection(); // cat mode..thanks, Nebbyula.
 global.commands = [];
 
 global.loadCommands = function() {
@@ -25,7 +21,11 @@ global.loadCommands = function() {
         modules.forEach((f, i) => {
           let props = require(`../commands/${f}`);
           client.commands.set(props.help.name, props);
-          if(props.metadata.types["slash"]) commands.push(props.data.toJSON()) // only push it to be registered if it supports slash
+          if(props.metadata.types["slash"]) commands.push(props.data.toJSON()); // only push it to be registered if it supports slash
+          let parsedver = props.metadata.version.split(".");
+          let parsedbotver = host.version.internal.split(".");
+          if(parseInt(parsedver[0]) > parseInt(parsedbotver[0])) log("Command " + props.help.name + " was developed for a future major version of Precipitation. Some functionality may not work. (" + props.metadata.version + " > " + host.version.internal + ")", logging.warn, "LOADER")
+          if(parseInt(parsedbotver[1]) > parseInt(parsedver[1]) + 3) log("Command " + props.help.name + " hasn't been updated for some time. It may be a good idea to test this command. (" + host.version.internal + " > " + props.metadata.version + ")", logging.warn, "LOADER")
           if(props.help.category == "Secrets") { // this is an easter egg
             eggCounter++;
           } else {
@@ -52,6 +52,10 @@ global.loadCommands = function() {
           let props = require(`../commands/roll/${f}`);
           client.commands.roll.set(props.help.name, props);
           if(props.metadata.types["slash"]) commands.push(props.data.toJSON()) // only push it to be registered if it supports slash
+          let parsedver = props.metadata.version.split(".");
+          let parsedbotver = host.version.internal.split(".");
+          if(parseInt(parsedver[0]) > parseInt(parsedbotver[0])) log("Roll command " + props.help.name + " was developed for a future major version of Precipitation. Some functionality may not work. (" + props.metadata.version + " > " + host.version.internal + ")", logging.warn, "LOADER")
+          if(parseInt(parsedbotver[1]) > parseInt(parsedver[1]) + 3) log("Roll command " + props.help.name + " hasn't been updated for some time. It may be a good idea to test this command. (" + host.version.internal + " > " + props.metadata.version + ")", logging.warn, "LOADER")
           if(props.help.category == "Secrets") { // this is an easter egg
             eggCounter++;
           } else {
@@ -78,6 +82,10 @@ global.loadCommands = function() {
           let props = require(`../commands/bleed/${f}`);
           client.commands.bleed.set(props.help.name, props);
           if(props.metadata.types["slash"]) commands.push(props.data.toJSON()) // only push it to be registered if it supports slash
+          let parsedver = props.metadata.version.split(".");
+          let parsedbotver = host.version.internal.split(".");
+          if(parseInt(parsedver[0]) > parseInt(parsedbotver[0])) log("Bleed command " + props.help.name + " was developed for a future major version of Precipitation. Some functionality may not work. (" + props.metadata.version + " > " + host.version.internal + ")", logging.warn, "LOADER")
+          if(parseInt(parsedbotver[1]) > parseInt(parsedver[1]) + 3) log("Bleed command " + props.help.name + " hasn't been updated for some time. It may be a good idea to test this command. (" + host.version.internal + " > " + props.metadata.version + ")", logging.warn, "LOADER")
           if(props.help.category == "Secrets") { // this is an easter egg
             eggCounter++;
           } else {
@@ -89,6 +97,32 @@ global.loadCommands = function() {
         log("Sorry, but a command had an error: " + err.stack, logging.error, "LOADER")
       }
       log("Loaded " + counter + " bleed commands. (& " + eggCounter + " easter eggs.)", logging.success, "LOADER")
+    }
+  })
+  fs.readdir("./commands/cat", function(error, files) {
+    if (error) {
+      fs.mkdirSync("./commands/cat/")
+      log("Commands folder for cat-mode branch not found - creating now.", logging.warn, "HANDLER")
+    } else {
+      let modules = files.filter(f => f.split(".").pop() === "js");
+      let counter = 0;
+      let eggCounter = 0;
+      try {
+        modules.forEach((f, i) => {
+          let props = require(`../commands/cat/${f}`);
+          client.commands.cat.set(props.help.name, props);
+          if(props.metadata.types["slash"]) commands.push(props.data.toJSON()) // only push it to be registered if it supports slash
+          if(props.help.category == "Secrets") { // this is an easter egg
+            eggCounter++;
+          } else {
+            counter++;
+          }
+          log("Loaded cat command " + props.help.name + ".")
+        })
+      } catch (err) {
+        log("Sorry, but a command had an error: " + err.stack, logging.error, "LOADER")
+      }
+      log("Loaded " + counter + " cat-mode commands. (& " + eggCounter + " easter eggs.)", logging.success, "LOADER")
     }
   })
 }
@@ -125,6 +159,10 @@ function processCommand(message, cbranch) { // used in editing messages + normal
     case branches.bleed:
       cmd = client.commands.bleed.get(command.toLowerCase())
       if(!cmd) cmd = client.commands.roll.get(command.toLowerCase())
+      if(!cmd) cmd = client.commands.get(command.toLowerCase())
+      break;
+    case branches.cat:
+      cmd = client.commands.cat.get(command.toLowerCase())
       if(!cmd) cmd = client.commands.get(command.toLowerCase())
       break;
   }
@@ -194,6 +232,9 @@ client.on('messageCreate', function(message) {
         break;
       case "bleed":
         processCommand(message, branches.bleed)
+        break;
+      case "cat":
+        processCommand(message, branches.cat)
         break;
     }
   }

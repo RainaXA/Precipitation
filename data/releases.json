@@ -1,5 +1,5 @@
 {
-  "stable": "September 15th, 2022 (2.0 => 2.1) [current: 2.0.1]",
-  "roll": "September 12th, 2022 (2.0 => 2.1-dev22.09.12) [current: 2.0.1]",
-  "bleed": "September 8th, 2022 (2.0 => 2.1-dev22.09.08) [current: 2.0.1-dev22.09.07]"
+  "stable": "October 1st, 2022 (2.1 => 2.2) [current: 2.1]",
+  "roll": "September 18th, 2022 (2.1 => 2.2-dev22.09.18) [current: 2.1.a]",
+  "bleed": "September 17th, 2022 (2.1 => 2.1-dev22.09.17) [current: 2.1.b]"
 }
