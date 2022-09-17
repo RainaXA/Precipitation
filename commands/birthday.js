@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('@discordjs/builders');
+const { SlashCommandBuilder } = require('@discordjs/builders'); // vs code git test!
 
 function toProperUSFormat(month, day, year) {
   let wMonth;
