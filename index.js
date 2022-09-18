@@ -6,7 +6,7 @@
   I don't even have a license. I don't care if someone steals this. I develop for the people, and the people can do whatever they'd like with this program.
 /*/
 
-const { Client, Intents, MessageEmbed, Permissions, Collection } = require('discord.js');
+const { Client, Intents } = require('discord.js');
 global.client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_PRESENCES, Intents.FLAGS.DIRECT_MESSAGES], partials: ["CHANNEL"] });
 const fs = require('fs');
 const readline = require('readline');
