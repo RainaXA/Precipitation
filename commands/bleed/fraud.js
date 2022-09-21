@@ -1,5 +1,7 @@
-const { MessageEmbed } = require('discord.js')
+const { MessageEmbed, Collection } = require('discord.js')
 const fs = require('fs')
+
+var modes = new Collection();
 
 function playerList(message) {
   let list = "";
@@ -10,7 +12,7 @@ function playerList(message) {
   .setTitle("Fraud #" + gameInfo[message.guild.id].id + " | " + message.guild.name)
   .addField("Players (" + gameInfo[message.guild.id].players.length + "/12)", list)
   .setColor(host.colors[branch])
-  .setFooter({text: "Fraud v1.0"})
+  .setFooter({text: "Fraud v1.1"})
   message.channel.send({embeds: [embed]})
 }
 
@@ -23,6 +25,7 @@ fs.readdir("./modules/fraud/", function(error, files) {
     try {
       modules.forEach((f, i) => {
         let props = require(`../../modules/fraud/${f}`);
+        modes.set(props.mode.name, props)
         log("Loaded Fraud game mode " + f.replace(".js", "") + ".")
         counter++;
       })
@@ -41,6 +44,10 @@ module.exports.default = async (message, args, parameter) => {
       gameInfo[message.guild.id].players = [];
       gameInfo[message.guild.id].players.push(message.author)
       gameInfo[message.guild.id].id = currentID;
+      gameInfo[message.guild.id].settings = {
+        "mode": "Classic"
+      };
+      gameInfo[message.guild.id].host = message.author.id;
       currentID++;
       currentlyPlaying[message.author.id] = message.guild.id;
       gameInfo[message.guild.id].started = false;
@@ -60,7 +67,7 @@ module.exports.default = async (message, args, parameter) => {
       break;
     case "start":
       if(!gameInfo[message.guild.id]) return message.channel.send("The game does not exist yet, please use `" + host.prefix[branch] + "fraud create` to create it.")
-      if(gameInfo[message.guild.id].players[0].id != message.author.id) return message.channel.send("You are not the host, so you may not start the game.")
+      if(gameInfo[message.guild.id].host != message.author.id) return message.channel.send("You are not the host, so you may not start the game.")
       if(gameInfo[message.guild.id].started) return message.channel.send("The game has already been started!")
       if(gameInfo[message.guild.id].players.length < 4) return message.channel.send("A minimum of 4 players are required for the game to start.")
       gameInfo[message.guild.id].started = true;
@@ -80,7 +87,7 @@ module.exports.default = async (message, args, parameter) => {
       .addField("Cheating", "It is against the rules to reveal to anyone outside of Fraud if you are impersonating someone else or if you are being impersonated.")
       .addField("Spamming", "Typing multiple messages in very short intervals of time is considered spamming. It's annoying, and sometimes the entire game will slow down because of it.")
       .setColor(host.colors[branch])
-      .setFooter({text: "Fraud v1.0"})
+      .setFooter({text: "Fraud v1.1"})
       return message.channel.send({embeds: [embed]})
     case "leave":
       if(!currentlyPlaying[message.author.id]) return message.channel.send("You are not in a game.")
@@ -102,6 +109,22 @@ module.exports.default = async (message, args, parameter) => {
         message.channel.send("You have left the game.")
       }
       break;
+    case "settings": {
+      if(!gameInfo[message.guild.id]) return message.channel.send("The game does not exist yet, please use `" + host.prefix[branch] + "fraud create` to create it.")
+      if(!gameInfo[message.guild.id].host) return message.channel.send("You are not the host, so you may not change the game settings.");
+      let newArgs = args.toLowerCase().slice(9);
+      let parsedArgs = newArgs.split(" ");
+      switch(parsedArgs[0]) {
+        case "mode":
+          
+      }
+      let setEmbed = new MessageEmbed()
+      .setTitle("Game Settings")
+      .addField("Game Mode", gameInfo[message.guild.id].settings.mode)
+      .setColor(host.colors[branch])
+      .setFooter({text: "Fraud v1.1"})
+      message.channel.send({embeds: [setEmbed]})
+    }
   }
 }
 
@@ -115,7 +138,7 @@ module.exports.help = {
 
 module.exports.metadata = {
     allowDM: false,
-    version: "2.0.0",
+    version: "2.1.0",
     types: {
       "message": true,
       "slash": false,
