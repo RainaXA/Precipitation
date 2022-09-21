@@ -8,30 +8,15 @@ module.exports = {
         .setDescription('Gets the current latency of the bot.'),
 };
 */
-let selectedTime = new Date();
-console.log(selectedTime.getHours())
-console.log(selectedTime.getUTCHours())
 
 module.exports.default = async (message, args, parameter) => {
-  let selectedTime = new Date();
+  if(!config.users[message.author.id]) config.users[message.author.id] = {};
   args = parseInt(args);
   if(isNaN(args)) return message.channel.send("Please input a valid argument.")
-  let utchour = selectedTime.getUTCHours() + args;
-  let minute = selectedTime.getMinutes()
-  let second = selectedTime.getSeconds();
-  if(utchour < 0) utchour = 24 + utchour
-  if(minute < 10) minute = String("0" + minute)
-  if(second < 10) second = String("0" + second)
-  let sometimething = "";
-  if(parameter == "to-12h") {
-    if(utchour > 12) {
-      utchour -= 12;
-      sometimething = "PM"
-    } else {
-      sometimething = "AM"
-    }
-  }
-  message.channel.send("**Current time:** " + utchour + ":" + minute + ":" + second + sometimething);
+  if(args > 14) return message.channel.send("Please input a valid UTC timezone. (-12 to 14)")
+  if(args < -12) return message.channel.send("Please input a valid UTC timezone. (-12 to 14)")
+  config.users[message.author.id].tz = args
+  message.channel.send("Okay, I've set your UTC offset to " + args + ".");
 }
 
 module.exports.slash = async (interaction) => {
@@ -41,7 +26,7 @@ module.exports.slash = async (interaction) => {
 module.exports.help = {
     name: "settime",
     desc: "Sets your current timezone. (currently only shows timezone)",
-    args: "(timezone)",
+    args: "**(UTC offset)**",
     parameters: "--to-12h",
     category: "Personalization",
 }

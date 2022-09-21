@@ -9,7 +9,7 @@ function find(query, amount) {
     users.each(user => {
       if(user.tag.toLowerCase().startsWith(query)) {
         if(results.amount == undefined) return; // don't go to the last in the alphabet, dont do anything else if we've found a user.
-        results = user;
+        if(!user.bot) results = user; // prefer to ignore bots when only finding one user
       }
     })
   } else { // get a list for more than one user
@@ -27,7 +27,6 @@ function find(query, amount) {
 module.exports.find = find;
 
 module.exports.default = async (message, args, parameter) => {
-  const { MessageEmbed } = require('discord.js')
   if(!args) return message.channel.send("Please input an argument.")
   let findList = find(args.toLowerCase(), 10);
   if(!findList) return message.channel.send("No results were found - please try being more lenient with your search.")
