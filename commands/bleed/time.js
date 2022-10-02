@@ -18,7 +18,7 @@ try {
 
 module.exports.default = async (message, args, parameter) => {
   let user;
-  if(find && args) user = find(args.split("--")[0].toLowerCase(), 1);
+  if(find && args) user = find(args.split(" --")[0].toLowerCase(), 1);
   if(!user) user = message.author;
   if(!config.users[user.id]) config.users[user.id] = {}
   let tz = config.users[user.id].tz;
