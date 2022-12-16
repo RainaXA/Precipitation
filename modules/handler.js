@@ -1,6 +1,6 @@
 let fs = require('fs')
 
-const { Collection } = require('discord.js');
+const { Collection, MessageEmbed } = require('discord.js');
 
 client.commands = new Collection();
 client.commands.roll = new Collection();
@@ -9,6 +9,27 @@ client.commands.cat = new Collection(); // cat mode..thanks, Nebbyula.
 global.commands = [];
 
 global.loadCommands = function() {
+  fs.readdir("./commandas", function(error, files) {
+    if (error) {
+      fs.mkdirSync("./commandas/")
+      log("Commands folder not found - creating now.", logging.warn, "HANDLER")
+    } else {
+      let modules = files.filter(f => f.split(".").pop() === "js");
+      let counter = 0;
+      try {
+        modules.forEach((f, i) => {
+          let props = require(`../commandas/${f}`);
+          client.commands.set(props.name, props);
+          counter++;
+          if(props.execute.slash) commands.push(props.data.toJSON())
+          log("Loaded command " + props.name + ".")
+        })
+      } catch (err) {
+        log("Sorry, but a command had an error: " + err.stack, logging.error, "LOADER")
+      }
+      log("Loaded " + counter + " new commands.", logging.success, "LOADER")
+    }
+  })
   fs.readdir("./commands", function(error, files) {
     if (error) {
       fs.mkdirSync("./commands/")
@@ -31,7 +52,7 @@ global.loadCommands = function() {
           } else {
             counter++;
           }
-          log("Loaded command " + props.help.name + ".")
+          log("Loaded command " + props.name + ".")
         })
       } catch (err) {
         log("Sorry, but a command had an error: " + err.stack, logging.error, "LOADER")
@@ -170,6 +191,9 @@ function processCommand(message, cbranch) { // used in editing messages + normal
   try {
     if(cmd) {
       validCommand = true;
+      if(!cmd.help) {
+        return cmd.execute.discord(message, args, parameter)
+      }
       if(message.guild) {
         for(permission of cmd.metadata.permissions.bot) {
           if(!message.guild.me.permissions.has(permission)) return message.channel.send("I do not have permission to run this command.")
@@ -183,23 +207,14 @@ function processCommand(message, cbranch) { // used in editing messages + normal
       if(!cmd.metadata.allowDM && !message.guild) return message.channel.send("Sorry, but this command is not permitted in a direct message.")
       if(cmd.prereq) cmd.prereq(types.default, message, args);
       cmd.default(message, args, parameter); // else run if old
-    } else {
-      client.commands.each(cmdd => {
-        if (command.toLowerCase() == cmdd.help.alias) { // did you instead run an alias?
-          cmd = client.commands.get(cmdd.help.name)
-          validCommand = true;
-          if(!cmd.metadata.allowDM && !message.guild) return message.channel.send("Sorry, but this command is not permitted in a direct message.")
-          cmd.default(message, args, parameter);            // if so, still run it
-        }
-      })
     }
     if(!validCommand) message.channel.send("Sorry, but it appears this command is unknown.");
   } catch(err) {
-    log(err, logging.error, "CATCH")
+    log(err.stack, logging.error, "CATCH")
     let errorEmbed = new MessageEmbed()
     .setTitle("Fatal Exception")
     .setDescription("Here are the logs of the error:")
-    .addField("Details", err.stack)
+    .addField("Details", err)
     .setFooter({text: "Precipitation " + host.version.external })
     message.channel.send({embeds: [errorEmbed]})
   }

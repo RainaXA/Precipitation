@@ -1,6 +1,6 @@
 const host = require('../host.json');
 
-const status = host.version.external + " " + host.version.name + " || " + host.prefix[branch] + "help"
+const status = host.version.external + " " + host.version.name + " || " + host.prefix + "help"
 
 function setStatus() {
   client.user.setActivity(status);

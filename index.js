@@ -38,19 +38,19 @@ global.log = function(message, type, sender) {
   let msg;
   switch (type) {
     case logging.error:
-      msg = "\x1b[91m[ERROR | " + sender + "] " + message
+      msg = "\x1b[91m" + sender + ": " + message
       break;
     case logging.warn:
-      msg = "\x1b[93m[WARN | " + sender + "] " + message
+      msg = "\x1b[93m" + sender + ": " + message
       break;
     case logging.info:
-      msg = "\x1b[94m[INFO | " + sender + "] " + message
+      msg = "\x1b[94m" + sender + ": " + message
       break;
     case logging.success:
-      msg = "\x1b[92m[DONE | " + sender + "] " + message
+      msg = "\x1b[92m" + sender + ": " + message
       break;
     case logging.output:
-      msg = "\x1b[97m" + message
+      msg = "\x1b[97m" + sender + ": " + message
       break;
     default:
       if(!host.developer.debugging) return;
@@ -58,14 +58,6 @@ global.log = function(message, type, sender) {
   }
   console.log(msg + "\x1b[0m")
 }
-
-global.branch = host.developer.branch;
-if(branch != "stable" && branch != "roll" && branch != "bleed") {
-  branch = "other";
-  log("The branch set in host.developer.branch is not valid, defaulting prefix. Please use \"stable\", \"roll\", or \"bleed\".", logging.warn, "BRANCH");
-}
-var prefix = host.prefix[branch]
-log("Current developer branch is " + branch + " - using prefix " + prefix, logging.success, "BRANCH")
 
 global.getTextInput = function(text, list) {
   for(let i = 0; i < list.length; i++) {
@@ -127,7 +119,7 @@ if(!fs.existsSync('./config.json')) {
 }
 
 if(host.developer.startConnect == true) {
-  client.login(host.tokens[branch])
+  client.login(host.token)
 } else {
   log("Precipitation is set to start disconnected. (host.developer.startConnect)", "GEN")
   if(fs.existsSync('./commands/console/login.js')) {
@@ -170,7 +162,7 @@ client.on('ready', async() => {
   })
   const rest = new REST({
     version: '9'
-  }).setToken(host.tokens[branch]);
+  }).setToken(host.token);
   try {
     await rest.put(
     Routes.applicationCommands(client.user.id), {
@@ -188,6 +180,10 @@ client.on('interactionCreate', async interaction => {
     let command = client.commands.get(interaction.commandName);
     if (!command) return;
     if(getTextInput(interaction.user.id, host.id["blacklisted"])) return interaction.reply({ content: "Sorry, but you are blacklisted from the bot. If you feel you've been falsely banned, please make an appeal to <@" + host.id["owner"] + ">.", ephemeral: true })
+    if(!command.slash) {
+      await command.execute.slash(interaction);
+      return;
+    }
     if(!command.metadata.allowDM && !interaction.guild) return interaction.reply({ content: "Sorry, but this command is not permitted in a direct message.", ephemeral: true })
     if(interaction.guild) {
       for(permission of command.metadata.permissions.bot) {
