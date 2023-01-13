@@ -1,33 +1,17 @@
 {
   "version": {
-    "external": "2.1",
-    "name": "Manx",
-    "internal": "2.0.0"
+    "external": "3.0",
+    "name": "Shorthair",
+    "internal": "3.0.0"
   },
   "developer": {
     "startConnect": true,
-    "debugging": false,
-    "branch": "stable"
+    "debugging": false
   },
-  "prefix": {
-    "stable": "pr:",
-    "roll": "pr#",
-    "bleed": "pr?",
-    "other": "pr!"
-  },
-  "colors": {
-    "stable": "BLUE",
-    "roll": "YELLOW",
-    "bleed": "RED",
-    "other": "WHITE"
-  },
+  "prefix": "pr:",
+  "colors": "BLUE",
   "slurs": ["nigger", "nigga", "retard", "fag"],
-  "tokens": {
-    "stable": "",
-    "roll": "",
-    "bleed": "",
-    "other": ""
-  },
+  "token": "",
   "id": {
     "owner": "297201585090723841",
     "privilegedUsers": [],
