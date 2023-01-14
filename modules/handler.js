@@ -19,9 +19,17 @@ global.loadCommands = function() {
       try {
         modules.forEach((f, i) => {
           let props = require(`../commandas/${f}`);
-          client.commands.set(props.name, props);
-          counter++;
-          if(props.execute.slash) commands.push(props.data.toJSON())
+          if(!props.name) {
+            for(item in props) {
+              client.commands.set(props[item].name, props[item]);
+              counter++;
+              if(props[item].execute.slash) commands.push(props[item].data.toJSON())
+            }
+          } else {
+            client.commands.set(props.name, props);
+            counter++;
+            if(props.execute.slash) commands.push(props.data.toJSON())
+          }
           log("Loaded command " + props.name + ".")
         })
       } catch (err) {
@@ -224,7 +232,7 @@ client.on('messageCreate', function(message) {
   let guildBranch = "stable";
   if(message.guild) {
     if(!config.guilds[message.guild.id]) config.guilds[message.guild.id] = {};
-    if(!config.guilds[message.guild.id].prefix) config.guilds[message.guild.id].prefix = host.prefix[branch];
+    if(!config.guilds[message.guild.id].prefix) config.guilds[message.guild.id].prefix = host.prefix;
     if(!config.guilds[message.guild.id].branch) config.guilds[message.guild.id].branch = "stable";
     guildBranch = config.guilds[message.guild.id].branch
   }

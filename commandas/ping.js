@@ -4,7 +4,7 @@ const pingMessages = ["Pinging...", "Ponging...", "Hacking the mainframe...",  "
 try {
     var name = require('./name.js').exports.name;
 } catch(err) {
-    log("Name function could not be obtained. Defaulting to basic name function.", logging.warn, "ping")
+    log("name function not found - defaulting to discord username only.", logging.warn, "ping")
     function name(user) {
       return user.username;
     }
@@ -31,7 +31,7 @@ var command = {
             await interaction.editReply({ content: "<:ping_transmit:502755300017700865> (" + (Date.now() - startTime) + "ms) Hey, " + interaction.user.username + "!" })
         },
         console: function() {
-            log("testing with the new handler!", logging.output)
+            log("testing with the new handler!", logging.output, "PING")
         }
     },
     ver: "3.0.0",

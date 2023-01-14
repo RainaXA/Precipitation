@@ -80,11 +80,11 @@ function processConsoleCommand() {
     var args = consoleCommand.slice(fcCommand[0].length + 1)
     let cmd = client.commands.get(cCommand.toLowerCase())
     if(cmd) {
-      if(!cmd.metadata.types["console"]) {
+      if(!cmd.execute.console) {
         log("Sorry, but this command cannot be used in the console.", logging.info, "CONSOLE")
         return processConsoleCommand();
       }
-      cmd.console(args);
+      cmd.execute.console(args);
     } else {
       log("Sorry, but it appears this console command is unknown.", logging.info, "CONSOLE") // crash otherwise
     }

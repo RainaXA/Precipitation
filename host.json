@@ -1,15 +1,16 @@
 {
   "version": {
     "external": "3.0",
-    "name": "Shorthair",
+    "name": "Shorthair Beta",
     "internal": "3.0.0"
   },
   "developer": {
     "startConnect": true,
-    "debugging": false
+    "debugging": false,
+    "branch": "stable"
   },
   "prefix": "pr:",
-  "colors": "BLUE",
+  "color": "BLUE",
   "slurs": ["nigger", "nigga", "retard", "fag"],
   "token": "",
   "id": {
