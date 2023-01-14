@@ -200,6 +200,15 @@ function processCommand(message, cbranch) { // used in editing messages + normal
     if(cmd) {
       validCommand = true;
       if(!cmd.help) {
+        if(message.guild) {
+          for(permission of cmd.prereqs.bot) {
+            if(!message.guild.me.permissions.has(permission)) return message.channel.send("I do not have permission to run this command.")
+          }
+          for(permission of cmd.prereqs.user) {
+            if(!message.member.permissions.has(permission)) return message.channel.send("You do not have permission to run this command.")
+          }
+        }
+        if(cmd.prereqs.owner && message.author.id != host.id["owner"]) return message.channel.send("Only the owner may use this command.")
         return cmd.execute.discord(message, args, parameter)
       }
       if(message.guild) {

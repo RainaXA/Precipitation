@@ -1,15 +1,6 @@
 const { MessageEmbed } = require('discord.js')
 const { SlashCommandBuilder } = require('@discordjs/builders');
 
-try {
-    var name = require('./name.js').exports.name;
-} catch(err) {
-    log("name function not found - defaulting to discord username only.", logging.warn, "ping")
-    function name(user) {
-      return user.username;
-    }
-}
-
 var releases = require("../data/releases.json")
 
 var embed;
