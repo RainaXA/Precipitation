@@ -4,21 +4,19 @@ const { Collection, MessageEmbed } = require('discord.js');
 
 client.commands = new Collection();
 client.commands.roll = new Collection();
-client.commands.bleed = new Collection();
-client.commands.cat = new Collection(); // cat mode..thanks, Nebbyula.
 global.commands = [];
 
 global.loadCommands = function() {
-  fs.readdir("./commandas", function(error, files) {
+  fs.readdir("./commands", function(error, files) {
     if (error) {
-      fs.mkdirSync("./commandas/")
-      log("Commands folder not found - creating now.", logging.warn, "HANDLER")
+      fs.mkdirSync("./commands/")
+      log("commands folder not found - creating now", logging.warn, "handler")
     } else {
       let modules = files.filter(f => f.split(".").pop() === "js");
       let counter = 0;
       try {
         modules.forEach((f, i) => {
-          let props = require(`../commandas/${f}`);
+          let props = require(`../commands/${f}`);
           if(!props.name) {
             for(item in props) {
               client.commands.set(props[item].name, props[item]);
@@ -30,128 +28,12 @@ global.loadCommands = function() {
             counter++;
             if(props.execute.slash) commands.push(props.data.toJSON())
           }
-          log("Loaded command " + props.name + ".")
+          log("loaded command " + props.name)
         })
       } catch (err) {
         log("Sorry, but a command had an error: " + err.stack, logging.error, "LOADER")
       }
-      log("Loaded " + counter + " new commands.", logging.success, "LOADER")
-    }
-  })
-  fs.readdir("./commands", function(error, files) {
-    if (error) {
-      fs.mkdirSync("./commands/")
-      log("Commands folder not found - creating now.", logging.warn, "HANDLER")
-    } else {
-      let modules = files.filter(f => f.split(".").pop() === "js");
-      let counter = 0;
-      let eggCounter = 0;
-      try {
-        modules.forEach((f, i) => {
-          let props = require(`../commands/${f}`);
-          client.commands.set(props.help.name, props);
-          if(props.metadata.types["slash"]) commands.push(props.data.toJSON()); // only push it to be registered if it supports slash
-          let parsedver = props.metadata.version.split(".");
-          let parsedbotver = host.version.internal.split(".");
-          if(parseInt(parsedver[0]) > parseInt(parsedbotver[0])) log("Command " + props.help.name + " was developed for a future major version of Precipitation. Some functionality may not work. (" + props.metadata.version + " > " + host.version.internal + ")", logging.warn, "LOADER")
-          if(parseInt(parsedbotver[1]) > parseInt(parsedver[1]) + 3) log("Command " + props.help.name + " hasn't been updated for some time. It may be a good idea to test this command. (" + host.version.internal + " > " + props.metadata.version + ")", logging.warn, "LOADER")
-          if(props.help.category == "Secrets") { // this is an easter egg
-            eggCounter++;
-          } else {
-            counter++;
-          }
-          log("Loaded command " + props.name + ".")
-        })
-      } catch (err) {
-        log("Sorry, but a command had an error: " + err.stack, logging.error, "LOADER")
-      }
-      log("Loaded " + counter + " commands. (& " + eggCounter + " easter eggs.)", logging.success, "LOADER")
-    }
-  })
-  fs.readdir("./commands/roll", function(error, files) {
-    if (error) {
-      fs.mkdirSync("./commands/roll/")
-      log("Commands folder for roll branch not found - creating now.", logging.warn, "HANDLER")
-    } else {
-      let modules = files.filter(f => f.split(".").pop() === "js");
-      let counter = 0;
-      let eggCounter = 0;
-      try {
-        modules.forEach((f, i) => {
-          let props = require(`../commands/roll/${f}`);
-          client.commands.roll.set(props.help.name, props);
-          if(props.metadata.types["slash"]) commands.push(props.data.toJSON()) // only push it to be registered if it supports slash
-          let parsedver = props.metadata.version.split(".");
-          let parsedbotver = host.version.internal.split(".");
-          if(parseInt(parsedver[0]) > parseInt(parsedbotver[0])) log("Roll command " + props.help.name + " was developed for a future major version of Precipitation. Some functionality may not work. (" + props.metadata.version + " > " + host.version.internal + ")", logging.warn, "LOADER")
-          if(parseInt(parsedbotver[1]) > parseInt(parsedver[1]) + 3) log("Roll command " + props.help.name + " hasn't been updated for some time. It may be a good idea to test this command. (" + host.version.internal + " > " + props.metadata.version + ")", logging.warn, "LOADER")
-          if(props.help.category == "Secrets") { // this is an easter egg
-            eggCounter++;
-          } else {
-            counter++;
-          }
-          log("Loaded roll command " + props.help.name + ".")
-        })
-      } catch (err) {
-        log("Sorry, but a command had an error: " + err.stack, logging.error, "LOADER")
-      }
-      log("Loaded " + counter + " roll commands. (& " + eggCounter + " easter eggs.)", logging.success, "LOADER")
-    }
-  })
-  fs.readdir("./commands/bleed", function(error, files) {
-    if (error) {
-      fs.mkdirSync("./commands/bleed/")
-      log("Commands folder for bleed branch not found - creating now.", logging.warn, "HANDLER")
-    } else {
-      let modules = files.filter(f => f.split(".").pop() === "js");
-      let counter = 0;
-      let eggCounter = 0;
-      try {
-        modules.forEach((f, i) => {
-          let props = require(`../commands/bleed/${f}`);
-          client.commands.bleed.set(props.help.name, props);
-          if(props.metadata.types["slash"]) commands.push(props.data.toJSON()) // only push it to be registered if it supports slash
-          let parsedver = props.metadata.version.split(".");
-          let parsedbotver = host.version.internal.split(".");
-          if(parseInt(parsedver[0]) > parseInt(parsedbotver[0])) log("Bleed command " + props.help.name + " was developed for a future major version of Precipitation. Some functionality may not work. (" + props.metadata.version + " > " + host.version.internal + ")", logging.warn, "LOADER")
-          if(parseInt(parsedbotver[1]) > parseInt(parsedver[1]) + 3) log("Bleed command " + props.help.name + " hasn't been updated for some time. It may be a good idea to test this command. (" + host.version.internal + " > " + props.metadata.version + ")", logging.warn, "LOADER")
-          if(props.help.category == "Secrets") { // this is an easter egg
-            eggCounter++;
-          } else {
-            counter++;
-          }
-          log("Loaded bleed command " + props.help.name + ".")
-        })
-      } catch (err) {
-        log("Sorry, but a command had an error: " + err.stack, logging.error, "LOADER")
-      }
-      log("Loaded " + counter + " bleed commands. (& " + eggCounter + " easter eggs.)", logging.success, "LOADER")
-    }
-  })
-  fs.readdir("./commands/cat", function(error, files) {
-    if (error) {
-      fs.mkdirSync("./commands/cat/")
-      log("Commands folder for cat-mode branch not found - creating now.", logging.warn, "HANDLER")
-    } else {
-      let modules = files.filter(f => f.split(".").pop() === "js");
-      let counter = 0;
-      let eggCounter = 0;
-      try {
-        modules.forEach((f, i) => {
-          let props = require(`../commands/cat/${f}`);
-          client.commands.cat.set(props.help.name, props);
-          if(props.metadata.types["slash"]) commands.push(props.data.toJSON()) // only push it to be registered if it supports slash
-          if(props.help.category == "Secrets") { // this is an easter egg
-            eggCounter++;
-          } else {
-            counter++;
-          }
-          log("Loaded cat command " + props.help.name + ".")
-        })
-      } catch (err) {
-        log("Sorry, but a command had an error: " + err.stack, logging.error, "LOADER")
-      }
-      log("Loaded " + counter + " cat-mode commands. (& " + eggCounter + " easter eggs.)", logging.success, "LOADER")
+      log("loaded " + counter + " commands.", logging.success, "handler")
     }
   })
 }
@@ -159,8 +41,7 @@ loadCommands();
 
 var branches = {
   stable: 0,
-  roll: 1,
-  bleed: 2
+  roll: 1
 }
 
 function processCommand(message, cbranch) { // used in editing messages + normal messages
@@ -185,15 +66,6 @@ function processCommand(message, cbranch) { // used in editing messages + normal
       cmd = client.commands.roll.get(command.toLowerCase())
       if(!cmd) cmd = client.commands.get(command.toLowerCase())
       break;
-    case branches.bleed:
-      cmd = client.commands.bleed.get(command.toLowerCase())
-      if(!cmd) cmd = client.commands.roll.get(command.toLowerCase())
-      if(!cmd) cmd = client.commands.get(command.toLowerCase())
-      break;
-    case branches.cat:
-      cmd = client.commands.cat.get(command.toLowerCase())
-      if(!cmd) cmd = client.commands.get(command.toLowerCase())
-      break;
   }
   let validCommand = false;
   try {
@@ -211,19 +83,6 @@ function processCommand(message, cbranch) { // used in editing messages + normal
         if(cmd.prereqs.owner && message.author.id != host.id["owner"]) return message.channel.send("Only the owner may use this command.")
         return cmd.execute.discord(message, args, parameter)
       }
-      if(message.guild) {
-        for(permission of cmd.metadata.permissions.bot) {
-          if(!message.guild.me.permissions.has(permission)) return message.channel.send("I do not have permission to run this command.")
-        }
-        for(permission of cmd.metadata.permissions.user) {
-          if(!message.member.permissions.has(permission)) return message.channel.send("You do not have permission to run this command.")
-        }
-      }
-      if(cmd.metadata.requireOwner && message.author.id != host.id["owner"]) return message.channel.send("Only the owner may use this command.")
-      if(!cmd.metadata.types["message"]) return message.channel.send("This command is not available as a default command.")
-      if(!cmd.metadata.allowDM && !message.guild) return message.channel.send("Sorry, but this command is not permitted in a direct message.")
-      if(cmd.prereq) cmd.prereq(types.default, message, args);
-      cmd.default(message, args, parameter); // else run if old
     }
     if(!validCommand) message.channel.send("Sorry, but it appears this command is unknown.");
   } catch(err) {
@@ -262,12 +121,6 @@ client.on('messageCreate', function(message) {
       case "roll":
         processCommand(message, branches.roll)
         break;
-      case "bleed":
-        processCommand(message, branches.bleed)
-        break;
-      case "cat":
-        processCommand(message, branches.cat)
-        break;
     }
   }
 });
@@ -298,9 +151,28 @@ client.on('messageUpdate', function(oldMessage, newMessage) {
       case "roll":
         processCommand(newMessage, branches.roll)
         break;
-      case "bleed":
-        processCommand(newMessage, branches.bleed)
-        break;
     }
   }
 })
+
+client.on('interactionCreate', async interaction => {
+  if (!interaction.isCommand()) return;
+  let command = client.commands.get(interaction.commandName);
+  if (!command) return;
+  if(getTextInput(interaction.user.id, host.id["blacklisted"])) return interaction.reply({ content: "Sorry, but you are blacklisted from the bot. If you feel you've been falsely banned, please make an appeal to <@" + host.id["owner"] + ">.", ephemeral: true })
+  if(!command.slash) {
+    await command.execute.slash(interaction);
+    return;
+  }
+  if(!command.metadata.allowDM && !interaction.guild) return interaction.reply({ content: "Sorry, but this command is not permitted in a direct message.", ephemeral: true })
+  if(interaction.guild) {
+    for(permission of command.metadata.permissions.bot) {
+      if(!interaction.guild.me.permissions.has(permission)) return interaction.reply({ content: "I do not have permission to run this command."})
+    }
+    for(permission of command.metadata.permissions.user) {
+      if(!interaction.member.permissions.has(permission)) return interaction.reply({ content: "You do not have permission to run this command."})
+    }
+  }
+  if(command.prereq) await command.prereq(types.slash, interaction);
+  await command.slash(interaction);
+});

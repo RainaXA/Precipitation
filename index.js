@@ -175,29 +175,6 @@ client.on('ready', async() => {
   processConsoleCommand();
 })
 
-client.on('interactionCreate', async interaction => {
-    if (!interaction.isCommand()) return;
-    let command = client.commands.get(interaction.commandName);
-    if (!command) return;
-    if(getTextInput(interaction.user.id, host.id["blacklisted"])) return interaction.reply({ content: "Sorry, but you are blacklisted from the bot. If you feel you've been falsely banned, please make an appeal to <@" + host.id["owner"] + ">.", ephemeral: true })
-    if(!command.slash) {
-      await command.execute.slash(interaction);
-      return;
-    }
-    if(!command.metadata.allowDM && !interaction.guild) return interaction.reply({ content: "Sorry, but this command is not permitted in a direct message.", ephemeral: true })
-    if(interaction.guild) {
-      for(permission of command.metadata.permissions.bot) {
-        if(!interaction.guild.me.permissions.has(permission)) return interaction.reply({ content: "I do not have permission to run this command."})
-      }
-      for(permission of command.metadata.permissions.user) {
-        if(!interaction.member.permissions.has(permission)) return interaction.reply({ content: "You do not have permission to run this command."})
-      }
-    }
-    if(command.prereq) await command.prereq(types.slash, interaction);
-    await command.slash(interaction);
-});
-
-
 process.on('uncaughtException', error => {
   log(error.stack, logging.error, "CATCH")
 })
