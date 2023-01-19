@@ -156,7 +156,11 @@ function transitionTrial(guID) {
           setTimeout(win, 3000, guID, 0)
         } else {
           sendMessage(gameInfo[guID].trial.username + " was Innocent.", gameInfo[guID].players)
-          gameInfo[guID].phase = 2
+          if(gameInfo[guID].aliveCount <= 2) {
+            setTimeout(win, 5000, guID, 1)
+          } else {
+            gameInfo[guID].phase = 2
+          }
           return;
         }
       } else {
