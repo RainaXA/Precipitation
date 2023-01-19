@@ -14,6 +14,15 @@ client.on('ready', async() => { // init guilds on start
     });
   })
 
+try {
+  var name = require('./name.js').name;
+} catch(err) {
+  log("name function not found - using discord username.", logging.warn, "config")
+  function name(user) {
+    return user.username;
+  }
+}
+
 var command = {
     name: "config",
     desc: "Changes server-specific properties.",
@@ -79,3 +88,11 @@ var command = {
 }
 
 module.exports = command;
+
+client.on('messageCreate', message => {
+    if(!message.guild) return; // do not do anything if it's a dm
+    if (config.guilds[message.guild.id].settings.filter && getTextInput(message.content, host.slurs)) {
+      message.channel.messages.fetch(message.id).then(message => message.delete())
+      if(message.author.id != client.user.id) message.author.send("Hey, " + name(message.author) + "!\n\nThis server has banned very offensive words. Please refrain from using these words.")
+    }
+  })
