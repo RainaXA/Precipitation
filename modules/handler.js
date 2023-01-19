@@ -107,7 +107,7 @@ client.on('messageCreate', function(message) {
   if (message.content.startsWith("<@" + client.user.id + ">")) {
     global.messagePrefix = "<@" + client.user.id + ">"
   } else if (!message.guild) {
-    global.messagePrefix = host.prefix[branch]
+    global.messagePrefix = host.prefix
   } else {
     global.messagePrefix = config.guilds[message.guild.id].prefix
   }

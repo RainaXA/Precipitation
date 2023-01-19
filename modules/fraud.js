@@ -75,7 +75,7 @@ function dayCycle(guID) {
       setTimeout(dayCycle, 30000, guID)
       break;
     case 2: // begin rest phase
-      gameInfo[guID].guilties = 0;
+      gameInfo[guID].guilties = [];
       gameInfo[guID].phase = 0;
       gameInfo[guID].trials = 2;
       gameInfo[guID].votesAgainst = {};
@@ -98,7 +98,7 @@ function dayCycle(guID) {
       gameInfo[guID].day++;
       break;
     case 8: // secondary voting
-      gameInfo[guID].guilties = 0;
+      gameInfo[guID].guilties = [];
       gameInfo[guID].phase = 2;
       gameInfo[guID].trials = 2;
       gameInfo[guID].votesAgainst = {};
@@ -146,7 +146,7 @@ function transitionTrial(guID) {
       break;
     case 5:
       setTimeout(dayCycle, 10000, guID)
-      if(gameInfo[guID].guilties > (gameInfo[guID].players.length - gameInfo[guID].dead.length - gameInfo[guID].guilties)) {
+      if(gameInfo[guID].guilties.length > (gameInfo[guID].players.length - gameInfo[guID].dead.length - gameInfo[guID].guilties.length)) {
         sendMessage("**GUILTY!** They have been executed.", gameInfo[guID].players)
         gameInfo[guID].dead.push(gameInfo[guID].trial)
         gameInfo[guID].aliveCount = gameInfo[guID].aliveCount - 1;
@@ -270,7 +270,8 @@ client.on('messageCreate', function(message) {
         } else { // they are fraud :)
           if(currentGame.frauded.id == currentGame.trial.id) return; // trials can only happen if fraud takes over, so we can assume frauded exists
         }
-        currentGame.guilties++;
+        if(getTextInput(message.author.id, currentGame.guilties)) return; //they've already voted guilty!
+        currentGame.guilties.push(message.author.id);
         return message.channel.send("*Your vote has been received.*")
       }
       break;
