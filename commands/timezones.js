@@ -1,7 +1,13 @@
 try {
     var find = require('./find.js').exports.find;
   } catch(err) {
-    log("find function not found - will display message author.", logging.warn, "uinfo")
+    log("find function not found - will display message author.", logging.warn, "timezones")
+}
+
+try {
+    var toProperUSFormat = require('./birthday.js').exports.toProperUSFormat;
+  } catch(err) {
+    log("united states date format function not found - not showing birthday.", logging.warn, "timezones")
 }
 
 var commands = {
@@ -28,10 +34,28 @@ var commands = {
                     if(!config.users[message.author.id].offset && config.users[message.author.id].offset != 0) return message.channel.send("No offset found, set it using `pr:settime`!")
                     let date = new Date()
                     let newHours = (date.getUTCHours() + config.users[message.author.id].offset);
+                    let day;
+                    let seconds = date.getUTCSeconds();
+                    let minutes = date.getUTCMinutes();
                     if(newHours < 0) {
-                        newHours = 24 - newHours
+                        newHours = 24 + newHours
+                        day = date.getUTCDate() - 1;
+                    } else if(newHours > 24) {
+                        newHours = newHours - 24
+                        day = date.getUTCDate() + 1;
+                    } else {
+                        day = date.getUTCDate();
                     }
-                    message.channel.send("**" + message.author.tag + "**: " + newHours + ":" + date.getUTCMinutes())
+                    if(newHours < 10) {
+                        newHours = "0" + newHours;
+                    }
+                    if(minutes < 10) {
+                        minutes = "0" + minutes;
+                    }
+                    if(seconds < 10) {
+                        seconds = "0" + seconds;
+                    }
+                    message.channel.send("**" + message.author.tag + "**: " + toProperUSFormat((date.getUTCMonth() + 1), day, date.getUTCFullYear()) + " " + newHours + ":" + minutes + ":" + seconds)
                 }
             }
         },
