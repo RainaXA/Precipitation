@@ -97,6 +97,13 @@ var command = {
                     message.channel.send("You have left the game.")
                   }
                   break;
+                case "disband":
+                  if(!gameInfo[message.guild.id]) return message.channel.send("The game does not exist yet, please use `" + host.prefix + "fraud create` to create it.")
+                  if(gameInfo[message.guild.id].players[0].id != message.author.id) return message.channel.send("You are not the host, so you may not disband the lobby.")
+                  if(gameInfo[message.guild.id].started) return message.channel.send("The game has been started, therefore it may not be disbanded.")
+                  message.channel.send("The game has now been disbanded.")
+                  gameInfo[currentlyPlaying[message.author.id]] = null;
+                  currentlyPlaying[message.author.id] = null;
               }
         }
     },
