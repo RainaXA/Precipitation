@@ -37,6 +37,16 @@ var commands = {
                     let day;
                     let seconds = date.getUTCSeconds();
                     let minutes = date.getUTCMinutes();
+                    if(config.users[message.author.id].offsetMin) {
+                        minutes = minutes + config.users[message.author.id].offsetMin
+                    }
+                    if(minutes < 0) { // stupid damn utc offsets being OFF THE HOUR!!!
+                        minutes = 60 + minutes
+                        newHours = newHours - 1;
+                    } else if(minutes > 60) {
+                        minutes = minutes - 60
+                        newHours = newHours + 1;
+                    }
                     if(newHours < 0) {
                         newHours = 24 + newHours
                         day = date.getUTCDate() - 1;
@@ -55,7 +65,7 @@ var commands = {
                     if(seconds < 10) {
                         seconds = "0" + seconds;
                     }
-                    message.channel.send("**" + message.author.tag + "**: " + toProperUSFormat((date.getUTCMonth() + 1), day, date.getUTCFullYear()) + " " + newHours + ":" + minutes + ":" + seconds)
+                    message.channel.send("**" + message.author.tag + "**: " + toProperUSFormat((date.getUTCMonth() + 1), day, date.getUTCFullYear()) + ", " + newHours + ":" + minutes + ":" + seconds)
                 }
             }
         },
@@ -72,17 +82,38 @@ var commands = {
     "settime": {
         name: "settime",
         desc: "Set your timezone.",
-        args: "(UTC/GMT offset)",
+        args: "**(UTC/GMT offset)**",
         parameters: "",
         execute: {
             discord: function(message, args) {
-                args = parseInt(args);
-                if(isNaN(args)) {
-                    return message.channel.send("Please return a number.")
+                if(args == "-9.5" || args == "-3.5" || args == "3.5" || args == "4.5" || args == "5.5" || args == "5.75" || args == "6.5" || args == "8.75" || args == "9.5" || args == "10.5" || args == "12.75") {
+                    if(args.startsWith("-") && args.endsWith(".5")) {
+                        if(!config.users[message.author.id]) config.users[message.author.id] = {}
+                        config.users[message.author.id].offsetMin = -30
+                    } else if (args.endsWith(".5")) {
+                        if(!config.users[message.author.id]) config.users[message.author.id] = {}
+                        config.users[message.author.id].offsetMin = 30
+                    } else if(args.startsWith("-") && args.endsWith(".75")) {
+                        if(!config.users[message.author.id]) config.users[message.author.id] = {}
+                        config.users[message.author.id].offsetMin = -45
+                    } else if (args.endsWith(".75")) {
+                        if(!config.users[message.author.id]) config.users[message.author.id] = {}
+                        config.users[message.author.id].offsetMin = 45
+                    }
+                    config.users[message.author.id].offset = parseInt(args)
+                    message.channel.send("I've set your UTC/GMT timezone to " + args + ", use `pr:time` and see if it's accurate!")
+                } else {
+                    args = parseInt(args);
+                    if(isNaN(args)) {
+                        return message.channel.send("Please return a number.")
+                    } else if(args < -12 || args > 14) {
+                        return message.channel.send("Please return a valid offset, between -12 and 14.")
+                    }
+                    if(!config.users[message.author.id]) config.users[message.author.id] = {}
+                    config.users[message.author.id].offset = args
+                    delete config.users[message.author.id].offsetMin;
+                    message.channel.send("I've set your UTC/GMT timezone to " + args + ", use `pr:time` and see if it's accurate!")
                 }
-                if(!config.users[message.author.id]) config.users[message.author.id] = {}
-                config.users[message.author.id].offset = args
-                message.channel.send("I've set your UTC/GMT timezone to " + args + ", use `pr:time` and see if it's accurate!")
             }
         },
         ver: "3.0.0",
