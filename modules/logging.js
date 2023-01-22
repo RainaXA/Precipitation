@@ -37,7 +37,8 @@ client.on('messageUpdate', function(oldMessage, newMessage) {
 });
 
 client.on('guildMemberAdd', async function(member) {
-  if(!config.guilds[member.guild.id].settings.logging.members) return;
+	if(!config.guilds[member.guild.id].settings) return;
+  	if(!config.guilds[member.guild.id].settings.logging.members) return;
 	let infoDisplay = new MessageEmbed()
 	.setAuthor({name: member.user.tag, iconURL: member.user.displayAvatarURL})
 	.addField("Account Dates", "**Creation Date**: " + member.user.createdAt.toUTCString() + "\n**Join Date**: " + member.joinedAt.toUTCString())
