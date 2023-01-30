@@ -181,12 +181,25 @@ global.startGame = function(playerList, guildID) {
   gameInfo[guildID].trial = null;
   gameInfo[guildID].daysRemaining = 3;
   gameInfo[guildID].aliveCount = gameInfo[guildID].players.length;
+  for(spec of gameInfo[guildID].specs) {
+    gameInfo[guildID].dead.push(spec)
+    gameInfo[guildID].aliveCount = gameInfo[guildID].aliveCount - 1
+  }
+  while(getTextInput(gameInfo[guildID].fraud, gameInfo[guildID].dead, true)) {
+    gameInfo[guildID].fraud = playerList[Math.floor(Math.random() * playerList.length)];
+  }
   gameInfo[guildID].trials = 2;
   gameInfo[guildID].votesAgainst = {};
   for(player of playerList) {
     gameInfo[guildID].votesAgainst[player.id] = [];
-    if(gameInfo[guildID].fraud.id == player.id) player.send("You are the **Fraud**.\nImpersonate somebody during the first resting period, and you have to act exactly like them without being caught.")
-    if(gameInfo[guildID].fraud.id != player.id) player.send("You are an **Innocent**.\nOnce the Fraud takes over somebody, you must figure out who it is!")
+    if(gameInfo[guildID].fraud.id == player.id) player.send("**Fraud**\nImpersonate somebody during the first resting period, and you have to act exactly like them without being caught.")
+    if(gameInfo[guildID].fraud.id != player.id) {
+      if(getTextInput(player, gameInfo[guildID].dead)) {
+        player.send("**Spectator**\nEnjoy the show! If somebody else dies, you can have a conversation with them.")
+      } else {
+        player.send("**Innocent**\nOnce the Fraud takes over somebody, you must figure out who it is!")
+      }
+    }
   }
   dayCycle(guildID)
 }
@@ -218,8 +231,6 @@ client.on('messageCreate', function(message) {
         }
       }
       return;
-    case 1:
-      break;
     case 2:
     case 8:
       if(message.content.startsWith("!vote ")) {
@@ -258,8 +269,6 @@ client.on('messageCreate', function(message) {
         break;
       }
       return;
-    case 3:
-      break;
     case 4:
       if(message.author.id != currentGame.fraud.id) { // user is not the fraud
         if(message.author.id != currentGame.trial.id) return; // since they cant take over, are they the one on trial?
@@ -278,8 +287,6 @@ client.on('messageCreate', function(message) {
         currentGame.guilties.push(message.author.id);
         return message.channel.send("*Your vote has been received.*")
       }
-      break;
-    case 6:
       break;
   }
   if(currentGame.fraud.id == message.author.id && currentGame.frauded != null) return sendMessage("**" + currentGame.frauded.username + "**: " + message.content, currentGame.players)

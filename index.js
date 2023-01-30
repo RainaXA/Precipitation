@@ -9,24 +9,114 @@
 const { Client, Intents } = require('discord.js');
 global.client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_PRESENCES, Intents.FLAGS.DIRECT_MESSAGES], partials: ["CHANNEL"] });
 const fs = require('fs');
-const readline = require('readline');
+const blessed = require('blessed');
 
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
-
 global.host = require("./host.json")
+
+var screen = blessed.screen({
+  smartCSR: true
+});
+screen.title = 'Precipitation ' + host.version.external;
+
+var titleBox = blessed.text({
+  top: "0",
+  left: "0",
+  width: "100%",
+  height: "1",
+  content: "Precipitation " + host.version.external + " Console",
+  tags: true,
+  style: {
+      fg: 'white',
+      bg: 'blue'
+  },
+  padding: {
+      left: 1
+  }
+});
+screen.append(titleBox);
+
+var logBox = blessed.log({
+  top: 1,
+  left: 0,
+  width: "100%",
+  height: "100%-4",
+  tags: true,
+  style: {
+      fg: 'white',
+      bg: 'black',
+      scrollbar: {
+          bg: 'white'
+      }
+  },
+  padding: {
+      left: 2
+  },
+  scrollable: true,
+  alwaysScroll: true,
+  scrollOnInput: true,
+  scrollbar: true
+});
+screen.append(logBox);
+
+var textBox = blessed.textbox({
+  top: "100%-2",
+  left: -1,
+  width: "100%+2",
+  height: 3,
+  tags: true,
+  value: "> ",
+  border: {
+      type: "line"
+  },
+  style: {
+      fg: 'white',
+      bg: 'black',
+      border: {
+          fg: 'white',
+          bg: 'black'
+      }
+  },
+  inputOnFocus: true
+});
+screen.append(textBox);
+textBox.focus();
+
+textBox.on('submit', function() {
+  var cmd = textBox.getText().slice(2);
+
+  log("> " + cmd, logging.input)
+  textBox.setValue("> ");
+  textBox.focus();
+
+  var fcCommand = cmd.split(" ")
+  while(fcCommand[0] == "") {
+    fcCommand.shift();
+  }
+  if(fcCommand[0] == undefined) return log("Sorry, but it appears this console command is unknown.", logging.info, "console") // crash otherwise
+  var args = cmd.slice(fcCommand[0].length + 1)
+  let command = client.commands.get(fcCommand[0].toLowerCase())
+  if(command) {
+    if(!command.execute.console) {
+      return log("Sorry, but this command cannot be used in the console.", logging.info, "console")
+    }
+    command.execute.console(args);
+  } else {
+    log("Sorry, but it appears this console command is unknown.", logging.info, "console") // crash otherwise
+  }
+})
+
+screen.render()
 
 global.logging = { // based off of AstralMod!
   error: 0,
   warn: 1,
   info: 2,
   success: 3,
-  output: 4
+  output: 4,
+  input: 5
 }
 
 global.types = { // types of commands
@@ -52,56 +142,39 @@ global.log = function(message, type, sender) {
     case logging.output:
       msg = "\x1b[97m" + sender + ": " + message
       break;
+    case logging.input:
+      msg = "\x1b[37m" + message
+      break;
     default:
       if(!host.developer.debugging) return;
-      msg = "\x1b[95m[DEBUG] " + message + "\x1b[0m"
+      msg = "\x1b[95m[DEBUG] " + message
   }
-  console.log(msg + "\x1b[0m")
+  logBox.log(msg + "\x1b[0m")
 }
 
-global.getTextInput = function(text, list) {
-  for(let i = 0; i < list.length; i++) {
-    if(text.toLowerCase().includes(list[i])) return true;
+global.getTextInput = function(text, list, caseInsensitive) { // true = don't check caps 
+  if(!caseInsensitive) {
+    for(let i = 0; i < list.length; i++) {
+      if(text.toLowerCase().includes(list[i])) return true;
+    }
+  } else {
+    for(let i = 0; i < list.length; i++) {
+      if(text.includes(list[i])) return true;
+    }
   }
   return false;
 }
 
-function processConsoleCommand() {
-  rl.question('> ', (consoleCommand) => {
-    var fcCommand = consoleCommand.split(" ")
-    while(fcCommand[0] == "") {
-      fcCommand.shift();
-    }
-    var cCommand = fcCommand[0]
-    if(cCommand == undefined) {
-      log("Sorry, but it appears this console command is unknown.", logging.info, "CONSOLE") // crash otherwise
-      return processConsoleCommand();
-    }
-    var args = consoleCommand.slice(fcCommand[0].length + 1)
-    let cmd = client.commands.get(cCommand.toLowerCase())
-    if(cmd) {
-      if(!cmd.execute.console) {
-        log("Sorry, but this command cannot be used in the console.", logging.info, "CONSOLE")
-        return processConsoleCommand();
-      }
-      cmd.execute.console(args);
-    } else {
-      log("Sorry, but it appears this console command is unknown.", logging.info, "CONSOLE") // crash otherwise
-    }
-    processConsoleCommand();
-  });
-}
-
-function saveConfiguration() {
+global.saveConfiguration = function() {
   fs.writeFile('config.json', JSON.stringify(config), function (err) {
     if (!err) log("Saved settings.", logging.debug)
-    if (err) log("Settings couldn't be saved!", logging.error, "CONFIG")
+    if (err) log("Settings couldn't be saved!", logging.error, "config")
   })
   setTimeout(saveConfiguration, 120000); // save again in 120 seconds
 }
 
 if(!fs.existsSync('./config.json')) {
-  log('config.json does not exist. Creating now.', logging.warn, "GEN")
+  log('config.json does not exist. Creating now.', logging.warn, "config")
   global.config = {
     "guilds": {
 
@@ -112,7 +185,7 @@ if(!fs.existsSync('./config.json')) {
   };
   fs.writeFile('config.json', JSON.stringify(config), function (err) {
     if (err) throw err;
-    log('config.json has been created.', logging.success, "GEN")
+    log('config.json has been created.', logging.success, "config")
   })
 } else {
   global.config = JSON.parse(fs.readFileSync("./config.json"));
@@ -127,7 +200,6 @@ if(host.developer.startConnect == true) {
   } else {
     log("To connect to Discord, restart the terminal.", "GEN")
   }
-  processConsoleCommand();
 }
 
 fs.readdir("./modules", function(error, files) {
@@ -146,7 +218,7 @@ fs.readdir("./modules", function(error, files) {
     } catch (err) {
       log("Sorry, but a module had an error: " + err.stack, logging.error, 3)
     }
-    log("Loaded " + counter + " modules.", logging.success, "LOADER")
+    log("Loaded " + counter + " modules.", logging.success, "modules")
   }
 })
 
@@ -172,7 +244,6 @@ client.on('ready', async() => {
   } catch (err) {
     log(err, logging.error, "SLASH")
   }
-  processConsoleCommand();
 })
 
 process.on('uncaughtException', error => {

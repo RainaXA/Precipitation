@@ -214,9 +214,8 @@ var commands = {
                         seconds = "0" + seconds;
                     }
                     let time;
-                    if(config.users[message.author.id].timePrefs) {
-                        if(!config.users[message.author.id].timePrefs.time) config.users[message.author.id].timePrefs.time = 2;
-                    }
+                    if(!config.users[message.author.id].timePrefs) config.users[message.author.id].timePrefs = {};
+                    if(!config.users[message.author.id].timePrefs.time) config.users[message.author.id].timePrefs.time = 2;
                     switch(config.users[message.author.id].timePrefs.time) {
                         case 1:
                             let ampm;
@@ -283,9 +282,8 @@ var commands = {
                         seconds = "0" + seconds;
                     }
                     let time;
-                    if(config.users[message.author.id].timePrefs) {
-                        if(!config.users[message.author.id].timePrefs.time) config.users[message.author.id].timePrefs.time = 2;
-                    }
+                    if(!config.users[message.author.id].timePrefs) config.users[message.author.id].timePrefs = {};
+                    if(!config.users[message.author.id].timePrefs.time) config.users[message.author.id].timePrefs.time = 2;
                     switch(config.users[message.author.id].timePrefs.time) {
                         case 1:
                             let ampm;
