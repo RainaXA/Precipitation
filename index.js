@@ -26,7 +26,7 @@ var titleBox = blessed.text({
   left: "0",
   width: "100%",
   height: "1",
-  content: "Precipitation " + host.version.external + " Console",
+  content: "Precipitation " + host.version.external + " " + host.version.name,
   tags: true,
   style: {
       fg: 'white',
@@ -54,10 +54,16 @@ var logBox = blessed.log({
   padding: {
       left: 2
   },
+  keys: true,
+  vi: true,
   scrollable: true,
   alwaysScroll: true,
   scrollOnInput: true,
-  scrollbar: true
+  scrollbar: {
+    style: {
+      bg: 'blue'
+    }
+  }
 });
 screen.append(logBox);
 
@@ -83,6 +89,26 @@ var textBox = blessed.textbox({
 });
 screen.append(textBox);
 textBox.focus();
+
+textBox.key('pageup', function() {
+  logBox.scroll(-logBox.height);
+  screen.render();
+})
+
+textBox.key('pagedown', function() {
+  logBox.scroll(logBox.height);
+  screen.render();
+})
+
+textBox.key('up', function() {
+  logBox.scroll(-1);
+  screen.render();
+})
+
+textBox.key('down', function() {
+  logBox.scroll(1);
+  screen.render();
+})
 
 textBox.on('submit', function() {
   var cmd = textBox.getText().slice(2);
@@ -152,14 +178,18 @@ global.log = function(message, type, sender) {
   logBox.log(msg + "\x1b[0m")
 }
 
-global.getTextInput = function(text, list, caseInsensitive) { // true = don't check caps 
-  if(!caseInsensitive) {
+global.getTextInput = function(text, list, type) { // true = don't check caps 
+  if(!type) { // case-insensitive
     for(let i = 0; i < list.length; i++) {
       if(text.toLowerCase().includes(list[i])) return true;
     }
-  } else {
+  } else if (type == 1) { // case-sensitive
     for(let i = 0; i < list.length; i++) {
       if(text.includes(list[i])) return true;
+    }
+  } else if (type == 2) { // numerical or other non-string
+    for(let i = 0; i < list.length; i++) {
+      if(text == list[i]) return true;
     }
   }
   return false;
@@ -247,5 +277,5 @@ client.on('ready', async() => {
 })
 
 process.on('uncaughtException', error => {
-  log(error.stack, logging.error, "CATCH")
+  log(error.stack, logging.error, "catch")
 })

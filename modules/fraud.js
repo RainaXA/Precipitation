@@ -185,7 +185,7 @@ global.startGame = function(playerList, guildID) {
     gameInfo[guildID].dead.push(spec)
     gameInfo[guildID].aliveCount = gameInfo[guildID].aliveCount - 1
   }
-  while(getTextInput(gameInfo[guildID].fraud, gameInfo[guildID].dead, true)) {
+  while(getTextInput(gameInfo[guildID].fraud, gameInfo[guildID].dead, 2)) {
     gameInfo[guildID].fraud = playerList[Math.floor(Math.random() * playerList.length)];
   }
   gameInfo[guildID].trials = 2;
@@ -194,7 +194,7 @@ global.startGame = function(playerList, guildID) {
     gameInfo[guildID].votesAgainst[player.id] = [];
     if(gameInfo[guildID].fraud.id == player.id) player.send("**Fraud**\nImpersonate somebody during the first resting period, and you have to act exactly like them without being caught.")
     if(gameInfo[guildID].fraud.id != player.id) {
-      if(getTextInput(player, gameInfo[guildID].dead)) {
+      if(getTextInput(player, gameInfo[guildID].dead, 2)) {
         player.send("**Spectator**\nEnjoy the show! If somebody else dies, you can have a conversation with them.")
       } else {
         player.send("**Innocent**\nOnce the Fraud takes over somebody, you must figure out who it is!")
@@ -224,6 +224,7 @@ client.on('messageCreate', function(message) {
         for(user of currentGame.players) {
           if(user.username.toLowerCase().includes(cmd)) {
             if(user.id == currentGame.fraud.id) return message.channel.send("You cannot take over yourself, that would be weird.")
+            if(getTextInput(user, gameInfo[guildID].dead, 2)) return message.channel.send("You cannot take over a spectator.")
             currentGame.frauded = user;
             currentGame.sayFraudMessage = 2;
             return message.channel.send("You have decided to take over " + user.username + ".")
@@ -243,6 +244,7 @@ client.on('messageCreate', function(message) {
             for(let i = 0; i < currentGame.votesAgainst[user.id].length; i++) {
               if(currentGame.votesAgainst[user.id][i] == message.author.id) return; // dont allow votes again
             }
+            if(getTextInput(user, gameInfo[guildID].dead, 2) && user.id != currentGame.frauded.id) return; // don't allow votes for dead/spectators, although be mindful that frauded are dead
             if(message.author.id == currentGame.fraud.id && currentGame.frauded) {
               currentGame.votesAgainst[user.id].push(currentGame.frauded.id) // submit vote as Frauded
             } else {
