@@ -224,7 +224,7 @@ client.on('messageCreate', function(message) {
         for(user of currentGame.players) {
           if(user.username.toLowerCase().includes(cmd)) {
             if(user.id == currentGame.fraud.id) return message.channel.send("You cannot take over yourself, that would be weird.")
-            if(getTextInput(user, gameInfo[guildID].dead, 2)) return message.channel.send("You cannot take over a spectator.")
+            if(getTextInput(user, currentGame.dead, 2)) return message.channel.send("You cannot take over a spectator.")
             currentGame.frauded = user;
             currentGame.sayFraudMessage = 2;
             return message.channel.send("You have decided to take over " + user.username + ".")
@@ -244,7 +244,7 @@ client.on('messageCreate', function(message) {
             for(let i = 0; i < currentGame.votesAgainst[user.id].length; i++) {
               if(currentGame.votesAgainst[user.id][i] == message.author.id) return; // dont allow votes again
             }
-            if(getTextInput(user, gameInfo[guildID].dead, 2) && user.id != currentGame.frauded.id) return; // don't allow votes for dead/spectators, although be mindful that frauded are dead
+            if(getTextInput(user, currentGame.dead, 2) && user.id != currentGame.frauded.id) return; // don't allow votes for dead/spectators, although be mindful that frauded are dead
             if(message.author.id == currentGame.fraud.id && currentGame.frauded) {
               currentGame.votesAgainst[user.id].push(currentGame.frauded.id) // submit vote as Frauded
             } else {
