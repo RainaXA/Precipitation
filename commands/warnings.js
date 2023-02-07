@@ -62,7 +62,7 @@ var commands = {
             slash: async function (interaction) {
                 let user = interaction.options.getUser('user');
                 if(!config.users[user.id]) config.users[user.id] = {};
-                if(!config.guilds[message.guild.id].warnings) config.guilds[message.guild.id].warnings = {};
+                if(!config.guilds[interaction.guild.id].warnings) config.guilds[interaction.guild.id].warnings = {};
                 if(!config.guilds[interaction.guild.id].warnings[user.id]) config.guilds[interaction.guild.id].warnings[user.id] = [];
                 if(config.guilds[interaction.guild.id].warnings[user.id].length > 9) return interaction.reply({ content: "Sorry, but Precipitation currently only supports up to 9 warnings per user.", ephemeral: true })
                 warnedUser[interaction.user.id] = user;
@@ -238,6 +238,19 @@ client.on('messageCreate', function(message) {
 });
 
 module.exports = commands;
-for(item in commands) {
-    commands[item].data = new SlashCommandBuilder().setName(commands[item].name).setDescription(commands[item].desc)
-}
+commands["warn"].data = new SlashCommandBuilder().setName(commands["warn"].name).setDescription(commands["warn"].desc).addUserOption(option =>
+    option.setName('user')
+    .setDescription('The user to warn')
+    .setRequired(true))
+commands["lswarn"].data = new SlashCommandBuilder().setName(commands["lswarn"].name).setDescription(commands["lswarn"].desc).addUserOption(option =>
+    option.setName('user')
+    .setDescription('The user to see warnings of [requires Manage Nicknames]')
+    .setRequired(false))
+commands["rmwarn"].data = new SlashCommandBuilder().setName(commands["rmwarn"].name).setDescription(commands["rmwarn"].desc).addIntegerOption(int =>
+    int.setName('id')
+    .setDescription("Which warning to remove")
+    .setRequired(true))
+  .addUserOption(user =>
+      user.setName('user')
+      .setDescription('Which user to remove a warning from')
+      .setRequired(true))

@@ -92,8 +92,8 @@ var commands = {
                 return message.channel.send({embeds: [uinfo]})
             },
             slash: async function (interaction) {
-                let uinfoUser = uni.options.getUser('user')
-                if(!uinfoUser) uinfoUser = uni.user;
+                let uinfoUser = interaction.options.getUser('user')
+                if(!uinfoUser) uinfoUser = interaction.user;
                 let accDates = "**Creation Date**: " + uinfoUser.createdAt.toUTCString()
                 let names = "**Username**: " + uinfoUser.username
                 if(config.users[uinfoUser.id].birthday) {
@@ -101,7 +101,13 @@ var commands = {
                 } else {
                     birthday = "*not set*"
                 }
-                let botInfo = "**Name**: " + name(uinfoUser) + "\n**Gender**: " + gender(uinfoUser, "Male", "Female", "Other", "*not set*") + "\n**Birthday**: " + birthday
+                let setloc;
+                if(config.users[uinfoUser.id].location && location) {
+                    setloc = location(uinfoUser)
+                } else {
+                    setloc = "*not set*"
+                }
+                let botInfo = "**Name**: " + name(uinfoUser) + "\n**Gender**: " + gender(uinfoUser, "Male", "Female", "Other", "*not set*") + "\n**Birthday**: " + birthday + "\n**Location**: " + setloc
                 let uinfoMember;
                 interaction.guild.members.cache.each(member => {
                     if(uinfoUser.id == member.id) {
@@ -156,7 +162,7 @@ var commands = {
                 .addField("Dates", "**Created**: " + interaction.guild.createdAt.toUTCString() + "\n**Precipitation Joined**: " + interaction.guild.joinedAt.toUTCString())
                 .addField("Members", "**Member Count**: " + interaction.guild.memberCount + "\n**Server Owner**: <@" + interaction.guild.ownerId + ">")
                 .addField("Misc.", "**Boosts:** " + interaction.guild.premiumSubscriptionCount)
-                .setColor(host.colors[branch])
+                .setColor(host.color)
                 .setFooter({ text: "Precipitation " + host.version.external, iconURL: client.user.displayAvatarURL() })
                 await interaction.reply({embeds: [embed]})
             }
@@ -177,3 +183,6 @@ module.exports = commands;
 for(item in commands) {
     commands[item].data = new SlashCommandBuilder().setName(commands[item].name).setDescription(commands[item].desc)
 }
+commands["uinfo"].data = new SlashCommandBuilder().setName(commands["uinfo"].name).setDescription(commands["uinfo"].desc).addUserOption(user =>
+    user.setName('user')
+    .setDescription('Which user to get information'))

@@ -78,7 +78,7 @@ var command = {
                   if(!gameInfo[message.guild.id]) return message.channel.send("The game does not exist yet, please use `" + host.prefix + "fraud create` to create it.")
                   if(gameInfo[message.guild.id].players[0].id != message.author.id) return message.channel.send("You are not the host, so you may not start the game.")
                   if(gameInfo[message.guild.id].started) return message.channel.send("The game has already been started!")
-                  //if(gameInfo[message.guild.id].players.length < 4) return message.channel.send("A minimum of 4 players are required for the game to start.")
+                  if(gameInfo[message.guild.id].players.length < 4) return message.channel.send("A minimum of 4 players are required for the game to start.")
                   gameInfo[message.guild.id].started = true;
                   message.channel.send("Please check your DM's. The game is starting.")
                   startGame(gameInfo[message.guild.id].players, message.guild.id)

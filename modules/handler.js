@@ -81,6 +81,8 @@ function processCommand(message, cbranch) { // used in editing messages + normal
           }
         }
         if(cmd.prereqs.owner && message.author.id != host.id["owner"]) return message.channel.send("Only the owner may use this command.")
+        if(!cmd.execute.discord) return message.channel.send("This command cannot be executed as a Discord command.")
+        if(!cmd.prereqs.dm && !message.guild) return message.channel.send("This command cannot be executed in a direct message.")
         return cmd.execute.discord(message, args, parameter)
       }
     }
@@ -137,7 +139,7 @@ client.on('messageUpdate', function(oldMessage, newMessage) {
   if (newMessage.content.startsWith("<@" + client.user.id + ">")) {
     global.messagePrefix = "<@" + client.user.id + ">"
   } else if (!newMessage.guild) {
-    global.messagePrefix = host.prefix[branch]
+    global.messagePrefix = host.prefix
   } else {
     global.messagePrefix = config.guilds[newMessage.guild.id].prefix
   }
@@ -160,11 +162,7 @@ client.on('interactionCreate', async interaction => {
   let command = client.commands.get(interaction.commandName);
   if (!command) return;
   if(getTextInput(interaction.user.id, host.id["blacklisted"])) return interaction.reply({ content: "Sorry, but you are blacklisted from the bot. If you feel you've been falsely banned, please make an appeal to <@" + host.id["owner"] + ">.", ephemeral: true })
-  if(!command.slash) {
-    await command.execute.slash(interaction);
-    return;
-  }
-  if(!command.metadata.allowDM && !interaction.guild) return interaction.reply({ content: "Sorry, but this command is not permitted in a direct message.", ephemeral: true })
+  if(!command.prereqs.dm && !interaction.guild) return interaction.reply({ content: "Sorry, but this command is not permitted in a direct message.", ephemeral: true })
   if(interaction.guild) {
     for(permission of command.metadata.permissions.bot) {
       if(!interaction.guild.me.permissions.has(permission)) return interaction.reply({ content: "I do not have permission to run this command."})
@@ -173,6 +171,6 @@ client.on('interactionCreate', async interaction => {
       if(!interaction.member.permissions.has(permission)) return interaction.reply({ content: "You do not have permission to run this command."})
     }
   }
-  if(command.prereq) await command.prereq(types.slash, interaction);
-  await command.slash(interaction);
+  await command.execute.slash(interaction);
+  return;
 });

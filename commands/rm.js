@@ -55,7 +55,7 @@ var command = {
     ver: "3.0.0",
     cat: "Moderation",
     prereqs: {
-        dm: true,
+        dm: false,
         owner: false,
         user: [Permissions.FLAGS.MANAGE_MESSAGES],
         bot: [Permissions.FLAGS.MANAGE_MESSAGES]
@@ -64,4 +64,7 @@ var command = {
 }
 
 module.exports = command;
-module.exports.data = new SlashCommandBuilder().setName(command.name).setDescription(command.desc)
+module.exports.data = new SlashCommandBuilder().setName(command.name).setDescription(command.desc).addIntegerOption(option =>
+    option.setName('remove')
+    .setDescription('Delete x amount of messages. [between 1-99]')
+    .setRequired(true))
