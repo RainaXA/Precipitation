@@ -30,6 +30,8 @@ var command = {
     parameters: "",
     execute: {
         discord: function(message, args) {
+          if(!config.guilds[guild.id].settings) config.guilds[guild.id].settings = {};
+          if(!config.guilds[guild.id].settings.logging) config.guilds[guild.id].settings.logging = {};
             let cArg = args.split(" ")
             if(!cArg[1] && cArg[0]) return message.channel.send("Please add another argument.")
             switch(cArg[0].toLowerCase()) {

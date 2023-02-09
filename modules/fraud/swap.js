@@ -192,7 +192,6 @@ client.on('messageCreate', function(message) {
   if(message.guild) return;
   if(!currentlyPlaying[message.author.id]) return;
   let currentGame = gameInfo[currentlyPlaying[message.author.id].toString()];
-  if(!currentGame.started) return message.channel.send("The game has not been started yet.")
   if(currentGame.mode != "Swap!") return;
   let isDead = false;
   for(let i = 0; i < currentGame.dead.length; i++) {

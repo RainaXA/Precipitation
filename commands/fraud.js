@@ -1,4 +1,5 @@
 const { MessageEmbed } = require('discord.js')
+const fs = require('fs')
 
 function playerList(message) {
     let list = "";
@@ -34,6 +35,26 @@ try {
     }
 }
 
+fs.readdir("./modules/fraud", function(error, files) {
+  if (error) {
+    fs.mkdirSync("./modules/fraud/")
+    log("fraud gamemodes folder not found - creating now.", logging.warn, "fraud")
+  } else {
+    let modules = files.filter(f => f.split(".").pop() === "js");
+    let counter = 0;
+    try {
+      modules.forEach((f, i) => {
+        let props = require(`../modules/fraud/${f}`);
+        log("Loaded module " + f.replace(".js", "") + ".", null, 1)
+        counter++;
+      })
+    } catch (err) {
+      log("Sorry, but a module had an error: " + err.stack, logging.error, 3)
+    }
+    log("loaded " + counter + " fraud modes.", logging.success, "fraud")
+  }
+})
+
 var command = {
     name: "fraud",
     desc: "Manage Fraud games.",
@@ -54,6 +75,7 @@ var command = {
                   currentlyPlaying[message.author.id] = message.guild.id;
                   gameInfo[message.guild.id].started = false;
                   gameInfo[message.guild.id].fraud = null;
+                  gameInfo[message.guild.id].mode = false; // temporary
                   return message.channel.send("The game has been created, use `" + host.prefix + "fraud join` in this server to join!")
                 case "join":
                   if(!gameInfo[message.guild.id]) return message.channel.send("The game does not exist yet, use `" + host.prefix + "fraud create` to create it.")

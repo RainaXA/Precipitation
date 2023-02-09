@@ -276,6 +276,11 @@ client.on('ready', async() => {
   }
 })
 
+client.on('newGuild', function(guild) {
+  config.guilds[guild.id] = {};
+  log("initialized new guild " + guild.name, logging.info, "config")
+})
+
 process.on('uncaughtException', error => {
   log(error.stack, logging.error, "catch")
 })
