@@ -1,38 +1,25 @@
 const { MessageEmbed } = require('discord.js')
 const fs = require('fs')
 
-function playerList(message) {
-    let list = "";
-    let specList = "";
-    let didSpec = false;
-    for (player of gameInfo[message.guild.id].players) {
-      didSpec = false;
-      for(spec of gameInfo[message.guild.id].specs) {
-        if(player == spec) {
-          didSpec = true;
-          specList = specList + spec.tag + "\n"
-          break;
-        }
-      }
-      if(!didSpec) list = list + player.tag + "\n"
-    }
-    if(specList == "") specList = "*None.*"
-    let embed = new MessageEmbed()
-    .setTitle("Fraud #" + gameInfo[message.guild.id].id + " | " + message.guild.name)
-    .addField("Players (" + (gameInfo[message.guild.id].players.length - gameInfo[message.guild.id].specs.length) + "/12)", list)
-    .addField ("Spectators", specList)
-    .setColor(host.color)
-    .setFooter({text: "Fraud v1.1"})
-    message.channel.send({embeds: [embed]})
-  }
+let fraudVer = "2.0 Beta"
 
-try {
-    var name = require('./name.js').exports.name;
-} catch(err) {
-    log("name function not found - defaulting to discord username only.", logging.warn, "ping")
-    function name(user) {
-      return user.username;
-    }
+function playerList(message) {
+  let list = "";
+  let specList = "";
+  for (player of gameInfo[message.guild.id].players) {
+    list = list + player.tag + "\n"
+  }
+  for(spec of gameInfo[message.guild.id].specs) {
+    specList = specList + spec.tag + "\n"
+  }
+  if(specList == "") specList = "*None.*"
+  let embed = new MessageEmbed()
+  .setTitle("Fraud #" + gameInfo[message.guild.id].id + " | " + message.guild.name)
+  .addField("Players (" + gameInfo[message.guild.id].players.length + "/12)", list)
+  .addField ("Spectators", specList)
+  .setColor(host.color)
+  .setFooter({text: "Fraud v" + fraudVer})
+  message.channel.send({embeds: [embed]})
 }
 
 fs.readdir("./modules/fraud", function(error, files) {
@@ -66,16 +53,30 @@ var command = {
             switch(multiargs[0].toLowerCase()) {
                 case "create":
                   if(gameInfo[message.guild.id]) return message.channel.send("The game already exists, please **join** the game instead.")
-                  gameInfo[message.guild.id] = {};
-                  gameInfo[message.guild.id].players = [];
-                  gameInfo[message.guild.id].players.push(message.author)
-                  gameInfo[message.guild.id].specs = [];
-                  gameInfo[message.guild.id].id = currentID;
+                  gameInfo[message.guild.id] = {
+                    players: [],
+                    viewers: [],
+                    specs: [],
+                    list: {
+
+                    },
+                    fraud: null,
+                    started: false,
+                    id: currentID
+                  };
                   currentID++;
+                  gameInfo[message.guild.id].list[message.author.id] = {
+                    name: message.author.username,
+                    id: message.author.id,
+                    player: true,
+                    tag: message.author.tag,
+                    dead: false,
+                    votedFor: null
+                  };
+                  gameInfo[message.guild.id].players.push(gameInfo[message.guild.id].list[message.author.id])
+                  gameInfo[message.guild.id].viewers.push(message.author)
                   currentlyPlaying[message.author.id] = message.guild.id;
-                  gameInfo[message.guild.id].started = false;
-                  gameInfo[message.guild.id].fraud = null;
-                  gameInfo[message.guild.id].mode = false; // temporary
+                  //gameInfo[message.guild.id].mode = false;
                   return message.channel.send("The game has been created, use `" + host.prefix + "fraud join` in this server to join!")
                 case "join":
                   if(!gameInfo[message.guild.id]) return message.channel.send("The game does not exist yet, use `" + host.prefix + "fraud create` to create it.")
@@ -83,14 +84,24 @@ var command = {
                   if(currentlyPlaying[message.author.id] == message.guild.id) return message.channel.send("You're already in this lobby.")
                   if(currentlyPlaying[message.author.id]) return message.channel.send("Sorry, but you're already in a game in another server. Please leave this game first.")
                   if(!multiargs[1]) multiargs[1] = "player"
+                  gameInfo[message.guild.id].list[message.author.id] = {};
+                  gameInfo[message.guild.id].list[message.author.id].name = message.author.username;
+                  gameInfo[message.guild.id].list[message.author.id].id = message.author.id;
+                  //gameInfo[message.guild.id].list[message.author.id].send = message.author.send;
+                  gameInfo[message.guild.id].list[message.author.id].tag = message.author.tag;
+                  gameInfo[message.guild.id].list[message.author.id].dead = false;
+                  gameInfo[message.guild.id].list[message.author.id].votedFor = null;
                   switch(multiargs[1].toLowerCase()) {
                     case "player":
-                      if((gameInfo[message.guild.id].players.length - gameInfo[message.guild.id].specs.length) >= 12) return message.channel.send("Sorry, but the game is full.")
-                      gameInfo[message.guild.id].players.push(message.author)
+                      if(gameInfo[message.guild.id].players.length >= 12) return message.channel.send("Sorry, but the game is full.")
+                      gameInfo[message.guild.id].list[message.author.id].player = true;
+                      gameInfo[message.guild.id].players.push(gameInfo[message.guild.id].list[message.author.id])
+                      gameInfo[message.guild.id].viewers.push(message.author)
                       break;
                     case "spectator":
-                      gameInfo[message.guild.id].players.push(message.author)
-                      gameInfo[message.guild.id].specs.push(message.author)
+                      gameInfo[message.guild.id].viewers.push(message.author)
+                      gameInfo[message.guild.id].specs.push(gameInfo[message.guild.id].list[message.author.id])
+                      gameInfo[message.guild.id].list[message.author.id].player = false;
                       break;
                   }
                   currentlyPlaying[message.author.id] = message.guild.id;
@@ -100,10 +111,10 @@ var command = {
                   if(!gameInfo[message.guild.id]) return message.channel.send("The game does not exist yet, please use `" + host.prefix + "fraud create` to create it.")
                   if(gameInfo[message.guild.id].players[0].id != message.author.id) return message.channel.send("You are not the host, so you may not start the game.")
                   if(gameInfo[message.guild.id].started) return message.channel.send("The game has already been started!")
-                  if(gameInfo[message.guild.id].players.length < 4) return message.channel.send("A minimum of 4 players are required for the game to start.")
+                  //if(gameInfo[message.guild.id].players.length < 4) return message.channel.send("A minimum of 4 players are required for the game to start.")
                   gameInfo[message.guild.id].started = true;
                   message.channel.send("Please check your DM's. The game is starting.")
-                  startGame(gameInfo[message.guild.id].players, message.guild.id)
+                  startGame(gameInfo[message.guild.id].viewers, message.guild.id)
                   break;
                 case "list":
                   if(!gameInfo[message.guild.id]) return message.channel.send("The game does not exist yet, use `" + host.prefix + "fraud create` to create it.")
@@ -118,11 +129,11 @@ var command = {
                   .addField("Cheating", "It is against the rules to reveal to anyone outside of Fraud if you are impersonating someone else or if you are being impersonated.")
                   .addField("Spamming", "Typing multiple messages in very short intervals of time is considered spamming. It's annoying, and sometimes the entire game will slow down because of it.")
                   .setColor(host.color)
-                  .setFooter({text: "Fraud v1.1"})
+                  .setFooter({text: "Fraud v" + fraudVer})
                   return message.channel.send({embeds: [embed]})
                 case "leave":
                   if(!currentlyPlaying[message.author.id]) return message.channel.send("You are not in a game.")
-                  if(gameInfo[currentlyPlaying[message.author.id]].players.length == 1) {
+                  if(gameInfo[currentlyPlaying[message.author.id]].players.length == 1 && gameInfo[message.guild.id].list[message.author.id].player) {
                     message.channel.send("The game has now been disbanded.")
                     gameInfo[currentlyPlaying[message.author.id]] = null;
                     currentlyPlaying[message.author.id] = null;
@@ -136,6 +147,24 @@ var command = {
                         }
                       }
                     }
+                    for(let i = 0; i < gameInfo[currentlyPlaying[message.author.id]].viewers.length; i++) {
+                      if((gameInfo[currentlyPlaying[message.author.id]].viewers[i].id == message.author.id)) {
+                        if(i != 0) {
+                          gameInfo[currentlyPlaying[message.author.id]].viewers.splice(i, 1)
+                        } else {
+                          gameInfo[currentlyPlaying[message.author.id]].viewers.shift();
+                        }
+                      }
+                    }
+                    for(let i = 0; i < gameInfo[currentlyPlaying[message.author.id]].specs.length; i++) {
+                      if((gameInfo[currentlyPlaying[message.author.id]].specs[i].id == message.author.id)) {
+                        if(i != 0) {
+                          gameInfo[currentlyPlaying[message.author.id]].specs.splice(i, 1)
+                        } else {
+                          gameInfo[currentlyPlaying[message.author.id]].specs.shift();
+                        }
+                      }
+                    }
                     currentlyPlaying[message.author.id] = null;
                     message.channel.send("You have left the game.")
                   }
@@ -145,7 +174,10 @@ var command = {
                   if(gameInfo[message.guild.id].players[0].id != message.author.id) return message.channel.send("You are not the host, so you may not disband the lobby.")
                   if(gameInfo[message.guild.id].started) return message.channel.send("The game has been started, therefore it may not be disbanded.")
                   message.channel.send("The game has now been disbanded.")
-                  gameInfo[currentlyPlaying[message.author.id]] = null;
+                  for(viewer of gameInfo[message.guild.id].viewers) {
+                    currentlyPlaying[viewer.id] = null;
+                  }
+                  gameInfo[message.guild.id] = null;
                   currentlyPlaying[message.author.id] = null;
                   return;
                 case "settings":
@@ -153,7 +185,7 @@ var command = {
                   .setTitle("Fraud #" + gameInfo[message.guild.id].id + " >> Settings | " + message.guild.name)
                   .addField("Game Mode", "Classic") // hardcoded until I get it working
                   .setColor(host.color)
-                  .setFooter({text: "Fraud v1.1"})
+                  .setFooter({text: "Fraud v" + fraudVer})
                   return message.channel.send({embeds: [embedd]})
               }
         }

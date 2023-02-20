@@ -3,7 +3,6 @@ let fs = require('fs')
 const { Collection, MessageEmbed } = require('discord.js');
 
 client.commands = new Collection();
-client.commands.roll = new Collection();
 global.commands = [];
 
 global.loadCommands = function() {
@@ -39,12 +38,7 @@ global.loadCommands = function() {
 }
 loadCommands();
 
-var branches = {
-  stable: 0,
-  roll: 1
-}
-
-function processCommand(message, cbranch) { // used in editing messages + normal messages
+function processCommand(message) { // used in editing messages + normal messages
   var fCommand = message.content.slice(messagePrefix.length).split(" ")
   let counter = 0;
   while(fCommand[0] == "") {
@@ -57,16 +51,7 @@ function processCommand(message, cbranch) { // used in editing messages + normal
   var parameters = args.split("--")
   var parameter = parameters[1]
   if(!parameter) parameter = "precipitation <3" // bot breaks because "toLowerCase()" may not exist
-  let cmd;
-  switch(cbranch) {
-    case branches.stable:
-      cmd = client.commands.get(command.toLowerCase())
-      break;
-    case branches.roll:
-      cmd = client.commands.roll.get(command.toLowerCase())
-      if(!cmd) cmd = client.commands.get(command.toLowerCase())
-      break;
-  }
+  let cmd = client.commands.get(command.toLowerCase());
   let validCommand = false;
   try {
     if(cmd) {
@@ -98,14 +83,7 @@ function processCommand(message, cbranch) { // used in editing messages + normal
   }
 }
 
-client.on('messageCreate', function(message) {
-  let guildBranch = "stable";
-  if(message.guild) {
-    if(!config.guilds[message.guild.id]) config.guilds[message.guild.id] = {};
-    if(!config.guilds[message.guild.id].prefix) config.guilds[message.guild.id].prefix = host.prefix;
-    if(!config.guilds[message.guild.id].branch) config.guilds[message.guild.id].branch = "stable";
-    guildBranch = config.guilds[message.guild.id].branch
-  }
+function initCommand(message) {
   if (message.content.startsWith("<@" + client.user.id + ">")) {
     global.messagePrefix = "<@" + client.user.id + ">"
   } else if (!message.guild) {
@@ -116,45 +94,17 @@ client.on('messageCreate', function(message) {
   if(message.content.toLowerCase().startsWith(messagePrefix) && !message.author.bot) {
     if(!config.users[message.author.id]) config.users[message.author.id] = {}
     if(getTextInput(message.author.id, host.id["blacklisted"])) return message.channel.send("Sorry, but you are blacklisted from the bot. If you feel you've been falsely banned, please make an appeal to <@" + host.id["owner"] + ">.")
-    switch(guildBranch) {
-      case "stable":
-        processCommand(message, branches.stable);
-        break;
-      case "roll":
-        processCommand(message, branches.roll)
-        break;
-    }
+    processCommand(message);
   }
+}
+
+client.on('messageCreate', function(message) {
+  initCommand(message)
 });
 
 client.on('messageUpdate', function(oldMessage, newMessage) {
   if(oldMessage.content == newMessage.content) return;
-  let guildBranch = "stable";
-  if(newMessage.guild) {
-    if(!config.guilds[newMessage.guild.id]) config.guilds[newMessage.guild.id] = {};
-    if(!config.guilds[newMessage.guild.id].prefix) config.guilds[newMessage.guild.id].prefix = host.prefix[branch];
-    if(!config.guilds[newMessage.guild.id].branch) config.guilds[newMessage.guild.id].branch = "stable";
-    guildBranch = config.guilds[newMessage.guild.id].branch
-  }
-  if (newMessage.content.startsWith("<@" + client.user.id + ">")) {
-    global.messagePrefix = "<@" + client.user.id + ">"
-  } else if (!newMessage.guild) {
-    global.messagePrefix = host.prefix
-  } else {
-    global.messagePrefix = config.guilds[newMessage.guild.id].prefix
-  }
-  if(newMessage.content.toLowerCase().startsWith(messagePrefix) && !newMessage.author.bot) {
-    if(!config.users[newMessage.author.id]) config.users[newMessage.author.id] = {}
-    if(getTextInput(newMessage.author.id, host.id["blacklisted"])) return newMessage.channel.send("Sorry, but you are blacklisted from the bot. If you feel you've been falsely banned, please make an appeal to <@" + host.id["owner"] + ">.")
-    switch(guildBranch) {
-      case "stable":
-        processCommand(newMessage, branches.stable);
-        break;
-      case "roll":
-        processCommand(newMessage, branches.roll)
-        break;
-    }
-  }
+  initCommand(newMessage);
 })
 
 client.on('interactionCreate', async interaction => {
@@ -164,10 +114,10 @@ client.on('interactionCreate', async interaction => {
   if(getTextInput(interaction.user.id, host.id["blacklisted"])) return interaction.reply({ content: "Sorry, but you are blacklisted from the bot. If you feel you've been falsely banned, please make an appeal to <@" + host.id["owner"] + ">.", ephemeral: true })
   if(!command.prereqs.dm && !interaction.guild) return interaction.reply({ content: "Sorry, but this command is not permitted in a direct message.", ephemeral: true })
   if(interaction.guild) {
-    for(permission of command.metadata.permissions.bot) {
+    for(permission of command.prereqs.bot) {
       if(!interaction.guild.me.permissions.has(permission)) return interaction.reply({ content: "I do not have permission to run this command."})
     }
-    for(permission of command.metadata.permissions.user) {
+    for(permission of command.prereqs.user) {
       if(!interaction.member.permissions.has(permission)) return interaction.reply({ content: "You do not have permission to run this command."})
     }
   }

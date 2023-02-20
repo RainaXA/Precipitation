@@ -7,11 +7,11 @@ var embed;
 client.on('ready', async() => {
     embed = new MessageEmbed()
     embed.setTitle("Precipitation " + host.version.external)
-    embed.setDescription('Hybrid moderation-fun bot')
+    embed.setDescription('General-purpose Discord bot')
     embed.addFields(
-        { name: "Credits", value: "**raina#7847** - bot developer\n**arcelo#8442** - bug finder" },
-        { name: "Next Release", value: releases["stable"] }, // not counting updates to this field as being a version change
-        { name: "Links", value: "[GitHub](https://www.github.com/RainaXA/Precipitation)\n[Support Server](https://discord.gg/bSx5e434ub)\n[Invite Precipitation](https://discord.com/api/oauth2/authorize?client_id=322397835716853771&permissions=8&scope=applications.commands%20bot) ([Roll](https://discord.com/api/oauth2/authorize?client_id=982907885535236118&permissions=8&scope=applications.commands%20bot) | [Bleed](https://discord.com/api/oauth2/authorize?client_id=982908116163260416&permissions=8&scope=bot%20applications.commands))" }
+        { name: "Credits", value: "**raina#7847** - bot developer\n**dr thargoide#8442** - bug finder" },
+        { name: "Next Release", value: releases["stable"] },
+        { name: "Links", value: "[GitHub](https://www.github.com/RainaXA/Precipitation)\n[Support Server](https://discord.gg/kasmyXa)\n[Invite Precipitation](https://discord.com/api/oauth2/authorize?client_id=322397835716853771&permissions=8&scope=applications.commands%20bot)" }
     )
     embed.setColor(host.color)
     embed.setFooter({ text: "Precipitation " + host.version.external + " " + host.version.name, iconURL: client.user.displayAvatarURL() })

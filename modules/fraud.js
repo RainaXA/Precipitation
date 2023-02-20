@@ -47,7 +47,7 @@ function dayCycle(guID) {
   switch(gameInfo[guID].phase) {
     case 0: // begin discussion phase
       if(gameInfo[guID].sayFraudMessage == 2) {
-        phase.addField("The Fraud has taken over someone.", "You must find who " + gameInfo[guID].fraud.username + " has taken over!") // add on that Fraud has taken over.
+        phase.addField("The Fraud has taken over someone.", "You must find who " + gameInfo[guID].fraud.name + " has taken over!") // add on that Fraud has taken over.
         gameInfo[guID].frauded.send("**You've been taken over!**")
         gameInfo[guID].dead.push(gameInfo[guID].frauded)
         gameInfo[guID].aliveCount = gameInfo[guID].aliveCount - 1;
@@ -62,7 +62,7 @@ function dayCycle(guID) {
       } else {
         phase.setDescription("Just talk with the others - there is nothing to worry about!")
       }
-      sendMessage({embeds: [phase]}, gameInfo[guID].players)
+      sendMessage({embeds: [phase]}, gameInfo[guID].viewers)
       setTimeout(dayCycle, 120000, guID)
       break;
     case 1: // begin voting phase
@@ -71,7 +71,7 @@ function dayCycle(guID) {
       phase.setDescription("Vote for who you think was taken over by the Fraud with `!vote`! You don't even have to type their full name!")
       phase.setColor("BLUE")
       phase.setFooter("There are " + gameInfo[guID].daysRemaining + " days remaining before the Fraud wins.")
-      sendMessage({embeds: [phase]}, gameInfo[guID].players)
+      sendMessage({embeds: [phase]}, gameInfo[guID].viewers)
       setTimeout(dayCycle, 30000, guID)
       break;
     case 2: // begin rest phase
@@ -81,6 +81,7 @@ function dayCycle(guID) {
       gameInfo[guID].votesAgainst = {};
       for(player of gameInfo[guID].players) {
         gameInfo[guID].votesAgainst[player.id] = [];
+        gameInfo[guID].list[player.id].votedFor = null;
       }
       phase.setTitle(placeValue(gameInfo[guID].day + 1) + " Resting Phase - 20s")
       phase.setColor("YELLOW")
@@ -93,7 +94,7 @@ function dayCycle(guID) {
         phase.setFooter("Innocents automatically win if the Fraud doesn't take over after the 2nd Resting Phase.")
       }
       if(gameInfo[guID].daysRemaining == 0) return win(guID, 1)
-      sendMessage({embeds: [phase]}, gameInfo[guID].players)
+      sendMessage({embeds: [phase]}, gameInfo[guID].viewers)
       setTimeout(dayCycle, 20000, guID)
       gameInfo[guID].day++;
       break;
@@ -109,7 +110,7 @@ function dayCycle(guID) {
       phase.setDescription("Vote for who you think was taken over by the Fraud with `!vote`! You don't even have to type their full name!")
       phase.setColor("DARK_BLUE")
       phase.setFooter("There are " + gameInfo[guID].daysRemaining + " days remaining before the Fraud wins.")
-      sendMessage({embeds: [phase]}, gameInfo[guID].players)
+      sendMessage({embeds: [phase]}, gameInfo[guID].viewers)
       setTimeout(dayCycle, 15000, guID)
       break;
   }
@@ -122,11 +123,11 @@ function win(guID, team) {
   gameInfo[guID].started = false;
   switch(team) {
     case 0: // innocent
-      return sendMessage("**Innocents win!**", gameInfo[guID].players);
+      return sendMessage("**Innocents win!**", gameInfo[guID].viewers);
     case 1: // fraud
-      return sendMessage("**The Fraud wins!** " + gameInfo[guID].fraud.username + " was the Fraud, and they took over " + gameInfo[guID].frauded.username + ".", gameInfo[guID].players);
+      return sendMessage("**The Fraud wins!** " + gameInfo[guID].fraud.name + " was the Fraud, and they took over " + gameInfo[guID].frauded.username + ".", gameInfo[guID].viewers);
     case 2: // innocents due to fraud inactivity
-      return sendMessage("**Innocents win!** " + gameInfo[guID].fraud.username + " was the inactive Fraud.", gameInfo[guID].players);
+      return sendMessage("**Innocents win!** " + gameInfo[guID].fraud.name + " was the inactive Fraud.", gameInfo[guID].viewers);
   }
 }
 
@@ -141,21 +142,21 @@ function transitionTrial(guID) {
       break;
     case 4:
       gameInfo[guID].phase++;
-      sendMessage("**Their fate lies in our hands.** Use `!guilty` to guilty, or your vote will be automatically innocent!", gameInfo[guID].players)
+      sendMessage("**Their fate lies in our hands.** Use `!guilty` to guilty, or your vote will be automatically innocent! You may take back your guilty vote using `!innocent`!", gameInfo[guID].viewers)
       setTimeout(transitionTrial, 15000, guID)
       break;
     case 5:
       setTimeout(dayCycle, 10000, guID)
-      if(gameInfo[guID].guilties.length > (gameInfo[guID].players.length - gameInfo[guID].dead.length - gameInfo[guID].guilties.length)) {
-        sendMessage("**GUILTY!** They have been executed.", gameInfo[guID].players)
+      if(gameInfo[guID].guilties.length > (gameInfo[guID].players.length - (gameInfo[guID].dead.length - gameInfo[guID].specs.length) - gameInfo[guID].guilties.length - 1)) {
+        sendMessage("**GUILTY!** " + gameInfo[guID].trial.name + " has been executed by a vote of " + gameInfo[guID].guilties.length + "-" + (gameInfo[guID].players.length - gameInfo[guID].guilties.length - (gameInfo[guID].dead.length - gameInfo[guID].specs.length) - 1) + ".", gameInfo[guID].viewers)
         gameInfo[guID].dead.push(gameInfo[guID].trial)
         gameInfo[guID].aliveCount = gameInfo[guID].aliveCount - 1;
         if(gameInfo[guID].trial.id == gameInfo[guID].frauded.id) {
-          sendMessage(gameInfo[guID].trial.username + " was the Fraud.", gameInfo[guID].players)
+          sendMessage(gameInfo[guID].trial.name + " was the Fraud.", gameInfo[guID].viewers)
           gameInfo[guID].phase = 7;
           setTimeout(win, 3000, guID, 0)
         } else {
-          sendMessage(gameInfo[guID].trial.username + " was Innocent.", gameInfo[guID].players)
+          sendMessage(gameInfo[guID].trial.name + " was Innocent.", gameInfo[guID].viewers)
           if(gameInfo[guID].aliveCount <= 2) {
             setTimeout(win, 5000, guID, 1)
           } else {
@@ -166,31 +167,33 @@ function transitionTrial(guID) {
       } else {
         if(gameInfo[guID].trials == 1) gameInfo[guID].phase = 8;
         if(gameInfo[guID].trials == 0) gameInfo[guID].phase = 2;
-        return sendMessage("**INNOCENT!** They may now return to play.", gameInfo[guID].players)
+        return sendMessage("**INNOCENT!** " + gameInfo[guID].trial.name + " has been pardoned by a vote of " + (gameInfo[guID].players.length - gameInfo[guID].guilties.length - (gameInfo[guID].dead.length - gameInfo[guID].specs.length) - 1) + "-" + gameInfo[guID].guilties.length + ".", gameInfo[guID].viewers)
       }
   }
 }
 
-global.startGame = function(playerList, guildID) {
-  gameInfo[guildID].fraud = playerList[Math.floor(Math.random() * playerList.length)];
+global.startGame = function(viewers, guildID) {
+  gameInfo[guildID].fraud = gameInfo[guildID].players[Math.floor(Math.random() * gameInfo[guildID].players.length)];
   gameInfo[guildID].frauded = null;
   gameInfo[guildID].sayFraudMessage = 0;
   gameInfo[guildID].day = 0;
   gameInfo[guildID].phase = 0;
-  gameInfo[guildID].dead = [];
+  //gameInfo[guildID].dead = gameInfo[guildID].specs;
+  gameInfo[guildID].dead = []
+  for (viewer of gameInfo[guildID].viewers) {
+    if (!gameInfo[guildID].list[viewer.id].player) {
+      gameInfo[guildID].dead.push(viewer)
+      gameInfo[guildID].list[viewer.id].dead = true;
+    } else {
+      gameInfo[guildID].list[viewer.id].dead = false;
+    }
+  }
   gameInfo[guildID].trial = null;
   gameInfo[guildID].daysRemaining = 3;
   gameInfo[guildID].aliveCount = gameInfo[guildID].players.length;
-  for(spec of gameInfo[guildID].specs) {
-    gameInfo[guildID].dead.push(spec)
-    gameInfo[guildID].aliveCount = gameInfo[guildID].aliveCount - 1
-  }
-  while(getTextInput(gameInfo[guildID].fraud, gameInfo[guildID].dead, 2)) {
-    gameInfo[guildID].fraud = playerList[Math.floor(Math.random() * playerList.length)];
-  }
   gameInfo[guildID].trials = 2;
   gameInfo[guildID].votesAgainst = {};
-  for(player of playerList) {
+  for(player of viewers) {
     gameInfo[guildID].votesAgainst[player.id] = [];
     if(gameInfo[guildID].fraud.id == player.id) player.send("**Fraud**\nImpersonate somebody during the first resting period, and you have to act exactly like them without being caught.")
     if(gameInfo[guildID].fraud.id != player.id) {
@@ -210,24 +213,23 @@ client.on('messageCreate', function(message) {
   if(!currentlyPlaying[message.author.id]) return;
   let currentGame = gameInfo[currentlyPlaying[message.author.id].toString()];
   if(!currentGame.started) return message.channel.send("The game has not been started yet.")
-  let isDead = false;
-  for(let i = 0; i < currentGame.dead.length; i++) {
-    if((currentGame.dead[i].id == message.author.id)) isDead = true;
-  }
-  if(isDead) return sendMessage("*" + message.author.username + ": " + message.content + "*", currentGame.dead)
+  if(currentGame.list[message.author.id].dead) return sendMessage("*" + message.author.username + ": " + message.content + "*", currentGame.dead)
   switch(currentGame.phase) {
     case 0:
       if(message.author.id != currentGame.fraud.id) return message.channel.send("You may not type during the Resting Phase.")
       if(message.content.startsWith("!fraud ")) {
         if(currentGame.sayFraudMessage == 1) return message.channel.send("You have already taken over, so you may not change your target.")
-        let cmd = message.content.slice(7)
-        for(user of currentGame.players) {
+        let cmd = message.content.slice(7).toLowerCase()
+        for(user of currentGame.viewers) {
           if(user.username.toLowerCase().includes(cmd)) {
             if(user.id == currentGame.fraud.id) return message.channel.send("You cannot take over yourself, that would be weird.")
-            if(getTextInput(user, currentGame.dead, 2)) return message.channel.send("You cannot take over a spectator.")
+            if(!currentGame.list[user.id].player) return message.channel.send("You cannot take over a spectator.")
             currentGame.frauded = user;
-            currentGame.sayFraudMessage = 2;
-            return message.channel.send("You have decided to take over " + user.username + ".")
+            if(currentGame.sayFraudMessage = 0) {
+              currentGame.sayFraudMessage = 2;
+              return message.channel.send("You have decided to take over " + user.username + ".")
+            }
+            if(currentGame.sayFraudMessage = 2) return message.channel.send("You have instead decided to take over " + user.username + ".")
           }
         }
       }
@@ -238,13 +240,24 @@ client.on('messageCreate', function(message) {
         let target = message.content.toLowerCase().slice(6)
         let submitted = false;
         for(user of currentGame.players) {
-          if(user.username.toLowerCase().includes(target)) {
+          if(user.name.toLowerCase().includes(target)) {
             if(message.author.id == user.id) return; // cant vote for yourself
-            if(user.id == currentGame.fraud.id) return user.send("*You can't vote for the original Fraud. You must try to find the one they've taken over.*"); // cant vote for the older fraud
+            if(user.id == currentGame.fraud.id) return message.author.send("*You can't vote for the original Fraud. You must try to find the one they've taken over.*"); // cant vote for the older fraud
             for(let i = 0; i < currentGame.votesAgainst[user.id].length; i++) {
               if(currentGame.votesAgainst[user.id][i] == message.author.id) return; // dont allow votes again
             }
             if(getTextInput(user, currentGame.dead, 2) && user.id != currentGame.frauded.id) return; // don't allow votes for dead/spectators, although be mindful that frauded are dead
+            if(currentGame.list[message.author.id].votedFor) {
+              for(let i = 0; i < currentGame.votesAgainst[currentGame.list[message.author.id].votedFor]; i++) {
+                if((currentGame.votesAgainst[currentGame.list[message.author.id].votedFor][i] == message.author.id)) {
+                  if(i != 0) {
+                    currentGame.votesAgainst[currentGame.list[message.author.id].votedFor].splice(i, 1)
+                  } else {
+                    currentGame.votesAgainst[currentGame.list[message.author.id].votedFor].shift();
+                  }
+                }
+              }
+            }
             if(message.author.id == currentGame.fraud.id && currentGame.frauded) {
               currentGame.votesAgainst[user.id].push(currentGame.frauded.id) // submit vote as Frauded
             } else {
@@ -255,16 +268,19 @@ client.on('messageCreate', function(message) {
           if(submitted) break;
         }
         if(!submitted) break;
-        if(message.author.id == currentGame.fraud.id && currentGame.frauded != null) {
-          sendMessage("**" + currentGame.frauded.username + " has voted against " + user.username + ".** " + (majorityCounts[currentGame.aliveCount] - currentGame.votesAgainst[user.id].length) + " more votes to get them on trial.", currentGame.players)
+        let shownName = message.author.username;
+        if(message.author.id == currentGame.fraud.id) shownName = currentGame.frauded.username
+        if(!currentGame.list[message.author.id].votedFor) {
+          sendMessage("**" + shownName + " has voted against " + user.name + ".** " + (majorityCounts[currentGame.aliveCount] - currentGame.votesAgainst[user.id].length) + " more votes to get them on trial.", currentGame.viewers)
         } else {
-          sendMessage("**" + message.author.username + " has voted against " + user.username + ".** " + (majorityCounts[currentGame.aliveCount] - currentGame.votesAgainst[user.id].length) + " more votes to get them on trial.", currentGame.players)
+          sendMessage("**" + shownName + " has changed their vote to " + user.name + ".** " + (majorityCounts[currentGame.aliveCount] - currentGame.votesAgainst[user.id].length) + " more votes to get them on trial.", currentGame.viewers)
         }
+        currentGame.list[message.author.id].votedFor = user.id;
         if((majorityCounts[currentGame.aliveCount] - currentGame.votesAgainst[user.id].length) <= 0) {
           currentGame.phase = 3;
           currentGame.trial = user;
           currentGame.trials = currentGame.trials - 1;
-          sendMessage("**The majority have elected to put " + user.username + " on trial.** You have forty-five seconds to provide a defense for your actions.", currentGame.players)
+          sendMessage("**The majority have elected to put " + user.name + " on trial.** You have forty-five seconds to provide a defense for your actions.", currentGame.viewers)
           transitionTrial(currentlyPlaying[message.author.id].toString()); // begin the trial!
         }
       } else {
@@ -288,9 +304,20 @@ client.on('messageCreate', function(message) {
         if(getTextInput(message.author.id, currentGame.guilties)) return; //they've already voted guilty!
         currentGame.guilties.push(message.author.id);
         return message.channel.send("*Your vote has been received.*")
+      } else if(message.content == "!innocent") {
+        for(let i = 0; i < currentGame.guilties; i++) {
+          if((currentGame.guilties[i] == message.author.id)) {
+            if(i != 0) {
+              currentGame.guilties.splice(i, 1)
+            } else {
+              currentGame.guilties.shift();
+            }
+          }
+        }
+        message.channel.send("*Your vote has been taken back.*")
       }
       break;
   }
-  if(currentGame.fraud.id == message.author.id && currentGame.frauded != null) return sendMessage("**" + currentGame.frauded.username + "**: " + message.content, currentGame.players)
-  sendMessage("**" + message.author.username + "**: " + message.content, currentGame.players)
+  if(currentGame.fraud.id == message.author.id && currentGame.frauded != null) return sendMessage("**" + currentGame.frauded.username + "**: " + message.content, currentGame.viewers)
+  sendMessage("**" + message.author.username + "**: " + message.content, currentGame.viewers)
 })
