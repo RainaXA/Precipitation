@@ -89,6 +89,7 @@ function initCommand(message) {
   } else if (!message.guild) {
     global.messagePrefix = host.prefix
   } else {
+    if(!config.guilds[message.guild.id].prefix) config.guilds[message.guild.id].prefix = host.prefix
     global.messagePrefix = config.guilds[message.guild.id].prefix
   }
   if(message.content.toLowerCase().startsWith(messagePrefix) && !message.author.bot) {

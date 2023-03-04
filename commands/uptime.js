@@ -67,7 +67,7 @@ var command = {
                 days++;
                 hours = hours - 24;
             }
-            log(days + "d " + hours + "h " + minutes + "m " + seconds + "s", logging.output)
+            log(days + "d " + hours + "h " + minutes + "m " + seconds + "s", logging.output, "uptime")
         }
     },
     ver: "3.0.0",

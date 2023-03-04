@@ -55,9 +55,10 @@ var commands = {
                 } else {
                     uinfoUser = message.author;
                 }
-                let accDates = "**Creation Date**: " + uinfoUser.createdAt.toUTCString()
+                let accDates = "**Creation Date**: <t:" + parseInt(uinfoUser.createdTimestamp / 1000, 10) + ">"
                 let names = "**Username**: " + uinfoUser.username
                 let birthday;
+                if(!config.users[uinfoUser.id]) config.users[uinfoUser.id] = {};
                 if(config.users[uinfoUser.id].birthday) {
                     birthday = toProperUSFormat(config.users[uinfoUser.id].birthday.month, config.users[uinfoUser.id].birthday.day, config.users[uinfoUser.id].birthday.year)
                 } else {
@@ -77,7 +78,7 @@ var commands = {
                     }
                 })
                 if (uinfoMember) {
-                    accDates = accDates + "\n**Join Date**: " + uinfoMember.joinedAt.toUTCString();
+                    accDates = accDates + "\n**Join Date**: <t:" + parseInt(uinfoMember.joinedTimestamp / 1000, 10) + ">"
                     names = names + "\n**Display Name**: " + uinfoMember.displayName
                 }
                 let uinfo = new MessageEmbed()
@@ -94,8 +95,9 @@ var commands = {
             slash: async function (interaction) {
                 let uinfoUser = interaction.options.getUser('user')
                 if(!uinfoUser) uinfoUser = interaction.user;
-                let accDates = "**Creation Date**: " + uinfoUser.createdAt.toUTCString()
+                let accDates = "**Creation Date**: <t:" + parseInt(uinfoUser.createdTimestamp / 1000, 10) + ">"
                 let names = "**Username**: " + uinfoUser.username
+                if(!config.users[uinfoUser.id]) config.users[uinfoUser.id] = {};
                 if(config.users[uinfoUser.id].birthday) {
                     birthday = toProperUSFormat(config.users[uinfoUser.id].birthday.month, config.users[uinfoUser.id].birthday.day, config.users[uinfoUser.id].birthday.year)
                 } else {
@@ -115,7 +117,7 @@ var commands = {
                     }
                 })
                 if (uinfoMember) {
-                    accDates = accDates + "\n**Join Date**: " + uinfoMember.joinedAt.toUTCString();
+                    accDates = accDates + "\n**Join Date**: <t:" + parseInt(uinfoMember.joinedTimestamp / 1000, 10) + ">"
                     names = names + "\n**Display Name**: " + uinfoMember.displayName
                 }
                 let uinfo = new MessageEmbed()
@@ -149,7 +151,7 @@ var commands = {
             discord: function(message, args) {
                 let embed = new MessageEmbed()
                 .setAuthor({ name: message.guild.name, iconURL: message.guild.iconURL() })
-                .addField("Dates", "**Created**: " + message.guild.createdAt.toUTCString() + "\n**Precipitation Joined**: " + message.guild.joinedAt.toUTCString())
+                .addField("Dates", "**Created**: <t:" + parseInt(uinfoMember.joinedTimestamp / 1000, 10) + ">\n**Precipitation Joined**: " + message.guild.joinedAt.toUTCString())
                 .addField("Members", "**Member Count**: " + message.guild.memberCount + "\n**Server Owner**: <@" + message.guild.ownerId + ">")
                 .addField("Misc.", "**Boosts:** " + message.guild.premiumSubscriptionCount)
                 .setColor(host.color)

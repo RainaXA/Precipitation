@@ -1,7 +1,9 @@
-const { MessageEmbed } = require('discord.js')
+const { MessageEmbed, Collection } = require('discord.js')
 const fs = require('fs')
 
 let fraudVer = "2.0 Beta"
+
+client.fraudModes = new Collection();
 
 function playerList(message) {
   let list = "";
@@ -14,7 +16,7 @@ function playerList(message) {
   }
   if(specList == "") specList = "*None.*"
   let embed = new MessageEmbed()
-  .setTitle("Fraud #" + gameInfo[message.guild.id].id + " | " + message.guild.name)
+  .setTitle("Fraud #" + gameInfo[message.guild.id].id + " [" + gameInfo[message.guild.id].mode + "] | " + message.guild.name)
   .addField("Players (" + gameInfo[message.guild.id].players.length + "/12)", list)
   .addField ("Spectators", specList)
   .setColor(host.color)
@@ -32,7 +34,7 @@ fs.readdir("./modules/fraud", function(error, files) {
     try {
       modules.forEach((f, i) => {
         let props = require(`../modules/fraud/${f}`);
-        log("Loaded module " + f.replace(".js", "") + ".", null, 1)
+        client.fraudModes.set(props.help.typename, props)
         counter++;
       })
     } catch (err) {
@@ -62,6 +64,7 @@ var command = {
                     },
                     fraud: null,
                     started: false,
+                    mode: "Classic",
                     id: currentID
                   };
                   currentID++;
@@ -76,7 +79,6 @@ var command = {
                   gameInfo[message.guild.id].players.push(gameInfo[message.guild.id].list[message.author.id])
                   gameInfo[message.guild.id].viewers.push(message.author)
                   currentlyPlaying[message.author.id] = message.guild.id;
-                  //gameInfo[message.guild.id].mode = false;
                   return message.channel.send("The game has been created, use `" + host.prefix + "fraud join` in this server to join!")
                 case "join":
                   if(!gameInfo[message.guild.id]) return message.channel.send("The game does not exist yet, use `" + host.prefix + "fraud create` to create it.")
@@ -111,10 +113,11 @@ var command = {
                   if(!gameInfo[message.guild.id]) return message.channel.send("The game does not exist yet, please use `" + host.prefix + "fraud create` to create it.")
                   if(gameInfo[message.guild.id].players[0].id != message.author.id) return message.channel.send("You are not the host, so you may not start the game.")
                   if(gameInfo[message.guild.id].started) return message.channel.send("The game has already been started!")
-                  //if(gameInfo[message.guild.id].players.length < 4) return message.channel.send("A minimum of 4 players are required for the game to start.")
+                  let mode = client.fraudModes.get(gameInfo[message.guild.id].mode.toLowerCase());
+                  if(gameInfo[message.guild.id].players.length < mode.help.minPlayers) return message.channel.send("A minimum of " + mode.help.minPlayers + " players are required for the game to start.")
+                  mode.startGame(gameInfo[message.guild.id].viewers, message.guild.id)
                   gameInfo[message.guild.id].started = true;
                   message.channel.send("Please check your DM's. The game is starting.")
-                  startGame(gameInfo[message.guild.id].viewers, message.guild.id)
                   break;
                 case "list":
                   if(!gameInfo[message.guild.id]) return message.channel.send("The game does not exist yet, use `" + host.prefix + "fraud create` to create it.")
@@ -133,38 +136,17 @@ var command = {
                   return message.channel.send({embeds: [embed]})
                 case "leave":
                   if(!currentlyPlaying[message.author.id]) return message.channel.send("You are not in a game.")
-                  if(gameInfo[currentlyPlaying[message.author.id]].players.length == 1 && gameInfo[message.guild.id].list[message.author.id].player) {
+                  if(gameInfo[currentlyPlaying[message.author.id]].players.length == 1 && gameInfo[currentlyPlaying[message.author.id]].list[message.author.id].player) {
                     message.channel.send("The game has now been disbanded.")
                     gameInfo[currentlyPlaying[message.author.id]] = null;
                     currentlyPlaying[message.author.id] = null;
                   } else {
-                    for(let i = 0; i < gameInfo[currentlyPlaying[message.author.id]].players.length; i++) {
-                      if((gameInfo[currentlyPlaying[message.author.id]].players[i].id == message.author.id)) {
-                        if(i != 0) {
-                          gameInfo[currentlyPlaying[message.author.id]].players.splice(i, 1)
-                        } else {
-                          gameInfo[currentlyPlaying[message.author.id]].players.shift();
-                        }
-                      }
-                    }
-                    for(let i = 0; i < gameInfo[currentlyPlaying[message.author.id]].viewers.length; i++) {
-                      if((gameInfo[currentlyPlaying[message.author.id]].viewers[i].id == message.author.id)) {
-                        if(i != 0) {
-                          gameInfo[currentlyPlaying[message.author.id]].viewers.splice(i, 1)
-                        } else {
-                          gameInfo[currentlyPlaying[message.author.id]].viewers.shift();
-                        }
-                      }
-                    }
-                    for(let i = 0; i < gameInfo[currentlyPlaying[message.author.id]].specs.length; i++) {
-                      if((gameInfo[currentlyPlaying[message.author.id]].specs[i].id == message.author.id)) {
-                        if(i != 0) {
-                          gameInfo[currentlyPlaying[message.author.id]].specs.splice(i, 1)
-                        } else {
-                          gameInfo[currentlyPlaying[message.author.id]].specs.shift();
-                        }
-                      }
-                    }
+                    let nu = gameInfo[currentlyPlaying[message.author.id]].players.findIndex((user) => message.author.id == user.id);
+                    gameInfo[currentlyPlaying[message.author.id]].players.splice(nu, 1)
+                    nu = gameInfo[currentlyPlaying[message.author.id]].viewers.findIndex((user) => message.author.id == user.id);
+                    gameInfo[currentlyPlaying[message.author.id]].viewers.splice(nu, 1)
+                    nu = gameInfo[currentlyPlaying[message.author.id]].specs.findIndex((user) => message.author.id == user.id);
+                    gameInfo[currentlyPlaying[message.author.id]].specs.splice(nu, 1)
                     currentlyPlaying[message.author.id] = null;
                     message.channel.send("You have left the game.")
                   }
@@ -181,9 +163,34 @@ var command = {
                   currentlyPlaying[message.author.id] = null;
                   return;
                 case "settings":
+                  if(!gameInfo[message.guild.id]) return message.channel.send("The game does not exist yet, please use `" + host.prefix + "fraud create` to create it.")
+                  if(!multiargs[1]) multiargs[1] = "n/a"
+                  switch(multiargs[1].toLowerCase()) {
+                    case "gm":
+                      if(!multiargs[2]) {
+                        let modeList = "";
+                        client.fraudModes.each(mode => {
+                          modeList = modeList + mode.help.name + "\n";
+                        })
+                        let embed = new MessageEmbed()
+                        .setTitle("Fraud #" + gameInfo[message.guild.id].id + " >> Settings >> Game Modes | " + message.guild.name)
+                        .addField("Game Modes", modeList)
+                        .setColor(host.color)
+                        .setFooter({text: "Fraud v" + fraudVer})
+                        return message.channel.send({embeds: [embed]})
+                      } else {
+                        let mode = client.fraudModes.get(multiargs[2].toLowerCase());
+                        if(mode) {
+                          gameInfo[message.guild.id].mode = mode.help.name
+                          return message.channel.send("Okay, I've changed the game mode to `" + mode.help.name + "`.")
+                        } else {
+                          return message.channel.send("Sorry, but this mode doesn't exist. Please use `" + host.prefix + "fraud settings gm` to see the list of game modes!")
+                        }
+                      }
+                  }
                   let embedd = new MessageEmbed()
                   .setTitle("Fraud #" + gameInfo[message.guild.id].id + " >> Settings | " + message.guild.name)
-                  .addField("Game Mode", "Classic") // hardcoded until I get it working
+                  .addField("Game Mode (gm)", gameInfo[message.guild.id].mode)
                   .setColor(host.color)
                   .setFooter({text: "Fraud v" + fraudVer})
                   return message.channel.send({embeds: [embedd]})

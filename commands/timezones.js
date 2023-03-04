@@ -282,8 +282,13 @@ var commands = {
                         seconds = "0" + seconds;
                     }
                     let time;
+                    let weekday;
                     if(!config.users[message.author.id].timePrefs) config.users[message.author.id].timePrefs = {};
                     if(!config.users[message.author.id].timePrefs.time) config.users[message.author.id].timePrefs.time = 2;
+                    if(!config.users[message.author.id].timePrefs.time) config.users[message.author.id].timePrefs.day = 1;
+                    //switch(config.users[message.author.id].timePrefs.day) {
+                        
+                    //}
                     switch(config.users[message.author.id].timePrefs.time) {
                         case 1:
                             let ampm;
@@ -389,8 +394,34 @@ var commands = {
                 if(!config.users[message.author.id].timePrefs) config.users[message.author.id].timePrefs = {}
                 switch(parseInt(multiargs[0])) {
                     case 1:
+                        switch(parseInt(multiargs[1])) {
+                            case 1:
+                                config.users[message.author.id].timePrefs.day = 1;
+                                return message.channel.send("Okay, I've set your time preference to `Thursday`.")
+                            case 2:
+                                config.users[message.author.id].timePrefs.day = 2;
+                                return message.channel.send("Okay, I've set your time preference to `Thurs`.")
+                            case 3:
+                                config.users[message.author.id].timePrefs.day = 3;
+                                return message.channel.send("Okay, I've set your time preference to `Th`.")
+                            default:
+                                let embed = new MessageEmbed()
+                                .setTitle("Time Display Preferences >> Day")
+                                .addField("Time Options", "**(1)** Thursday\n**(2)** Thurs\n**(3)** Th")
+                                .setColor(host.color)
+                                .setFooter({text: "Precipitation " + host.version.external})
+                                return message.channel.send({embeds: [embed]})
+                        }
                     case 2:
-                        return message.channel.send("Sorry, this feature doesn't exist yet. Check back later!")
+                        switch(parseInt(multiargs[1])) {
+                            default:
+                                let embed = new MessageEmbed()
+                                .setTitle("Time Display Preferences >> Date")
+                                .addField("Time Options", "**(1)** January 1st, 1970\n**(2)** January 1 1970\n**(3)** Jan 1 1970\n**(4)** 1 Jan 1970\n**(5)** January 1st\n**(6)** January 1\n**(7)** Jan 1\n**(8)** 1 Jan")
+                                .setColor(host.color)
+                                .setFooter({text: "Precipitation " + host.version.external})
+                                return message.channel.send({embeds: [embed]})
+                        }
                     case 3:
                         switch(parseInt(multiargs[1])) {
                             case 1:

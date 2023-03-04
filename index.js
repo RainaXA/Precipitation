@@ -145,11 +145,6 @@ global.logging = { // based off of AstralMod!
   input: 5
 }
 
-global.types = { // types of commands
-  default: 0,
-  slash: 1
-}
-
 global.log = function(message, type, sender) {
   let msg;
   switch (type) {
@@ -255,7 +250,7 @@ fs.readdir("./modules", function(error, files) {
 client.on('ready', async() => {
   log('Precipitation has started!', logging.success, "READY")
   log("Running on version " + host.version.internal, logging.success, "READY")
-  setTimeout(saveConfiguration, 5000)
+  setTimeout(saveConfiguration, 120000)
   client.guilds.cache.each(guild => {
     if(!config.guilds[guild.id]) {
       config.guilds[guild.id] = {};
@@ -276,9 +271,9 @@ client.on('ready', async() => {
   }
 })
 
-client.on('newGuild', function(guild) {
+client.on('guildCreate', function(guild) {
   config.guilds[guild.id] = {};
-  log("initialized new guild " + guild.name, logging.info, "config")
+  log("initialized new guild " + guild.name, logging.info, "guilds")
 })
 
 process.on('uncaughtException', error => {

@@ -3,7 +3,7 @@ var locations = require("../data/locations.json")
 var command = {
     name: "location",
     desc: "Sets your current location.",
-    args: "**(continent | country)**",
+    args: "**(continent | country | state | province)**",
     parameters: "",
     execute: {
         discord: function(message, args) {
@@ -25,7 +25,13 @@ var command = {
                     config.users[message.author.id].location.continent = locations.links.countries[locations.countries[args]];
                     return message.channel.send("Okay, you will now appear to be from " + config.users[message.author.id].location.country + ".");
                 case "state":
-                  return message.channel.send("*Coming soon...*");
+                case "province":
+                    if(!locations.states[args]) return message.channel.send("Please enter a valid state/province.");
+                    config.users[message.author.id].location = {};
+                    config.users[message.author.id].location.state = locations.states[args]
+                    config.users[message.author.id].location.country = locations.links.states[locations.states[args]];
+                    config.users[message.author.id].location.continent = locations.links.countries[config.users[message.author.id].location.country];
+                    return message.channel.send("Okay, you will now appear to be from " + config.users[message.author.id].location.state + ", " + config.users[message.author.id].location.country + ".");
             }
         }
     },
@@ -44,7 +50,9 @@ module.exports = command;
 module.exports.exports = {};
 module.exports.exports.location = function (user) {
     if(!config.users[user.id].location) return null;
-    if(config.users[user.id].location.country) {
+    if(config.users[user.id].location.state) {
+        return config.users[user.id].location.state + ", " + config.users[user.id].location.country;
+    } else if(config.users[user.id].location.country) {
         return config.users[user.id].location.country;
     } else {
         return config.users[user.id].location.continent;
