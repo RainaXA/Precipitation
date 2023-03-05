@@ -9,7 +9,7 @@ client.on('ready', async() => {
     embed.setTitle("Precipitation " + host.version.external)
     embed.setDescription('General-purpose Discord bot')
     embed.addFields(
-        { name: "Credits", value: "**raina#7847** - bot developer\n**dr thargoide#8442** - bug finder" },
+        { name: "Credits", value: "**raina#7847** - bot developer\n**dr thargoide#8442** - bug finder\n**OwaHai#0645** - hosting the bot!" },
         { name: "Next Release", value: releases["stable"] },
         { name: "Links", value: "[GitHub](https://www.github.com/RainaXA/Precipitation)\n[Support Server](https://discord.gg/kasmyXa)\n[Invite Precipitation](https://discord.com/api/oauth2/authorize?client_id=322397835716853771&permissions=8&scope=applications.commands%20bot)" }
     )
