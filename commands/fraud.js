@@ -259,6 +259,7 @@ var command = {
                   .setFooter({text: "Fraud v" + fraudVer})
                   return message.channel.send({embeds: [embedd]})
                 case "public":
+                  if(currentlyPlaying[message.author.id]) return message.channel.send("You are already in a game.")
                   if(publicLobbies.length == 0) { // create the public lobby
                     createPublicLobby(message)
                     playerList(message)
