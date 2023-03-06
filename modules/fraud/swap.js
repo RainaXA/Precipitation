@@ -3,16 +3,6 @@ if(!fs.existsSync('./commands/fraud.js')) log("Could not find a command to start
 
 const { MessageEmbed } = require('discord.js');
 
-global.gameInfo = {};
-global.currentlyPlaying = {}; // false if not playing, guildID if theyre in a game [stop long search for guild ID]
-global.currentID = 0;
-
-global.sendMessage = function(content, list) {
-    for(player of list) {
-        player.send(content)
-    }
-}
-
                      // 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
 const majorityCounts = [0, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7]
 
@@ -255,7 +245,7 @@ client.on('messageCreate', function(message) {
   if(message.author.id == client.user.id) return;
   if(message.guild) return;
   if(!currentlyPlaying[message.author.id]) return;
-  let currentGame = gameInfo[currentlyPlaying[message.author.id].toString()];
+  let currentGame = gameInfo[currentlyPlaying[message.author.id].id];
   if(currentGame.mode != "Swap!") return;
   if(!currentGame.started) return message.channel.send("The game has not been started yet.")
   if(currentGame.list[message.author.id].dead) return sendMessage("*" + message.author.username + ": " + message.content + "*", currentGame.dead)

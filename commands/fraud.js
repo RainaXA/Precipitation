@@ -1,27 +1,72 @@
 const { MessageEmbed, Collection } = require('discord.js')
 const fs = require('fs')
 
-let fraudVer = "2.0 Beta"
+let fraudVer = "3.0 Beta"
 
 client.fraudModes = new Collection();
 
-function playerList(message) {
+global.gameInfo = {};
+global.currentlyPlaying = {}; // false if not playing, guildID if theyre in a game [stop long search for guild ID]
+global.publicLobbies = [];
+global.currentID = 0;
+
+global.sendMessage = function(content, list) {
+  for(player of list) {
+      player.send(content)
+  }
+}
+
+global.playerList = function (message) {
   let list = "";
   let specList = "";
-  for (player of gameInfo[message.guild.id].players) {
+  for (player of gameInfo[currentlyPlaying[message.author.id].id].players) {
     list = list + player.tag + "\n"
   }
-  for(spec of gameInfo[message.guild.id].specs) {
+  for(spec of gameInfo[currentlyPlaying[message.author.id].id].specs) {
     specList = specList + spec.tag + "\n"
   }
   if(specList == "") specList = "*None.*"
   let embed = new MessageEmbed()
-  .setTitle("Fraud #" + gameInfo[message.guild.id].id + " [" + gameInfo[message.guild.id].mode + "] | " + message.guild.name)
-  .addField("Players (" + gameInfo[message.guild.id].players.length + "/12)", list)
+  .setTitle("Fraud #" + gameInfo[currentlyPlaying[message.author.id].id].id + " [" + gameInfo[currentlyPlaying[message.author.id].id].mode + "] | " + gameInfo[currentlyPlaying[message.author.id].id].name)
+  .addField("Players (" + gameInfo[currentlyPlaying[message.author.id].id].players.length + "/12)", list)
   .addField ("Spectators", specList)
   .setColor(host.color)
   .setFooter({text: "Fraud v" + fraudVer})
-  message.channel.send({embeds: [embed]})
+  if(!currentlyPlaying[message.author.id].public) return message.channel.send({embeds: [embed]});
+  return message.author.send({embeds: [embed]});
+}
+
+function createPublicLobby(message) {
+  publicLobbies.push(currentID)
+  gameInfo[currentID] = {
+    players: [],
+    viewers: [],
+    specs: [],
+    list: {
+
+    },
+    fraud: null,
+    started: false,
+    mode: "Classic",
+    name: "Public",
+    votes: [],
+    id: currentID
+  };
+  gameInfo[currentID].list[message.author.id] = {
+    name: message.author.username,
+    id: message.author.id,
+    player: true,
+    tag: message.author.tag,
+    dead: false,
+    votedFor: null
+  };
+  gameInfo[currentID].players.push(gameInfo[currentID].list[message.author.id])
+  gameInfo[currentID].viewers.push(message.author)
+  currentlyPlaying[message.author.id] = {
+    id: currentID,
+    public: true
+  };
+  currentID++;
 }
 
 fs.readdir("./modules/fraud", function(error, files) {
@@ -47,7 +92,7 @@ fs.readdir("./modules/fraud", function(error, files) {
 var command = {
     name: "fraud",
     desc: "Manage Fraud games.",
-    args: "**(start | join | create | list | rules | leave | disband | settings)** (join: spectator | player)",
+    args: "**(start | join | create | list | rules | leave | disband | settings | public)** (join: spectator | player)",
     parameters: "",
     execute: {
         discord: function(message, args) {
@@ -65,6 +110,7 @@ var command = {
                     fraud: null,
                     started: false,
                     mode: "Classic",
+                    name: message.guild.name,
                     id: currentID
                   };
                   currentID++;
@@ -78,12 +124,15 @@ var command = {
                   };
                   gameInfo[message.guild.id].players.push(gameInfo[message.guild.id].list[message.author.id])
                   gameInfo[message.guild.id].viewers.push(message.author)
-                  currentlyPlaying[message.author.id] = message.guild.id;
+                  currentlyPlaying[message.author.id] = {
+                    id: message.guild.id,
+                    public: false
+                  };
                   return message.channel.send("The game has been created, use `" + host.prefix + "fraud join` in this server to join!")
                 case "join":
                   if(!gameInfo[message.guild.id]) return message.channel.send("The game does not exist yet, use `" + host.prefix + "fraud create` to create it.")
                   if(gameInfo[message.guild.id].started) return message.channel.send("Sorry, but a game is ongoing in this server. You may not join a game in progress.")
-                  if(currentlyPlaying[message.author.id] == message.guild.id) return message.channel.send("You're already in this lobby.")
+                  if(currentlyPlaying[message.author.id].id == message.guild.id) return message.channel.send("You're already in this lobby.")
                   if(currentlyPlaying[message.author.id]) return message.channel.send("Sorry, but you're already in a game in another server. Please leave this game first.")
                   if(!multiargs[1]) multiargs[1] = "player"
                   gameInfo[message.guild.id].list[message.author.id] = {};
@@ -106,7 +155,10 @@ var command = {
                       gameInfo[message.guild.id].list[message.author.id].player = false;
                       break;
                   }
-                  currentlyPlaying[message.author.id] = message.guild.id;
+                  currentlyPlaying[message.author.id] = {
+                    id: message.guild.id,
+                    public: false
+                  };
                   playerList(message)
                   break;
                 case "start":
@@ -136,17 +188,17 @@ var command = {
                   return message.channel.send({embeds: [embed]})
                 case "leave":
                   if(!currentlyPlaying[message.author.id]) return message.channel.send("You are not in a game.")
-                  if(gameInfo[currentlyPlaying[message.author.id]].players.length == 1 && gameInfo[currentlyPlaying[message.author.id]].list[message.author.id].player) {
+                  if(gameInfo[currentlyPlaying[message.author.id].id].players.length == 1 && gameInfo[currentlyPlaying[message.author.id].id].list[message.author.id].player) {
                     message.channel.send("The game has now been disbanded.")
-                    gameInfo[currentlyPlaying[message.author.id]] = null;
+                    gameInfo[currentlyPlaying[message.author.id].id] = null;
                     currentlyPlaying[message.author.id] = null;
                   } else {
-                    let nu = gameInfo[currentlyPlaying[message.author.id]].players.findIndex((user) => message.author.id == user.id);
-                    gameInfo[currentlyPlaying[message.author.id]].players.splice(nu, 1)
-                    nu = gameInfo[currentlyPlaying[message.author.id]].viewers.findIndex((user) => message.author.id == user.id);
-                    gameInfo[currentlyPlaying[message.author.id]].viewers.splice(nu, 1)
-                    nu = gameInfo[currentlyPlaying[message.author.id]].specs.findIndex((user) => message.author.id == user.id);
-                    gameInfo[currentlyPlaying[message.author.id]].specs.splice(nu, 1)
+                    let nu = gameInfo[currentlyPlaying[message.author.id].id].players.findIndex((user) => message.author.id == user.id);
+                    gameInfo[currentlyPlaying[message.author.id].id].players.splice(nu, 1)
+                    nu = gameInfo[currentlyPlaying[message.author.id].id].viewers.findIndex((user) => message.author.id == user.id);
+                    gameInfo[currentlyPlaying[message.author.id].id].viewers.splice(nu, 1)
+                    nu = gameInfo[currentlyPlaying[message.author.id].id].specs.findIndex((user) => message.author.id == user.id);
+                    gameInfo[currentlyPlaying[message.author.id].id].specs.splice(nu, 1)
                     currentlyPlaying[message.author.id] = null;
                     message.channel.send("You have left the game.")
                   }
@@ -194,6 +246,33 @@ var command = {
                   .setColor(host.color)
                   .setFooter({text: "Fraud v" + fraudVer})
                   return message.channel.send({embeds: [embedd]})
+                case "public":
+                  if(publicLobbies.length == 0) { // create the public lobby
+                    createPublicLobby(message)
+                    playerList(message)
+                    return message.channel.send("You have joined a public Classic lobby. Please refer to your DMs for lobby chat and the game.")
+                  } else {
+                    let search = publicLobbies.find(game => gameInfo[game].players.length < 12);
+                    if(search == undefined) {
+                      createPublicLobby(message);
+                      return message.channel.send("You have joined a public Classic lobby. Please refer to your DMs for lobby chat and the game.");
+                    }
+                    gameInfo[search].list[message.author.id] = {};
+                    gameInfo[search].list[message.author.id].name = message.author.username;
+                    gameInfo[search].list[message.author.id].id = message.author.id;
+                    gameInfo[search].list[message.author.id].tag = message.author.tag;
+                    gameInfo[search].list[message.author.id].dead = false;
+                    gameInfo[search].list[message.author.id].votedFor = null;
+                    gameInfo[search].list[message.author.id].player = true;
+                    gameInfo[search].players.push(gameInfo[search].list[message.author.id])
+                    gameInfo[search].viewers.push(message.author)
+                    currentlyPlaying[message.author.id] = {
+                      id: search,
+                      public: true
+                    };
+                    playerList(message)
+                    return message.channel.send("You have joined a public Classic lobby. Please refer to your DMs for lobby chat and the game.")
+                  }
               }
         }
     },

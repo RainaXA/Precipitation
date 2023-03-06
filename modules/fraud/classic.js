@@ -3,16 +3,6 @@ if(!fs.existsSync('./commands/fraud.js')) log("Could not find a command to start
 
 const { MessageEmbed } = require('discord.js');
 
-global.gameInfo = {};
-global.currentlyPlaying = {}; // false if not playing, guildID if theyre in a game [stop long search for guild ID]
-global.currentID = 0;
-
-global.sendMessage = function(content, list) {
-    for(player of list) {
-        player.send(content)
-    }
-}
-
                      // 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
 const majorityCounts = [0, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7]
 
@@ -172,7 +162,7 @@ function transitionTrial(guID) {
   }
 }
 
-module.exports.startGame = function(viewers, guildID) {
+function startGame(viewers, guildID) {
   gameInfo[guildID].fraud = gameInfo[guildID].players[Math.floor(Math.random() * gameInfo[guildID].players.length)];
   gameInfo[guildID].frauded = null;
   gameInfo[guildID].sayFraudMessage = 0;
@@ -232,14 +222,39 @@ module.exports.startGame = function(viewers, guildID) {
   }
   dayCycle(guildID)
 }
+module.exports.startGame = startGame;
 
 client.on('messageCreate', function(message) {
   if(message.author.id == client.user.id) return;
   if(message.guild) return;
   if(!currentlyPlaying[message.author.id]) return;
-  let currentGame = gameInfo[currentlyPlaying[message.author.id].toString()];
+  let currentGame = gameInfo[currentlyPlaying[message.author.id].id];
   if(currentGame.mode != "Classic") return;
-  if(!currentGame.started) return message.channel.send("The game has not been started yet.")
+  if(!currentGame.started) {
+    let prefix = "!";
+    if(message.content.startsWith(prefix)) {
+      let command = message.content.slice(prefix.length)
+      switch(command) {
+        case "help":
+          return message.channel.send("Hello! Here are a quick few commands you can run in the lobby:\n\nhelp - see the list of commands\nlist - see the player list")
+        case "list":
+          playerList(message)
+          return;
+        case "start":
+          if(!currentlyPlaying[message.author.id].public) return message.channel.send("You may only vote to start the game in public lobbies.")
+          if(getTextInput(message.author.id, currentGame.votes, 2)) return message.channel.send("You've already voted to start the game early.")
+          currentGame.votes.push(message.author.id)
+          sendMessage("**" + message.author.username + " has voted to start the game early.** " + (majorityCounts[currentGame.players.length] - currentGame.votes.length) + " more votes to start the game.", currentGame.viewers);
+          if(majorityCounts[currentGame.players.length] - currentGame.votes.length == 0) {
+            startGame(gameInfo[currentlyPlaying[message.author.id].id].viewers, currentlyPlaying[message.author.id].id)
+            gameInfo[currentlyPlaying[message.author.id].id].started = true;
+          }
+          return;
+      }
+    }
+    sendMessage("**" + message.author.username + "**: " + message.content, currentGame.viewers);
+    return;
+  }
   if(currentGame.list[message.author.id].dead) return sendMessage("*" + message.author.username + ": " + message.content + "*", currentGame.dead)
   switch(currentGame.phase) {
     case 0:
@@ -300,7 +315,7 @@ client.on('messageCreate', function(message) {
           currentGame.trial = user;
           currentGame.trials = currentGame.trials - 1;
           sendMessage("**The majority have elected to put " + user.name + " on trial.** You have forty-five seconds to provide a defense for your actions.", currentGame.viewers)
-          transitionTrial(currentlyPlaying[message.author.id].toString()); // begin the trial!
+          transitionTrial(currentlyPlaying[message.author.id].id); // begin the trial!
         }
       } else {
         break;
