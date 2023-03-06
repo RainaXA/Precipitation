@@ -132,8 +132,12 @@ var command = {
                 case "join":
                   if(!gameInfo[message.guild.id]) return message.channel.send("The game does not exist yet, use `" + host.prefix + "fraud create` to create it.")
                   if(gameInfo[message.guild.id].started) return message.channel.send("Sorry, but a game is ongoing in this server. You may not join a game in progress.")
-                  if(currentlyPlaying[message.author.id].id == message.guild.id) return message.channel.send("You're already in this lobby.")
-                  if(currentlyPlaying[message.author.id]) return message.channel.send("Sorry, but you're already in a game in another server. Please leave this game first.")
+                  if(currentlyPlaying[message.author.id]) {
+                    if(currentlyPlaying[message.author.id].id == message.guild.id) {
+                      return message.channel.send("You're already in this lobby.")
+                    }
+                    return message.channel.send("Sorry, but you're already in a game in another server. Please leave this game first.")
+                  }
                   if(!multiargs[1]) multiargs[1] = "player"
                   gameInfo[message.guild.id].list[message.author.id] = {};
                   gameInfo[message.guild.id].list[message.author.id].name = message.author.username;
@@ -187,9 +191,14 @@ var command = {
                   .setFooter({text: "Fraud v" + fraudVer})
                   return message.channel.send({embeds: [embed]})
                 case "leave":
-                  if(!currentlyPlaying[message.author.id]) return message.channel.send("You are not in a game.")
+                  if(!currentlyPlaying[message.author.id]) return message.channel.send("You are not in a game.");
                   if(gameInfo[currentlyPlaying[message.author.id].id].players.length == 1 && gameInfo[currentlyPlaying[message.author.id].id].list[message.author.id].player) {
-                    message.channel.send("The game has now been disbanded.")
+                    if(currentlyPlaying[message.author.id].public) {
+                      publicLobbies = publicLobbies.filter((element) => element != currentlyPlaying[message.author.id].id)
+                      message.channel.send("You have left the game.")
+                    } else {
+                      message.channel.send("The game has now been disbanded.")
+                    }
                     gameInfo[currentlyPlaying[message.author.id].id] = null;
                     currentlyPlaying[message.author.id] = null;
                   } else {
@@ -207,6 +216,9 @@ var command = {
                   if(!gameInfo[message.guild.id]) return message.channel.send("The game does not exist yet, please use `" + host.prefix + "fraud create` to create it.")
                   if(gameInfo[message.guild.id].players[0].id != message.author.id) return message.channel.send("You are not the host, so you may not disband the lobby.")
                   if(gameInfo[message.guild.id].started) return message.channel.send("The game has been started, therefore it may not be disbanded.")
+                  if(currentlyPlaying[message.author.id].public) {
+                    return message.channel.send("You may not disband a public game.")
+                  }
                   message.channel.send("The game has now been disbanded.")
                   for(viewer of gameInfo[message.guild.id].viewers) {
                     currentlyPlaying[viewer.id] = null;
