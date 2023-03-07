@@ -151,7 +151,7 @@ var commands = {
             discord: function(message, args) {
                 let embed = new MessageEmbed()
                 .setAuthor({ name: message.guild.name, iconURL: message.guild.iconURL() })
-                .addField("Dates", "**Created**: <t:" + parseInt(uinfoMember.joinedTimestamp / 1000, 10) + ">\n**Precipitation Joined**: " + message.guild.joinedAt.toUTCString())
+                .addField("Dates", "**Created**: <t:" + parseInt(message.guild.createdTimestamp / 1000, 10) + ">\n**Precipitation Joined**: " + message.guild.joinedAt.toUTCString())
                 .addField("Members", "**Member Count**: " + message.guild.memberCount + "\n**Server Owner**: <@" + message.guild.ownerId + ">")
                 .addField("Misc.", "**Boosts:** " + message.guild.premiumSubscriptionCount)
                 .setColor(host.color)
