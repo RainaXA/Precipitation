@@ -299,18 +299,45 @@ var command = {
                     for(item in roles.properties.city) {
                       list = list + item + "\n";
                     }
+                    for(item in roles.properties.spies) {
+                      list = list + item + "\n";
+                    }
+                    for(item in roles.properties.neutral) {
+                      list = list + item + "\n";
+                    }
                     message.channel.send(list);
                   } else {
-                    if(!roles.properties.city[multiargs[1].toLowerCase()] || multiargs[1].toLowerCase() == "goal") return message.channel.send("This role does not exist.");
-                    let embedd = new MessageEmbed()
-                    .setTitle("The Wikipedia for The Migration | " + roles.properties.city[multiargs[1].toLowerCase()].name)
-                    .addField("Goal", roles.properties.city.goal, true)
-                    .addField("Alignment", roles.properties.city[multiargs[1].toLowerCase()].alignment, true)
-                    .addField("Abilities", roles.properties.city[multiargs[1].toLowerCase()].abilities)
-                    .addField("Artifacts", roles.properties.city[multiargs[1].toLowerCase()].artifacts)
-                    .setColor(host.color)
-                    .setFooter({text: "Deduction v" + fraudVer})
-                    return message.channel.send({embeds: [embedd]})
+                    if(roles.properties.city[multiargs[1].toLowerCase()] && multiargs[1].toLowerCase() != "goal") {
+                      let embedd = new MessageEmbed()
+                      .setTitle("The Wikipedia for The Migration | " + roles.properties.city[multiargs[1].toLowerCase()].name)
+                      .addField("Goal", roles.properties.city.goal, true)
+                      .addField("Alignment", roles.properties.city[multiargs[1].toLowerCase()].alignment, true)
+                      .addField("Abilities", roles.properties.city[multiargs[1].toLowerCase()].abilities)
+                      .addField("Artifacts", roles.properties.city[multiargs[1].toLowerCase()].artifacts)
+                      .setColor(host.color)
+                      .setFooter({text: "Deduction v" + fraudVer})
+                      return message.channel.send({embeds: [embedd]})
+                    } else if(roles.properties.spies[multiargs[1].toLowerCase()] && multiargs[1].toLowerCase() != "goal") {
+                      let embedd = new MessageEmbed()
+                      .setTitle("The Wikipedia for The Migration | " + roles.properties.spies[multiargs[1].toLowerCase()].name)
+                      .addField("Goal", roles.properties.spies.goal, true)
+                      .addField("Alignment", roles.properties.spies[multiargs[1].toLowerCase()].alignment, true)
+                      .addField("Abilities", roles.properties.spies[multiargs[1].toLowerCase()].abilities)
+                      .addField("Artifacts", roles.properties.spies[multiargs[1].toLowerCase()].artifacts)
+                      .setColor(host.color)
+                      .setFooter({text: "Deduction v" + fraudVer})
+                      return message.channel.send({embeds: [embedd]})
+                    } else if(roles.properties.neutral[multiargs[1].toLowerCase()]) {
+                      let embedd = new MessageEmbed()
+                      .setTitle("The Wikipedia for The Migration | " + roles.properties.neutral[multiargs[1].toLowerCase()].name)
+                      .addField("Goal", roles.properties.neutral[multiargs[1].toLowerCase()].goal, true)
+                      .addField("Alignment", roles.properties.neutral[multiargs[1].toLowerCase()].alignment, true)
+                      .addField("Abilities", roles.properties.neutral[multiargs[1].toLowerCase()].abilities)
+                      .addField("Artifacts", roles.properties.neutral[multiargs[1].toLowerCase()].artifacts)
+                      .setColor(host.color)
+                      .setFooter({text: "Deduction v" + fraudVer})
+                      return message.channel.send({embeds: [embedd]})
+                    }
                   }
               }
         }

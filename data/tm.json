@@ -51,10 +51,54 @@
       }
     },
     "spies": {
-
+      "goal": "Eliminate all who oppose the Spies.",
+      "hitman": {
+        "name": "Hitman",
+        "alignment": "Spy | Main",
+        "abilities": "- You may choose to kill someone at night.",
+        "artifacts": "- Saboteur visits will not block your kill."
+      },
+      "agent": {
+        "name": "Agent",
+        "alignment": "Spy | Supportive",
+        "abilities": "- You may investigate someone to see their true role during the night.",
+        "artifacts": "*None.*"
+      },
+      "saboteur": {
+        "name": "Saboteur",
+        "alignment": "Spy | Supportive",
+        "abilities": "- You may block all visits on a target for one night.",
+        "artifacts": "- Your ability will not affect other Spy roles."
+      },
+      "framer": {
+        "name": "Framer",
+        "alignment": "Spy | Supportive",
+        "abilities": "- You may frame someone, causing them to appear as a Framer.",
+        "artifacts": "- Your frames will last until the game ends."
+      }
     },
     "neutral": {
-      
+      "outcast": {
+        "name": "Outcast",
+        "alignment": "Neutral",
+        "goal": "Get executed by the City.",
+        "abilities": "- Once you get lynched, you may kill one player after death.",
+        "artifacts": "- This kill cannot be prevented, and will appear as \"shot by a gun.\""
+      },
+      "serial killer": {
+        "name": "Serial Killer",
+        "alignment": "Neutral",
+        "goal": "Kill at least three other players, or be the last one standing.",
+        "abilities": "- You may kill someone each night.",
+        "artifacts": "- If a Citizen is visiting your target, you will also kill them."
+      },
+      "psychopath": {
+        "name": "Psychopath",
+        "alignment": "Neutral",
+        "goal": "Remain alive to the end of the game.",
+        "abilities": "- You may manipulate your target into visiting another target.",
+        "artifacts": "- You will not see their role.\n- They will not know they have been manipulated."
+      }
     }
   }
 }
