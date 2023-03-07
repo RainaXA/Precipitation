@@ -85,7 +85,7 @@
         "abilities": "- Once you get lynched, you may kill one player after death.",
         "artifacts": "- This kill cannot be prevented, and will appear as \"shot by a gun.\""
       },
-      "serial killer": {
+      "serialkiller": {
         "name": "Serial Killer",
         "alignment": "Neutral",
         "goal": "Kill at least three other players, or be the last one standing.",
