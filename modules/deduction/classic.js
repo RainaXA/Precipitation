@@ -242,6 +242,7 @@ client.on('messageCreate', function(message) {
           return;
         case "start":
           if(!currentlyPlaying[message.author.id].public) return message.channel.send("You may only vote to start the game in public lobbies.")
+          if(currentGame.players.length < 4) return message.channel.send("You may not vote to start the game with under 4 players.")
           if(getTextInput(message.author.id, currentGame.votes, 2)) return message.channel.send("You've already voted to start the game early.")
           currentGame.votes.push(message.author.id)
           sendMessage("**" + message.author.username + " has voted to start the game early.** " + (majorityCounts[currentGame.players.length] - currentGame.votes.length) + " more votes to start the game.", currentGame.viewers);
@@ -352,5 +353,6 @@ client.on('messageCreate', function(message) {
 module.exports.help = {
   name: "Classic",
   typename: "classic",
+  game: "Fraud",
   minPlayers: 4
 }

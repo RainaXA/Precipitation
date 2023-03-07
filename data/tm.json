@@ -1,0 +1,60 @@
+{
+  "lists": {
+    "city": {
+
+    },
+    "spies": {
+
+    },
+    "neutral": {
+
+    }
+  },
+  "properties": {
+    "city": {
+      "goal": "Seek out and execute anyone who poses a threat to the City.",
+      "citizen": {
+        "name": "Citizen",
+        "alignment": "City | Investigative",
+        "abilities": "- You may hide with a target at night.",
+        "artifacts": "- If your target is attacked during the night, you will see their killer!\n- If your target is attacked by a Serial Killer, you will also die."
+      },
+      "detective": {
+        "name": "Detective",
+        "alignment": "City | Investigative",
+        "abilities": "- You may investigate an alive player to get a clue of their role.\n- You may investigate a dead player to see their role and cause of death.",
+        "artifacts": "*None.*"
+      },
+      "interrogator": {
+        "name": "Interrogator",
+        "alignment": "City | Investigative",
+        "abilities": "- You may choose an interrogation target during the day.\n- At night, you will be able to anonymously speak to your target.",
+        "artifacts": "- If your target is a Spy, they will not be able to see the private Spy chat."
+      },
+      "hunter": {
+        "name": "Hunter",
+        "alignment": "City | Supportive",
+        "abilities": "- You may mark a target for death during the night.\n- Your marked target will die the following night.",
+        "artifacts": "- If you change your target on the night your marked target will die, the delay will reset."
+      },
+      "doctor": {
+        "name": "Doctor",
+        "alignment": "City | Supportive",
+        "abilities": "- You may heal someone so they do not die that night.",
+        "artifacts": "- If your target is attacked more than once, they will die despite your heal."
+      },
+      "merchant": {
+        "name": "Merchant",
+        "alignment": "City | Supportive",
+        "abilities": "- You may sell a player protection or information during the night.\n- Protection will last until your target is attacked, and it will delay their death by one night.\n- Information allows your target to use the role of a dead player, no matter their faction.",
+        "artifacts": "- Each ability has a two night cooldown before it may be used again."
+      }
+    },
+    "spies": {
+
+    },
+    "neutral": {
+      
+    }
+  }
+}

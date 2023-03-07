@@ -34,22 +34,22 @@ var command = {
                 let helpp = {};
                 let cname;
                 client.commands.each(cmd => {
-                if (!cmd.help) {
-                    chelp = cmd.cat 
-                    cname = cmd.name
-                } else { 
-                    chelp = cmd.help.category
-                    cname = cmd.help.name 
-                }
-                if(!helpp[chelp]) {
-                    helpp[chelp] = cname;
-                } else {
-                    helpp[chelp] = helpp[chelp] + "\n" + cname
-                }
+                    if (!cmd.help) {
+                        chelp = cmd.cat 
+                        cname = cmd.name
+                    } else { 
+                        chelp = cmd.help.category
+                        cname = cmd.help.name 
+                    }
+                    if(!helpp[chelp]) {
+                        helpp[chelp] = cname;
+                    } else {
+                        helpp[chelp] = helpp[chelp] + "\n" + cname
+                    }
                 })
                 for(category in helpp) {
-                if(category != "Secrets") helpEmbed.addField(category, helpp[category], true)
-                if(category == "Secrets" && parameter == "easter-eggs") helpEmbed.addField(category, helpp[category], true) // only add Secrets if parameter is specified
+                    if(category != "Secrets") helpEmbed.addField(category, helpp[category], true)
+                    if(category == "Secrets" && parameter == "easter-eggs") helpEmbed.addField(category, helpp[category], true) // only add Secrets if parameter is specified
                 }
                 helpEmbed.setColor(host.color)
                 helpEmbed.setFooter({ text: "Precipitation " + host.version.external, iconURL: client.user.displayAvatarURL() })

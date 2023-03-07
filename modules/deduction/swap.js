@@ -352,5 +352,6 @@ client.on('messageCreate', function(message) {
 module.exports.help = {
   name: "Swap!",
   typename: "swap!",
+  game: "Fraud",
   minPlayers: 5
 }
