@@ -17,15 +17,12 @@ var command = {
             config.users[message.author.id].name = args;
             return message.channel.send("Sure, I'll refer to you by \"" + args + "\".")
         },
-        slash: async function (interaction) {
-            let rng = Math.floor(Math.random() * pingMessages.length)
-            let startTime = Date.now()
-            await interaction.reply({ content: "<:ping_receive:502755206841237505> " + pingMessages[rng] })
-            await interaction.editReply({ content: "<:ping_transmit:502755300017700865> (" + (Date.now() - startTime) + "ms) Hey, " + interaction.user.username + "!" })
-        },
-        console: function() {
-            log("testing with the new handler!", logging.output)
-        }
+        //slash: async function (interaction) { TODO: FIX LATER
+           // let rng = Math.floor(Math.random() * pingMessages.length)
+           // let startTime = Date.now()
+           // await interaction.reply({ content: "<:ping_receive:502755206841237505> " + pingMessages[rng] })
+           // await interaction.editReply({ content: "<:ping_transmit:502755300017700865> (" + (Date.now() - startTime) + "ms) Hey, " + interaction.user.username + "!" })
+        //}
     },
     ver: "3.0.0",
     cat: "Personalization",

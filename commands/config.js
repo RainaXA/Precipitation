@@ -93,6 +93,7 @@ module.exports = command;
 
 client.on('messageCreate', message => {
     if(!message.guild) return; // do not do anything if it's a dm
+    if(!config.guilds[message.guild.id].settings) config.guilds[message.guild.id].settings = {};
     if (config.guilds[message.guild.id].settings.filter && getTextInput(message.content, host.slurs)) {
       message.channel.messages.fetch(message.id).then(message => message.delete())
       if(message.author.id != client.user.id) message.author.send("Hey, " + name(message.author) + "!\n\nThis server has banned very offensive words. Please refrain from using these words.")
