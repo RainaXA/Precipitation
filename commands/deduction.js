@@ -17,6 +17,29 @@ global.sendMessage = function(content, list) {
   }
 }
 
+global.lists = {
+  "1": [roles.properties.city["detective"]],
+  "2": [roles.properties.city["detective"], roles.properties.city["doctor"]],
+  "3": [roles.properties.city["detective"], roles.properties.city["doctor"], "City | Any"],
+  "4": [roles.properties.city["detective"], roles.properties.city["doctor"], "City | Any", roles.properties.spies["hitman"]],
+  "5": [roles.properties.city["detective"], roles.properties.city["doctor"], "City | Investigative", "City | Supportive", roles.properties.spies["hitman"]],
+  "6": [roles.properties.city["detective"], roles.properties.city["doctor"], "City | Investigative", "City | Supportive", roles.properties.spies["hitman"], "Neutral *(excluding Serial Killer)*"],
+  "7": [roles.properties.city["detective"], roles.properties.city["doctor"], "City | Investigative", "City | Supportive", "City | Any", roles.properties.spies["hitman"], "Neutral *(excluding Serial Killer)*"],
+  "8": [roles.properties.city["detective"], roles.properties.city["doctor"], "City | Investigative", "City | Supportive", "City | Any", roles.properties.spies["hitman"], roles.properties.spies["framer"], "Neutral *(excluding Serial Killer)*"],
+}
+
+global.interpretList = function(list) {
+  let newList = "";
+  for(item of list) {
+    if(item === Object(item)) {
+      newList = newList + item.name + "\n"
+    } else {
+      newList = newList + item + "\n"
+    }
+  }
+  return newList;
+}
+
 global.playerList = function (message) {
   let list = "";
   let specList = "";
@@ -29,10 +52,11 @@ global.playerList = function (message) {
   if(specList == "") specList = "*None.*"
   let embed = new MessageEmbed()
   .setTitle("Lobby #" + gameInfo[currentlyPlaying[message.author.id].id].id + " [" + gameInfo[currentlyPlaying[message.author.id].id].mode + "] | " + gameInfo[currentlyPlaying[message.author.id].id].name)
-  .addField("Players (" + gameInfo[currentlyPlaying[message.author.id].id].players.length + "/12)", list)
-  .addField ("Spectators", specList)
-  .setColor(host.color)
-  .setFooter({text: "Deduction v" + fraudVer})
+  .addField("Players (" + gameInfo[currentlyPlaying[message.author.id].id].players.length + "/12)", list, true)
+  if(gameInfo[currentlyPlaying[message.author.id].id].mode == "Base") embed.addField("Role List", interpretList(lists[String(gameInfo[currentlyPlaying[message.author.id].id].players.length)]), true)
+  embed.addField ("Spectators", specList)
+  embed.setColor(host.color)
+  embed.setFooter({text: "Deduction v" + fraudVer})
   if(!currentlyPlaying[message.author.id].public) return message.channel.send({embeds: [embed]});
   return message.author.send({embeds: [embed]});
 }
@@ -295,17 +319,28 @@ var command = {
                   }
                 case "tmwiki":
                   if(!multiargs[1]) {
-                    let list = "";
+                    let list = {
+                      city: "",
+                      spies: "",
+                      neutral: "",
+                    };
                     for(item in roles.properties.city) {
-                      list = list + item + "\n";
+                      if(roles.properties.city[item].name) list["city"] = list["city"] + roles.properties.city[item].name + "\n";
                     }
                     for(item in roles.properties.spies) {
-                      list = list + item + "\n";
+                      if(roles.properties.spies[item].name) list["spies"] = list["spies"] + roles.properties.spies[item].name + "\n";
                     }
                     for(item in roles.properties.neutral) {
-                      list = list + item + "\n";
+                      if(roles.properties.neutral[item].name) list["neutral"] = list["neutral"] + roles.properties.neutral[item].name + "\n";
                     }
-                    message.channel.send(list);
+                    let embedd = new MessageEmbed()
+                    .setTitle("The Wikipedia for The Migration | Role List")
+                    .addField("City", list["city"], true)
+                    .addField("Spies", list["spies"], true)
+                    .addField("Neutrals", list["neutral"], true)
+                    .setColor(host.color)
+                    .setFooter({text: "Deduction v" + fraudVer})
+                    return message.channel.send({embeds: [embedd]})
                   } else {
                     if(roles.properties.city[multiargs[1].toLowerCase()] && multiargs[1].toLowerCase() != "goal") {
                       let embedd = new MessageEmbed()
@@ -314,7 +349,7 @@ var command = {
                       .addField("Alignment", roles.properties.city[multiargs[1].toLowerCase()].alignment, true)
                       .addField("Abilities", roles.properties.city[multiargs[1].toLowerCase()].abilities)
                       .addField("Artifacts", roles.properties.city[multiargs[1].toLowerCase()].artifacts)
-                      .setColor(host.color)
+                      .setColor(roles.properties.city.color)
                       .setFooter({text: "Deduction v" + fraudVer})
                       return message.channel.send({embeds: [embedd]})
                     } else if(roles.properties.spies[multiargs[1].toLowerCase()] && multiargs[1].toLowerCase() != "goal") {
@@ -324,7 +359,7 @@ var command = {
                       .addField("Alignment", roles.properties.spies[multiargs[1].toLowerCase()].alignment, true)
                       .addField("Abilities", roles.properties.spies[multiargs[1].toLowerCase()].abilities)
                       .addField("Artifacts", roles.properties.spies[multiargs[1].toLowerCase()].artifacts)
-                      .setColor(host.color)
+                      .setColor(roles.properties.spies.color)
                       .setFooter({text: "Deduction v" + fraudVer})
                       return message.channel.send({embeds: [embedd]})
                     } else if(roles.properties.neutral[multiargs[1].toLowerCase()]) {
@@ -334,7 +369,7 @@ var command = {
                       .addField("Alignment", roles.properties.neutral[multiargs[1].toLowerCase()].alignment, true)
                       .addField("Abilities", roles.properties.neutral[multiargs[1].toLowerCase()].abilities)
                       .addField("Artifacts", roles.properties.neutral[multiargs[1].toLowerCase()].artifacts)
-                      .setColor(host.color)
+                      .setColor(roles.properties.neutral[multiargs[1].toLowerCase()].color)
                       .setFooter({text: "Deduction v" + fraudVer})
                       return message.channel.send({embeds: [embedd]})
                     }

@@ -1,18 +1,22 @@
 {
   "lists": {
     "city": {
-
+      "investigative": ["citizen", "detective", "interrogator"],
+      "supportive": ["hunter", "doctor", "merchant"],
+      "any": ["citizen", "detective", "interrogator", "hunter", "doctor", "merchant"]
     },
     "spies": {
-
+      "main": ["hitman"],
+      "supportive": ["agent", "saboteur", "framer"]
     },
     "neutral": {
-
+      "list": ["outcast", "serialkiller", "psychopath"]
     }
-  },
+  },  
   "properties": {
     "city": {
       "goal": "Seek out and execute anyone who poses a threat to the City.",
+      "color": "BLUE",
       "citizen": {
         "name": "Citizen",
         "alignment": "City | Investigative",
@@ -52,6 +56,7 @@
     },
     "spies": {
       "goal": "Eliminate all who oppose the Spies.",
+      "color": "RED",
       "hitman": {
         "name": "Hitman",
         "alignment": "Spy | Main",
@@ -80,6 +85,7 @@
     "neutral": {
       "outcast": {
         "name": "Outcast",
+        "color": "YELLOW",
         "alignment": "Neutral",
         "goal": "Get executed by the City.",
         "abilities": "- Once you get lynched, you may kill one player after death.",
@@ -87,6 +93,7 @@
       },
       "serialkiller": {
         "name": "Serial Killer",
+        "color": "PURPLE",
         "alignment": "Neutral",
         "goal": "Kill at least three other players, or be the last one standing.",
         "abilities": "- You may kill someone each night.",
@@ -94,6 +101,7 @@
       },
       "psychopath": {
         "name": "Psychopath",
+        "color": "AQUA",
         "alignment": "Neutral",
         "goal": "Remain alive to the end of the game.",
         "abilities": "- You may manipulate your target into visiting another target.",

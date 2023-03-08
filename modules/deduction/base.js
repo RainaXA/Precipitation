@@ -6,8 +6,6 @@ const roles = require('../../data/tm.json');
                      // 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
 const majorityCounts = [0, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7]
 
-let baseList = [];
-
 function dayCycle(guID) {
   // phases:
   // 0 = discussion
@@ -15,8 +13,7 @@ function dayCycle(guID) {
   // 2 = rest
   // 3 = justice
   // 8 = revoting
-  if(gameInfo[guID].phase == 1 && !gameInfo[guID].frauded) gameInfo[guID].phase = 2; // skip voting if fraud hasnt taken over
-  if(gameInfo[guID].day >= 2 && !gameInfo[guID].frauded) return win(guID, 2) // autowin if no taken over by the end of second resting phase
+  if(gameInfo[guID].day == 0) gameInfo[guID].phase = 2; // skip voting on first day
   let phase = new MessageEmbed();
   switch(gameInfo[guID].phase) {
     case 0: // begin discussion phase
@@ -29,23 +26,28 @@ function dayCycle(guID) {
         gameInfo[guID].sayFraudMessage = 1;
       }
       gameInfo[guID].phase++;
-      phase.setTitle(placeValue(gameInfo[guID].day + 1) + " Discussion Phase - 2m")
-      phase.setColor("GREEN")
-      if(gameInfo[guID].sayFraudMessage == 1) {
-        phase.setDescription("Discuss with the others - figure out who's been taken over, or act like your victim!")
-        phase.setFooter("There are " + gameInfo[guID].daysRemaining + " days remaining before the Fraud wins.")
+      let timer;
+      if(gameInfo[guID].day == 0) { // first discussion phase is shorter
+        timer = "10s";
+        setTimeout(dayCycle, 10000, guID);
       } else {
-        phase.setDescription("Just talk with the others - there is nothing to worry about!")
+        timer = "45s";
+        setTimeout(dayCycle, 45000, guID);
+      }
+      phase.setTitle(placeValue(gameInfo[guID].day + 1) + " Discussion Phase - " + timer)
+      phase.setColor("GREEN")
+      if(gameInfo[guID].day == 0) {
+        phase.setDescription("Nothing's happened, have a quick chat!")
+      } else {
+        phase.setDescription("Figure out who the Spies are!")
       }
       sendMessage({embeds: [phase]}, gameInfo[guID].viewers)
-      setTimeout(dayCycle, 120000, guID)
       break;
     case 1: // begin voting phase
       gameInfo[guID].phase++;
       phase.setTitle(placeValue(gameInfo[guID].day + 1) + " Voting Phase - 30s")
-      phase.setDescription("Vote for who you think was taken over by the Fraud with `!vote`! You don't even have to type their full name!")
+      phase.setDescription("Vote for who you think the Spies are with `!vote`! You don't even have to type their full name!")
       phase.setColor("BLUE")
-      phase.setFooter("There are " + gameInfo[guID].daysRemaining + " days remaining before the Fraud wins.")
       sendMessage({embeds: [phase]}, gameInfo[guID].viewers)
       setTimeout(dayCycle, 30000, guID)
       break;
@@ -58,7 +60,7 @@ function dayCycle(guID) {
         gameInfo[guID].votesAgainst[player.id] = [];
         gameInfo[guID].list[player.id].votedFor = null;
       }
-      phase.setTitle(placeValue(gameInfo[guID].day + 1) + " Resting Phase - 20s")
+      phase.setTitle(placeValue(gameInfo[guID].day + 1) + " Resting Phase - 40s")
       phase.setColor("YELLOW")
       if(gameInfo[guID].sayFraudMessage == 1) {
         phase.setFooter("There are " + gameInfo[guID].daysRemaining + " days remaining before the Fraud wins.")
@@ -70,7 +72,7 @@ function dayCycle(guID) {
       }
       if(gameInfo[guID].daysRemaining == 0) return win(guID, 1)
       sendMessage({embeds: [phase]}, gameInfo[guID].viewers)
-      setTimeout(dayCycle, 20000, guID)
+      setTimeout(dayCycle, 40000, guID)
       gameInfo[guID].day++;
       break;
     case 8: // secondary voting
@@ -147,6 +149,10 @@ function transitionTrial(guID) {
         return sendMessage("**INNOCENT!** " + gameInfo[guID].trial.name + " has been pardoned by a vote of " + (gameInfo[guID].players.length - gameInfo[guID].guilties.length - (gameInfo[guID].dead.length - gameInfo[guID].specs.length) - 1) + "-" + gameInfo[guID].guilties.length + ".", gameInfo[guID].viewers)
       }
   }
+}
+
+function roleAssignment() {
+
 }
 
 function startGame(viewers, guildID) {
@@ -303,7 +309,6 @@ client.on('messageCreate', function(message) {
       }
       break;
   }
-  if(currentGame.fraud.id == message.author.id && currentGame.frauded != null) return sendMessage("**" + currentGame.frauded.username + "**: " + message.content, currentGame.viewers)
   sendMessage("**" + message.author.username + "**: " + message.content, currentGame.viewers)
 })
 
