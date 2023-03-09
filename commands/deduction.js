@@ -124,6 +124,18 @@ var command = {
           let multiargs = args.split(" ")
             switch(multiargs[0].toLowerCase()) {
                 case "create":
+                  let setMode;
+                  let listedGame;
+                  if(multiargs[1]) {
+                    let mode = client.gameModes.get(multiargs[1].toLowerCase());
+                    if(mode) {
+                      setMode = mode.help.name
+                      listedGame = mode.help.game
+                    }
+                  } else {
+                    setMode = "Classic";
+                    listedGame = "Fraud";
+                  }
                   if(gameInfo[message.guild.id]) return message.channel.send("The game already exists, please **join** the game instead.")
                   gameInfo[message.guild.id] = {
                     players: [],
@@ -134,7 +146,7 @@ var command = {
                     },
                     fraud: null,
                     started: false,
-                    mode: "Classic",
+                    mode: setMode,
                     name: message.guild.name,
                     id: currentID
                   };
@@ -153,7 +165,7 @@ var command = {
                     id: message.guild.id,
                     public: false
                   };
-                  return message.channel.send("The game has been created, use `" + host.prefix + "deduction join` in this server to join!")
+                  return message.channel.send("Created new game of mode `" + listedGame + "/" + setMode + "`. Anyone may use `" + host.prefix + "deduction join` in this server to join!")
                 case "join":
                   if(!gameInfo[message.guild.id]) return message.channel.send("The game does not exist yet, use `" + host.prefix + "deduction create` to create it.")
                   if(gameInfo[message.guild.id].started) return message.channel.send("Sorry, but a game is ongoing in this server. You may not join a game in progress.")

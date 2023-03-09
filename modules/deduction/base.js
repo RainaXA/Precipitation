@@ -45,12 +45,13 @@ function dayCycle(guID) {
       gameInfo[guID].phase++;
       phase.setTitle("Day " + (gameInfo[guID].day + 1) + " - Voting Phase - 30s")
       phase.setDescription("Vote for who you think the Spies are with `!vote`! You don't even have to type their full name!")
-      phase.setColor("BLUE")
+      phase.setColor("YELLOW")
       sendMessage({embeds: [phase]}, gameInfo[guID].viewers)
       setTimeout(dayCycle, 30000, guID)
       break;
     case 2: // begin rest phase
       gameInfo[guID].guilties = [];
+      gameInfo[guID].innocents = [];
       gameInfo[guID].phase = -2;
       gameInfo[guID].trials = 2;
       gameInfo[guID].votesAgainst = {};
@@ -58,8 +59,8 @@ function dayCycle(guID) {
         gameInfo[guID].votesAgainst[player.id] = [];
         gameInfo[guID].list[player.id].votedFor = null;
       }
-      phase.setTitle("Day " + (gameInfo[guID].day + 1) + " - Resting Phase - 40s")
-      phase.setColor("YELLOW")
+      phase.setTitle("Day " + (gameInfo[guID].day + 1) + " - Night - 40s")
+      phase.setColor("BLUE")
       phase.setDescription("Use your night abilities! `!target` is how most roles will perform. (you'll see a message otherwise.)")
       sendMessage({embeds: [phase]}, gameInfo[guID].viewers)
       setTimeout(dayCycle, 40000, guID)
@@ -67,6 +68,7 @@ function dayCycle(guID) {
       break;
     case 8: // secondary voting
       gameInfo[guID].guilties = [];
+      gameInfo[guID].innocents = [];
       gameInfo[guID].phase = 2;
       gameInfo[guID].votesAgainst = {};
       for(player of gameInfo[guID].players) {
@@ -75,7 +77,7 @@ function dayCycle(guID) {
       }
       phase.setTitle("Day " + (gameInfo[guID].day + 1) + " - Voting Phase - 15s")
       phase.setDescription("Vote for who you think the Spies are with `!vote`! You don't even have to type their full name!")
-      phase.setColor("DARK_BLUE")
+      phase.setColor("ORANGE")
       sendMessage({embeds: [phase]}, gameInfo[guID].viewers)
       setTimeout(dayCycle, 15000, guID)
       break;
@@ -103,16 +105,16 @@ function transitionTrial(guID) {
       break;
     case 4:
       gameInfo[guID].phase++;
-      sendMessage("**Their fate lies in our hands.** Use `!guilty` to guilty, or your vote will be automatically innocent! You may take back your guilty vote using `!innocent`!", gameInfo[guID].viewers)
+      sendMessage("**The fate of " + gameInfo[guID].trial.name + " lies in our hands.**\n\n`!guilty` - provides a guilty vote\n`!innocent` - provides an innocent vote\n`!cancel` - cancels any vote you submitted", gameInfo[guID].viewers)
       setTimeout(transitionTrial, 15000, guID)
       break;
     case 5:
-      if(gameInfo[guID].guilties.length > (gameInfo[guID].players.length - (gameInfo[guID].dead.length - gameInfo[guID].specs.length) - gameInfo[guID].guilties.length - 1)) {
-        sendMessage("**GUILTY!** " + gameInfo[guID].trial.name + " has been executed by a vote of " + gameInfo[guID].guilties.length + "-" + (gameInfo[guID].players.length - gameInfo[guID].guilties.length - (gameInfo[guID].dead.length - gameInfo[guID].specs.length) - 1) + ".", gameInfo[guID].viewers)
+      if(gameInfo[guID].guilties.length > gameInfo[guID].innocents.length) {
+        sendMessage("**GUILTY!** " + gameInfo[guID].trial.name + " has been executed by a vote of " + gameInfo[guID].guilties.length + "-" + gameInfo[guID].innocents.length + ".", gameInfo[guID].viewers)
         gameInfo[guID].dead.push(gameInfo[guID].trial)
         gameInfo[guID].list[gameInfo[guID].trial.id].dead = true;
         gameInfo[guID].aliveCount = gameInfo[guID].aliveCount - 1;
-        sendMessage(gameInfo[guID].trial.name + "'s role was unknown. (not developed!)", gameInfo[guID].viewers)
+        sendMessage("**" + gameInfo[guID].trial.name + "'s role was " + gameInfo[guID].list[gameInfo[guID].trial.id].role.name + ".**", gameInfo[guID].viewers)
         gameInfo[guID].phase = 2
         setTimeout(dayCycle, 5000, guID)
         return;
@@ -120,18 +122,16 @@ function transitionTrial(guID) {
         if(gameInfo[guID].trials == 1) gameInfo[guID].phase = 8;
         if(gameInfo[guID].trials == 0) gameInfo[guID].phase = 2;
         setTimeout(dayCycle, 5000, guID)
-        return sendMessage("**INNOCENT!** " + gameInfo[guID].trial.name + " has been pardoned by a vote of " + (gameInfo[guID].players.length - gameInfo[guID].guilties.length - (gameInfo[guID].dead.length - gameInfo[guID].specs.length) - 1) + "-" + gameInfo[guID].guilties.length + ".", gameInfo[guID].viewers)
+        return sendMessage("**INNOCENT!** " + gameInfo[guID].trial.name + " has been pardoned by a vote of " + gameInfo[guID].innocents.length + "-" + gameInfo[guID].guilties.length + ".", gameInfo[guID].viewers)
       }
   }
-}
-
-function roleAssignment() {
-
 }
 
 function startGame(viewers, guildID) {
   gameInfo[guildID].day = 0;
   gameInfo[guildID].phase = -2;
+  gameInfo[guildID].phase = 2;
+  gameInfo[guildID].spies = [];
   //gameInfo[guildID].dead = gameInfo[guildID].specs;
   gameInfo[guildID].dead = [];
   for (viewer of gameInfo[guildID].viewers) {
@@ -146,19 +146,44 @@ function startGame(viewers, guildID) {
   gameInfo[guildID].aliveCount = gameInfo[guildID].players.length;
   gameInfo[guildID].trials = 2;
   gameInfo[guildID].votesAgainst = {};
-  for(role of lists[String(gameInfo[guildID].players.length)]) {
-    log(role, logging.warn, "test")
-  }
   let rolesToAssign = lists[String(gameInfo[guildID].players.length)];
   for(player of viewers) { // assign roles!
     gameInfo[guildID].votesAgainst[player.id] = [];
     if(!gameInfo[guildID].list[player.id].dead) {
       let rng = Math.floor(Math.random() * rolesToAssign.length)
-      gameInfo[guildID].list[player.id].role = rolesToAssign[rng].name.toLowerCase();
-      player.send(gameInfo[guildID].list[player.id].role)
-      gameInfo[guildID].players.splice(rng, 1)
+      gameInfo[guildID].list[player.id].role = rolesToAssign[rng];
+      log(gameInfo[guildID].list[player.id].role, logging.warn, "test")
+      let embedd = new MessageEmbed()
+      .setTitle(gameInfo[guildID].list[player.id].role.name)
+      switch(gameInfo[guildID].list[player.id].role.alignment.split(" ")[0].toLowerCase()) {
+        case "city":
+          embedd.setColor(roles.properties.city.color)
+          embedd.addField("Goal", roles.properties.city.goal, true)
+          break;
+        case "spy":
+          embedd.setColor(roles.properties.spies.color)
+          embedd.addField("Goal", roles.properties.spies.goal, true)
+          gameInfo[guildID].spies.push(message.author)
+          break;
+        case "neutral":
+          embedd.setColor(gameInfo[guildID].list[player.id].role.color)
+          embedd.addField("Goal", gameInfo[guildID].list[player.id].role.goal, true)
+          break;
+      }
+      embedd.addField("Alignment", gameInfo[guildID].list[player.id].role.alignment, true)
+      embedd.addField("Abilities", gameInfo[guildID].list[player.id].role.abilities)
+      embedd.addField("Artifacts", gameInfo[guildID].list[player.id].role.artifacts)
+      player.send({embeds: [embedd]})
+      rolesToAssign.splice(rng, 1)
     } else {
-      player.send("Spectator")
+      let embedd = new MessageEmbed()
+      .setTitle("Spectator")
+      .setColor("GRAY")
+      .addField("Goal", "Enjoy the show.", true)
+      .addField("Alignment", "Neutral", true)
+      .addField("Abilities", "- You are able to talk with other spectators.")
+      .addField("Artifacts", "- You are unable to interact with the game.\n- You may talk with the other dead.")
+      player.send({embeds: [embedd]})
     }
   }
   dayCycle(guildID)
@@ -200,8 +225,10 @@ client.on('messageCreate', function(message) {
   if(currentGame.list[message.author.id].dead) return sendMessage("*" + message.author.username + ": " + message.content + "*", currentGame.dead)
   switch(currentGame.phase) {
     case -2:
+      if(getTextInput(message.author, currentGame.spies, 2)) {
+        return sendMessage("**" + message.author.username + "**: " + message.content, currentGame.spies)
+      }
       return message.channel.send("Don't talk! The Spies may overhear!")
-      //return;
     case 0:
     case -1:
       return;
@@ -212,7 +239,7 @@ client.on('messageCreate', function(message) {
         let submitted = false;
         for(user of currentGame.players) {
           if(user.name.toLowerCase().includes(target)) {
-            if(message.author.id == user.id) return; // cant vote for yourself
+            //if(message.author.id == user.id) return; // cant vote for yourself
             for(let i = 0; i < currentGame.votesAgainst[user.id].length; i++) {
               if(currentGame.votesAgainst[user.id][i] == message.author.id) return; // dont allow votes again
             }
@@ -248,15 +275,37 @@ client.on('messageCreate', function(message) {
       if(message.author.id != currentGame.trial.id) return; // since they cant take over, are they the one on trial?
       break;
     case 5:
+      if(message.author.id == currentGame.trial.id) return; // since they cant take over, are they the one on trial?
       if(message.content == "!guilty") {
-        if(message.author.id == currentGame.trial.id) return; // since they cant take over, are they the one on trial?
-        if(getTextInput(message.author.id, currentGame.guilties)) return; //they've already voted guilty!
+        if(getTextInput(message.author.id, currentGame.guilties)) return; //they've already voted!
+        let nu = currentGame.innocents.findIndex((userID) => message.author.id == userID);
         currentGame.guilties.push(message.author.id);
-        return message.channel.send("*Your vote has been received.*")
-      } else if(message.content == "!innocent" || message.content == "!cancel") {
+        if(nu != -1) {
+          currentGame.innocents.splice(nu, 1)
+          return sendMessage(message.author.username + " has changed their vote.", currentGame.viewers)
+        } else {
+          return sendMessage(message.author.username + " has voted.", currentGame.viewers)
+        }
+      } else if(message.content == "!innocent") {
+        if(getTextInput(message.author.id, currentGame.innocents)) return; //they've already voted!
         let nu = currentGame.guilties.findIndex((userID) => message.author.id == userID);
-        currentGame.guilties.splice(nu, 1)
-        message.channel.send("*Your vote has been taken back.*")
+        currentGame.innocents.push(message.author.id);
+        if(nu != -1) {
+          currentGame.guilties.splice(nu, 1)
+          return sendMessage(message.author.username + " has changed their vote.", currentGame.viewers)
+        } else {
+          return sendMessage(message.author.username + " has voted.", currentGame.viewers)
+        }
+      } else if(message.content == "!cancel") {
+        if(getTextInput(message.author.id, currentGame.innocents)) {
+          let nu = currentGame.innocents.findIndex((userID) => message.author.id == userID);
+          currentGame.innocents.splice(nu, 1)
+          return sendMessage(message.author.username + " has cancelled their vote.", currentGame.viewers)
+        } else if(getTextInput(message.author.id, currentGame.guilties)) {
+          let nu = currentGame.guilties.findIndex((userID) => message.author.id == userID);
+          currentGame.guilties.splice(nu, 1)
+          return sendMessage(message.author.username + " has cancelled their vote.", currentGame.viewers)
+        }
       }
       break;
   }
