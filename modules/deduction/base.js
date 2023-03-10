@@ -6,6 +6,38 @@ const roles = require('../../data/tm.json');
                      // 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
 const majorityCounts = [0, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7]
 
+function roleRevealResults(role, death) {
+  if(!death) {
+    // Citizen, Merchant, Saboteur, or Outcast
+    // Detective, Agent, or Psychopath
+    // Hunter, Interrogator, or Hitman 
+    // Doctor, Framer, or Serial Killer
+    switch(role.toLowerCase()) {
+      case "citizen":
+      case "merchant":
+      case "saboteur":
+      case "outcast":
+        return "Citizen, Merchant, Saboteur, or Outcast";
+      case "detective":
+      case "agent":
+      case "psychopath":
+        return "Detective, Agent, or Psychopath";
+      case "hunter":
+      case "interrogator":
+      case "hitman":
+        return "Hunter, Interrogator, or Hitman";
+      case "doctor":
+      case "framer":
+      case "serial killer":
+        return "Doctor, Framer, or Serial Killer";
+    }
+  } else {
+    switch(role) {
+
+    }
+  }
+}
+
 function dayCycle(guID) {
   // phases:
   // 0 = discussion
@@ -52,7 +84,7 @@ function dayCycle(guID) {
     case 2: // begin rest phase
       gameInfo[guID].guilties = [];
       gameInfo[guID].innocents = [];
-      gameInfo[guID].phase = -2;
+      gameInfo[guID].phase = 6;
       gameInfo[guID].trials = 2;
       gameInfo[guID].votesAgainst = {};
       for(player of gameInfo[guID].players) {
@@ -65,6 +97,31 @@ function dayCycle(guID) {
       sendMessage({embeds: [phase]}, gameInfo[guID].viewers)
       setTimeout(dayCycle, 40000, guID)
       gameInfo[guID].day++;
+      break;
+    case 6:
+      for(user of gameInfo[guID].viewers) { // first priority
+        if(!gameInfo[guID].list[viewer.id].player) return;
+        if(!gameInfo[guID].queued[viewer.id]) return user.send("You did not perform your night ability.")
+        switch(gameInfo[guID].list[viewer.id].role) {
+          case roles.properties.city.detective:
+            user.send("You have concluded that " + gameInfo[guID].queued[viewer.id].username + " could be a **" + roleRevealResults(gameInfo[guID].list[gameInfo[guID].queued[viewer.id].id].role.name, false) + "**.")
+            break;
+          case roles.properties.city.doctor:
+            gameInfo[guID].list[gameInfo[guID].queued[viewer.id]].healed = true;
+            gameInfo[guID].list[gameInfo[guID].queued[viewer.id]].attackers = 0;
+            break;
+        }
+      }/*
+      for(user of gameInfo[guID].viewers) { // second priority
+        if(!gameInfo[guID].list[viewer.id].player) return;
+        switch(gameInfo[guID].list[viewer.id].role) {
+          case roles.properties.spies.hitman:
+            user.send("You have concluded that " + gameInfo[guID].queued[viewer.id].username + " could be a **" + roleRevealResults(gameInfo[guID].list[gameInfo[guID].queued[viewer.id].id].role.name, false) + "**.")
+            break;
+        }
+      }*/
+      gameInfo[guID].phase = -2;
+      setTimeout(dayCycle, 5000, guID)
       break;
     case 8: // secondary voting
       gameInfo[guID].guilties = [];
@@ -105,16 +162,16 @@ function transitionTrial(guID) {
       break;
     case 4:
       gameInfo[guID].phase++;
-      sendMessage("**The fate of " + gameInfo[guID].trial.name + " lies in our hands.**\n\n`!guilty` - provides a guilty vote\n`!innocent` - provides an innocent vote\n`!cancel` - cancels any vote you submitted", gameInfo[guID].viewers)
+      sendMessage("**The fate of " + gameInfo[guID].trial.username + " lies in our hands.**\n\n`!guilty` - provides a guilty vote\n`!innocent` - provides an innocent vote\n`!cancel` - cancels any vote you submitted", gameInfo[guID].viewers)
       setTimeout(transitionTrial, 15000, guID)
       break;
     case 5:
       if(gameInfo[guID].guilties.length > gameInfo[guID].innocents.length) {
-        sendMessage("**GUILTY!** " + gameInfo[guID].trial.name + " has been executed by a vote of " + gameInfo[guID].guilties.length + "-" + gameInfo[guID].innocents.length + ".", gameInfo[guID].viewers)
+        sendMessage("**GUILTY!** " + gameInfo[guID].trial.username + " has been executed by a vote of " + gameInfo[guID].guilties.length + "-" + gameInfo[guID].innocents.length + ".", gameInfo[guID].viewers)
         gameInfo[guID].dead.push(gameInfo[guID].trial)
         gameInfo[guID].list[gameInfo[guID].trial.id].dead = true;
         gameInfo[guID].aliveCount = gameInfo[guID].aliveCount - 1;
-        sendMessage("**" + gameInfo[guID].trial.name + "'s role was " + gameInfo[guID].list[gameInfo[guID].trial.id].role.name + ".**", gameInfo[guID].viewers)
+        sendMessage("**" + gameInfo[guID].trial.username + "'s role was " + gameInfo[guID].list[gameInfo[guID].trial.id].role.name + ".**", gameInfo[guID].viewers)
         gameInfo[guID].phase = 2
         setTimeout(dayCycle, 5000, guID)
         return;
@@ -122,7 +179,7 @@ function transitionTrial(guID) {
         if(gameInfo[guID].trials == 1) gameInfo[guID].phase = 8;
         if(gameInfo[guID].trials == 0) gameInfo[guID].phase = 2;
         setTimeout(dayCycle, 5000, guID)
-        return sendMessage("**INNOCENT!** " + gameInfo[guID].trial.name + " has been pardoned by a vote of " + gameInfo[guID].innocents.length + "-" + gameInfo[guID].guilties.length + ".", gameInfo[guID].viewers)
+        return sendMessage("**INNOCENT!** " + gameInfo[guID].trial.username + " has been pardoned by a vote of " + gameInfo[guID].innocents.length + "-" + gameInfo[guID].guilties.length + ".", gameInfo[guID].viewers)
       }
   }
 }
@@ -130,10 +187,10 @@ function transitionTrial(guID) {
 function startGame(viewers, guildID) {
   gameInfo[guildID].day = 0;
   gameInfo[guildID].phase = -2;
-  gameInfo[guildID].phase = 2;
   gameInfo[guildID].spies = [];
   //gameInfo[guildID].dead = gameInfo[guildID].specs;
   gameInfo[guildID].dead = [];
+  gameInfo[guildID].queued = {};
   for (viewer of gameInfo[guildID].viewers) {
     if (!gameInfo[guildID].list[viewer.id].player) {
       gameInfo[guildID].dead.push(viewer)
@@ -149,6 +206,7 @@ function startGame(viewers, guildID) {
   let rolesToAssign = lists[String(gameInfo[guildID].players.length)];
   for(player of viewers) { // assign roles!
     gameInfo[guildID].votesAgainst[player.id] = [];
+    gameInfo[guildID].queued[player.id] = null;
     if(!gameInfo[guildID].list[player.id].dead) {
       let rng = Math.floor(Math.random() * rolesToAssign.length)
       gameInfo[guildID].list[player.id].role = rolesToAssign[rng];
@@ -225,19 +283,15 @@ client.on('messageCreate', function(message) {
   if(currentGame.list[message.author.id].dead) return sendMessage("*" + message.author.username + ": " + message.content + "*", currentGame.dead)
   switch(currentGame.phase) {
     case -2:
-      if(getTextInput(message.author, currentGame.spies, 2)) {
-        return sendMessage("**" + message.author.username + "**: " + message.content, currentGame.spies)
-      }
-      return message.channel.send("Don't talk! The Spies may overhear!")
-    case 0:
     case -1:
+    case 0:
       return;
     case 2:
     case 8:
       if(message.content.startsWith("!vote ")) {
         let target = message.content.toLowerCase().slice(6)
         let submitted = false;
-        for(user of currentGame.players) {
+        for(user of currentGame.viewers) {
           if(user.name.toLowerCase().includes(target)) {
             //if(message.author.id == user.id) return; // cant vote for yourself
             for(let i = 0; i < currentGame.votesAgainst[user.id].length; i++) {
@@ -264,7 +318,7 @@ client.on('messageCreate', function(message) {
           currentGame.phase = 3;
           currentGame.trial = user;
           currentGame.trials = currentGame.trials - 1;
-          sendMessage("**The majority have elected to put " + user.name + " on trial.** You have forty-five seconds to provide a defense for your actions.", currentGame.viewers)
+          sendMessage("**The majority have elected to put " + user.username + " on trial.** You have forty-five seconds to provide a defense for your actions.", currentGame.viewers)
           transitionTrial(currentlyPlaying[message.author.id].id); // begin the trial!
         }
       } else {
@@ -308,6 +362,29 @@ client.on('messageCreate', function(message) {
         }
       }
       break;
+    case 6:
+      if(message.content.startsWith("!target ")) {
+        let target = message.content.toLowerCase().slice(8)
+        for(user of currentGame.viewers) {
+          if(user.username.toLowerCase().includes(target)) {
+            switch(currentGame.list[message.author.id].role) {
+              case roles.properties.city.detective:
+                //if(message.author.id == user.id) return message.channel.send("Well, you're certainly not the brightest detective, huh?")
+                currentGame.queued[message.author.id] = user
+                return message.channel.send("You have decided to investigate " + user.username + " tonight.")
+              case roles.properties.spies.doctor:
+                if(message.author.id == user.id) return message.channel.send("HA! You wish you could heal yourself!")
+                if(getTextInput(user, currentGame.dead, 2)) return message.channel.send("Unfortunately, you are not trained in revival.")
+                currentGame.queued[message.author.id] = user
+                return message.channel.send("You have decided to heal " + user.username + " tonight.")
+            }
+          }
+        }
+      }
+      if(getTextInput(message.author, currentGame.spies, 2)) {
+        return sendMessage("**" + message.author.username + "**: " + message.content, currentGame.spies)
+      }
+      return message.channel.send("Don't talk! The Spies may overhear!")
   }
   sendMessage("**" + message.author.username + "**: " + message.content, currentGame.viewers)
 })
