@@ -163,7 +163,7 @@ function startGame(viewers, guildID) {
         case "spy":
           embedd.setColor(roles.properties.spies.color)
           embedd.addField("Goal", roles.properties.spies.goal, true)
-          gameInfo[guildID].spies.push(message.author)
+          gameInfo[guildID].spies.push(player)
           break;
         case "neutral":
           embedd.setColor(gameInfo[guildID].list[player.id].role.color)
