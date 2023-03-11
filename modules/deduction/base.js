@@ -101,25 +101,59 @@ function dayCycle(guID) {
     case 6:
       for(user of gameInfo[guID].viewers) { // first priority
         if(!gameInfo[guID].list[viewer.id].player) return;
-        if(!gameInfo[guID].queued[viewer.id]) return user.send("You did not perform your night ability.")
+        if(!gameInfo[guID].queued[viewer.id] && gameInfo[guID].list[viewer.id].role.name != "Outcast") return user.send("You did not perform your night ability.") // outcasts do not have a night ability
         switch(gameInfo[guID].list[viewer.id].role) {
-          case roles.properties.city.detective:
-            user.send("You have concluded that " + gameInfo[guID].queued[viewer.id].username + " could be a **" + roleRevealResults(gameInfo[guID].list[gameInfo[guID].queued[viewer.id].id].role.name, false) + "**.")
+          case roles.properties.spies.saboteur:
+            gameInfo[guID].list[gameInfo[guID].queued[viewer.id]].saboteured = true;
             break;
-          case roles.properties.city.doctor:
-            gameInfo[guID].list[gameInfo[guID].queued[viewer.id]].healed = true;
-            gameInfo[guID].list[gameInfo[guID].queued[viewer.id]].attackers = 0;
+          case roles.properties.spies.framer:
+            gameInfo[guID].list[gameInfo[guID].queued[viewer.id]].framed = true;
             break;
         }
-      }/*
+      }
       for(user of gameInfo[guID].viewers) { // second priority
         if(!gameInfo[guID].list[viewer.id].player) return;
         switch(gameInfo[guID].list[viewer.id].role) {
-          case roles.properties.spies.hitman:
-            user.send("You have concluded that " + gameInfo[guID].queued[viewer.id].username + " could be a **" + roleRevealResults(gameInfo[guID].list[gameInfo[guID].queued[viewer.id].id].role.name, false) + "**.")
+          case roles.properties.city.detective:
+            if(gameInfo[guID].list[gameInfo[guID].queued[viewer.id]].saboteured) return user.send(gameInfo[guID].queued[viewer.id].username + "'s doorknob was completely broken off! You decide to return home.")
+            let results = roleRevealResults(gameInfo[guID].list[gameInfo[guID].queued[viewer.id].id].role.name)
+            if(gameInfo[guID].list[gameInfo[guID].queued[viewer.id].id].framed) results = roleRevealResults("Framer");
+            user.send("You have concluded that " + gameInfo[guID].queued[viewer.id].username + " could be a **" + results + "**.")
+            break;
+          case roles.properties.city.doctor:
+            if(gameInfo[guID].list[gameInfo[guID].queued[viewer.id]].saboteured) return user.send(gameInfo[guID].queued[viewer.id].username + "'s doorknob was completely broken off! You decide to return home.")
+            gameInfo[guID].list[gameInfo[guID].queued[viewer.id]].healed = true;
+            gameInfo[guID].list[gameInfo[guID].queued[viewer.id]].attackers = 0;
+            break;
+          case roles.properties.spies.agent:
+            user.send("You have determined that " + gameInfo[guID].queued[viewer.id].username + " is a **" + gameInfo[guID].list[gameInfo[guID].queued[viewer.id].id].role.name + "**.")
             break;
         }
-      }*/
+      }
+      for(user of gameInfo[guID].viewers) { // third priority
+        if(!gameInfo[guID].list[viewer.id].player) return;
+        switch(gameInfo[guID].list[viewer.id].role) {
+          case roles.properties.spies.hitman:
+            gameInfo[guID].list[gameInfo[guID].queued[viewer.id]].attackers++;
+            gameInfo[guID].list[gameInfo[guID].queued[viewer.id]].methods.push("shot by a gun");
+            break;
+          case roles.properties.neutral.serialkiller:
+            if(gameInfo[guID].list[gameInfo[guID].queued[viewer.id]].saboteured) return user.send(gameInfo[guID].queued[viewer.id].username + "'s doorknob was completely broken off! You decide to return home.")
+            gameInfo[guID].list[gameInfo[guID].queued[viewer.id]].attackers++;
+            gameInfo[guID].list[gameInfo[guID].queued[viewer.id]].methods.push("stabbed with a knife");
+            break;
+          case roles.properties.city.hunter:
+            if(gameInfo[guID].list[gameInfo[guID].queued[viewer.id]].marked) {
+              gameInfo[guID].list[gameInfo[guID].queued[viewer.id]].attackers++;
+              gameInfo[guID].list[gameInfo[guID].queued[viewer.id]].methods.push("shot by a gun");
+            } else {
+              if(gameInfo[guID].list[gameInfo[guID].queued[viewer.id]].saboteured) return user.send(gameInfo[guID].queued[viewer.id].username + "'s doorknob was completely broken off! You decide to return home.")
+              gameInfo[guID].list[gameInfo[guID].queued[viewer.id]].marked = true;
+              user.send(gameInfo[guID].queued[viewer.id].username + " has successfully been marked for death.")
+            }
+            break;
+        }
+      }
       gameInfo[guID].phase = -2;
       setTimeout(dayCycle, 5000, guID)
       break;
@@ -207,6 +241,7 @@ function startGame(viewers, guildID) {
   for(player of viewers) { // assign roles!
     gameInfo[guildID].votesAgainst[player.id] = [];
     gameInfo[guildID].queued[player.id] = null;
+    gameInfo[guildID].list[player.id].methods = []
     if(!gameInfo[guildID].list[player.id].dead) {
       let rng = Math.floor(Math.random() * rolesToAssign.length)
       gameInfo[guildID].list[player.id].role = rolesToAssign[rng];
