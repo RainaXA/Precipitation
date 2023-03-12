@@ -65,6 +65,16 @@ var command = {
                     config.guilds[message.guild.id].settings.logging.members = cArg[1]
                     return message.channel.send("Okay, I will log members in " + message.guild.channels.cache.get(cArg[1]).name + ".")
                 }
+                case "updog":
+                if(cArg[1].toLowerCase() == "true") {
+                    return message.channel.send("This feature is fairly offensive, as it was designed for a friend. It is not advised to use this feature unless you AND your server members are absolutely okay with ironic suicidal remarks.\n\nTo mitigate this warning, please re-execute the command using `YES` instead of `true`.")
+                } else if(cArg[1] == "YES") {
+                  config.guilds[message.guild.id].settings.updog = true;
+                  return message.channel.send("Okay, I'm setting the updog anger to `true`.");
+                } else {
+                    config.guilds[message.guild.id].settings.updog = false;
+                    return message.channel.send("Okay, I'm setting the updog anger to `false`.");
+                }
                 default:
                 let configuration = new MessageEmbed()
                 .setTitle("Server Configuration || " + message.guild.name)
@@ -72,6 +82,7 @@ var command = {
                 .addField("Slur Filter (filter)", String(config.guilds[message.guild.id].settings.filter).replace("false", "Disabled").replace("true", "Enabled").replace("undefined", "Disabled"))
                 .addField("Message Logging (mlog)", String(config.guilds[message.guild.id].settings.logging.messages).replace("null", "Disabled").replace("undefined", "Disabled")) // set to string, if null or undefined, replace with Disabled. damn i feel cool!
                 .addField("Member Logging (mblog)", String(config.guilds[message.guild.id].settings.logging.members).replace("null", "Disabled").replace("undefined", "Disabled"))
+                .addField("I HATE UPDOG (updog)", String(config.guilds[message.guild.id].settings.updog).replace("false", "Disabled").replace("undefined", "Disabled").replace("true", "Enabled"))
                 .setColor(host.color)
                 .setFooter({ text: "Precipitation " + host.version.external, iconURL: client.user.displayAvatarURL() })
                 return message.channel.send({embeds: [configuration]})
@@ -91,6 +102,7 @@ var command = {
 
 module.exports = command;
 
+// filter module
 client.on('messageCreate', message => {
     if(!message.guild) return; // do not do anything if it's a dm
     if(!config.guilds[message.guild.id].settings) config.guilds[message.guild.id].settings = {};
@@ -99,3 +111,14 @@ client.on('messageCreate', message => {
       if(message.author.id != client.user.id) message.author.send("Hey, " + name(message.author) + "!\n\nThis server has banned very offensive words. Please refrain from using these words.")
     }
   })
+
+
+// I HATE UPDOG MODULE
+// designed for a friend
+client.on('messageCreate', message => {
+  if(!message.guild) return; // do not do anything if it's a dm
+  if(!config.guilds[message.guild.id].settings) config.guilds[message.guild.id].settings = {};
+  if (config.guilds[message.guild.id].settings.updog && message.content.toLowerCase().includes("updog") && !message.content.toLowerCase().includes("config updog")) {
+    if(message.author.id != client.user.id) message.channel.send("<@" + message.author.id + ">, https://cdn.discordapp.com/attachments/626264483513499649/1084593676317106247/IMG_4632.jpg")
+  }
+})
