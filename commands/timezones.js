@@ -272,6 +272,8 @@ var commands = {
                     let day;
                     let seconds = date.getUTCSeconds();
                     let minutes = date.getUTCMinutes();
+                    let weekday = date.getUTCDay();
+                    let shownDate;
                     if(config.users[user.id].offsetMin) {
                         minutes = minutes + config.users[user.id].offsetMin
                     }
@@ -301,8 +303,48 @@ var commands = {
                         seconds = "0" + seconds;
                     }
                     let time;
+                    weekday = String(weekday);
                     if(!config.users[message.author.id].timePrefs) config.users[message.author.id].timePrefs = {};
                     if(!config.users[message.author.id].timePrefs.time) config.users[message.author.id].timePrefs.time = 2;
+                    if(!config.users[message.author.id].timePrefs.day) config.users[message.author.id].timePrefs.day = 1;
+                    if(!config.users[message.author.id].timePrefs.date) config.users[message.author.id].timePrefs.date = 1;
+                    switch(config.users[message.author.id].timePrefs.day) {
+                        case 1:
+                            weekday = weekday.replace("0", "Sunday").replace("1", "Monday").replace("2", "Tuesday").replace("3", "Wednesday").replace("4", "Thursday").replace("5", "Friday").replace("0", "Saturday")
+                            break;
+                        case 2:
+                            weekday = weekday.replace("0", "Sun").replace("1", "Mon").replace("2", "Tues").replace("3", "Wed").replace("4", "Thurs").replace("5", "Fri").replace("0", "Sat")
+                            break;
+                        case 3:
+                            weekday = weekday.replace("0", "Su").replace("1", "M").replace("2", "Tu").replace("3", "W").replace("4", "Th").replace("5", "F").replace("0", "Sa")
+                            break;
+                    }
+                    switch(config.users[message.author.id].timePrefs.date) {
+                        case 1:
+                            shownDate = toProperUSFormat((date.getUTCMonth() + 1), day, date.getUTCFullYear());
+                            break;
+                        case 2:;
+                            shownDate = convertToMonth(date.getUTCMonth(), 0) + " " + day + " " + date.getUTCFullYear()
+                            break;
+                        case 3:
+                            shownDate = convertToMonth(date.getUTCMonth(), 1) + " " + day + " " + date.getUTCFullYear();
+                            break;
+                        case 4:
+                            shownDate = day + " " + convertToMonth(date.getUTCMonth(), 1) + " " + date.getUTCFullYear();
+                            break;
+                        case 5:
+                            shownDate = toProperUSFormat((date.getUTCMonth() + 1), day, date.getUTCFullYear()).slice(0, -6);
+                            break;
+                        case 6:
+                            shownDate = convertToMonth(date.getUTCMonth(), 0) + " " + day
+                            break;
+                        case 7:
+                            shownDate = convertToMonth(date.getUTCMonth(), 1) + " " + day
+                            break;
+                        case 8:
+                            shownDate = day + " " + convertToMonth(date.getUTCMonth(), 1)
+                            break;
+                    }
                     switch(config.users[message.author.id].timePrefs.time) {
                         case 1:
                             let ampm;
@@ -331,7 +373,7 @@ var commands = {
                             time = newHours + ":" + minutes
                             break;
                     }
-                    message.channel.send("**" + user.tag + "**: " + toProperUSFormat((date.getUTCMonth() + 1), day, date.getUTCFullYear()) + ", " + time)
+                    message.channel.send("**" + user.tag + "**: " + weekday + ", " + shownDate + ", " + time)
                 } else {
                     if(!config.users[message.author.id]) config.users[message.author.id] = {}
                     if(!config.users[message.author.id].offset && config.users[message.author.id].offset != 0) return message.channel.send("No offset found, set it using `pr:settime`!")
