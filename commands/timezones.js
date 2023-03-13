@@ -12,6 +12,93 @@ try {
     log("united states date format function not found - not showing birthday.", logging.warn, "timezones")
 }
 
+function convertToMonth(month, type) {
+    let wMonth;
+    switch(type) {
+        case 0:
+            switch(month + 1) {
+                case 1:
+                wMonth = "January";
+                break;
+                case 2:
+                wMonth = "February";
+                break;
+                case 3:
+                wMonth = "March";
+                break;
+                case 4:
+                wMonth = "April";
+                break;
+                case 5:
+                wMonth = "May";
+                break;
+                case 6:
+                wMonth = "June";
+                break;
+                case 7:
+                wMonth = "July";
+                break;
+                case 8:
+                wMonth = "August";
+                break;
+                case 9:
+                wMonth = "September";
+                break;
+                case 10:
+                wMonth = "October";
+                break;
+                case 11:
+                wMonth = "November";
+                break;
+                case 12:
+                wMonth = "December";
+                break;
+            }
+            break;
+        case 1:
+            switch(month + 1) {
+                case 1:
+                wMonth = "Jan";
+                break;
+                case 2:
+                wMonth = "Feb";
+                break;
+                case 3:
+                wMonth = "Mar";
+                break;
+                case 4:
+                wMonth = "Apr";
+                break;
+                case 5:
+                wMonth = "May";
+                break;
+                case 6:
+                wMonth = "Jun";
+                break;
+                case 7:
+                wMonth = "Jul";
+                break;
+                case 8:
+                wMonth = "Aug";
+                break;
+                case 9:
+                wMonth = "Sep";
+                break;
+                case 10:
+                wMonth = "Oct";
+                break;
+                case 11:
+                wMonth = "Nov";
+                break;
+                case 12:
+                wMonth = "Dec";
+                break;
+            }
+            break;
+    }
+    return wMonth;
+}
+
 function utcOffsetFromTimezone(location) {
     switch (location) {
         case "sst":
@@ -253,6 +340,8 @@ var commands = {
                     let day;
                     let seconds = date.getUTCSeconds();
                     let minutes = date.getUTCMinutes();
+                    let weekday = date.getUTCDay();
+                    let shownDate;
                     if(config.users[message.author.id].offsetMin) {
                         minutes = minutes + config.users[message.author.id].offsetMin
                     }
@@ -266,9 +355,11 @@ var commands = {
                     if(newHours < 0) {
                         newHours = 24 + newHours
                         day = date.getUTCDate() - 1;
+                        weekday = weekday - 1;
                     } else if(newHours > 24) {
                         newHours = newHours - 24
                         day = date.getUTCDate() + 1;
+                        weekday = weekday + 1;
                     } else {
                         day = date.getUTCDate();
                     }
@@ -282,13 +373,48 @@ var commands = {
                         seconds = "0" + seconds;
                     }
                     let time;
-                    let weekday;
+                    weekday = String(weekday);
                     if(!config.users[message.author.id].timePrefs) config.users[message.author.id].timePrefs = {};
                     if(!config.users[message.author.id].timePrefs.time) config.users[message.author.id].timePrefs.time = 2;
-                    if(!config.users[message.author.id].timePrefs.time) config.users[message.author.id].timePrefs.day = 1;
-                    //switch(config.users[message.author.id].timePrefs.day) {
-                        
-                    //}
+                    if(!config.users[message.author.id].timePrefs.day) config.users[message.author.id].timePrefs.day = 1;
+                    if(!config.users[message.author.id].timePrefs.date) config.users[message.author.id].timePrefs.date = 1;
+                    switch(config.users[message.author.id].timePrefs.day) {
+                        case 1:
+                            weekday = weekday.replace("0", "Sunday").replace("1", "Monday").replace("2", "Tuesday").replace("3", "Wednesday").replace("4", "Thursday").replace("5", "Friday").replace("0", "Saturday")
+                            break;
+                        case 2:
+                            weekday = weekday.replace("0", "Sun").replace("1", "Mon").replace("2", "Tues").replace("3", "Wed").replace("4", "Thurs").replace("5", "Fri").replace("0", "Sat")
+                            break;
+                        case 3:
+                            weekday = weekday.replace("0", "Su").replace("1", "M").replace("2", "Tu").replace("3", "W").replace("4", "Th").replace("5", "F").replace("0", "Sa")
+                            break;
+                    }
+                    switch(config.users[message.author.id].timePrefs.date) {
+                        case 1:
+                            shownDate = toProperUSFormat((date.getUTCMonth() + 1), day, date.getUTCFullYear());
+                            break;
+                        case 2:;
+                            shownDate = convertToMonth(date.getUTCMonth(), 0) + " " + day + " " + date.getUTCFullYear()
+                            break;
+                        case 3:
+                            shownDate = convertToMonth(date.getUTCMonth(), 1) + " " + day + " " + date.getUTCFullYear();
+                            break;
+                        case 4:
+                            shownDate = day + " " + convertToMonth(date.getUTCMonth(), 1) + " " + date.getUTCFullYear();
+                            break;
+                        case 5:
+                            shownDate = toProperUSFormat((date.getUTCMonth() + 1), day, date.getUTCFullYear()).slice(0, -6);
+                            break;
+                        case 6:
+                            shownDate = convertToMonth(date.getUTCMonth(), 0) + " " + day
+                            break;
+                        case 7:
+                            shownDate = convertToMonth(date.getUTCMonth(), 1) + " " + day
+                            break;
+                        case 8:
+                            shownDate = day + " " + convertToMonth(date.getUTCMonth(), 1)
+                            break;
+                    }
                     switch(config.users[message.author.id].timePrefs.time) {
                         case 1:
                             let ampm;
@@ -317,7 +443,7 @@ var commands = {
                             time = newHours + ":" + minutes
                             break;
                     }
-                    message.channel.send("**" + message.author.tag + "**: " + toProperUSFormat((date.getUTCMonth() + 1), day, date.getUTCFullYear()) + ", " + time)
+                    message.channel.send("**" + message.author.tag + "**: " + weekday + ", " + shownDate + ", " + time)
                 }
             }
         },
@@ -397,13 +523,13 @@ var commands = {
                         switch(parseInt(multiargs[1])) {
                             case 1:
                                 config.users[message.author.id].timePrefs.day = 1;
-                                return message.channel.send("Okay, I've set your time preference to `Thursday`.")
+                                return message.channel.send("Okay, I've set your day preference to `Thursday`.")
                             case 2:
                                 config.users[message.author.id].timePrefs.day = 2;
-                                return message.channel.send("Okay, I've set your time preference to `Thurs`.")
+                                return message.channel.send("Okay, I've set your day preference to `Thurs`.")
                             case 3:
                                 config.users[message.author.id].timePrefs.day = 3;
-                                return message.channel.send("Okay, I've set your time preference to `Th`.")
+                                return message.channel.send("Okay, I've set your day preference to `Th`.")
                             default:
                                 let embed = new MessageEmbed()
                                 .setTitle("Time Display Preferences >> Day")
@@ -414,6 +540,30 @@ var commands = {
                         }
                     case 2:
                         switch(parseInt(multiargs[1])) {
+                            case 1:
+                                config.users[message.author.id].timePrefs.date = 1;
+                                return message.channel.send("Okay, I've set your date preference to `January 1st, 1970`.")
+                            case 2:
+                                config.users[message.author.id].timePrefs.date = 2;
+                                return message.channel.send("Okay, I've set your date preference to `January 1 1970`.")
+                            case 3:
+                                config.users[message.author.id].timePrefs.date = 3;
+                                return message.channel.send("Okay, I've set your date preference to `Jan 1 1970`.")
+                            case 4:
+                                config.users[message.author.id].timePrefs.date = 4;
+                                return message.channel.send("Okay, I've set your date preference to `1 Jan 1970`.")
+                            case 5:
+                                config.users[message.author.id].timePrefs.date = 5;
+                                return message.channel.send("Okay, I've set your date preference to `January 1st`.")
+                            case 6:
+                                config.users[message.author.id].timePrefs.date = 6;
+                                return message.channel.send("Okay, I've set your date preference to `January 1`.")
+                            case 7:
+                                config.users[message.author.id].timePrefs.date = 7;
+                                return message.channel.send("Okay, I've set your date preference to `Jan 1`.")
+                            case 8:
+                                config.users[message.author.id].timePrefs.date = 8;
+                                return message.channel.send("Okay, I've set your date preference to `1 Jan`.")
                             default:
                                 let embed = new MessageEmbed()
                                 .setTitle("Time Display Preferences >> Date")
