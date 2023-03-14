@@ -9,7 +9,7 @@ try {
 
 var command = {
     name: "pic",
-    desc: "Gets the current latency of the bot.",
+    desc: "Gets the profile picture of yourself or another user.",
     args: "",
     parameters: "",
     execute: {

@@ -28,7 +28,7 @@ var command = {
             let rng = Math.floor(Math.random() * pingMessages.length)
             let startTime = Date.now()
             await interaction.reply({ content: "<:ping_receive:502755206841237505> " + pingMessages[rng] })
-            await interaction.editReply({ content: "<:ping_transmit:502755300017700865> (" + (Date.now() - startTime) + "ms) Hey, " + interaction.user.username + "!" })
+            await interaction.editReply({ content: "<:ping_transmit:502755300017700865> (" + (Date.now() - startTime) + "ms) Hey, " + name(interaction.user) + "!" })
         },
         console: function() {
             log("testing with the new handler!", logging.output, "PING")
