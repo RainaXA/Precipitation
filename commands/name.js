@@ -8,7 +8,7 @@ var command = {
     execute: {
         discord: function(message, args) {
             if(args.length >= 75) return message.channel.send("That's too long of a name.")
-            if((args.includes("<@") && args.includes(">")) || args.includes("@everyone") || args.includes("@here")) return message.channel.send("I won't ping anyone.")
+            if((args.includes("<@") && args.includes(">")) || args.includes("@everyone") || args.includes("@here")) return message.channel.send("I won't ping anyone. JK @here FUCK YOU GUYS :middle_finger:")
             if(getTextInput(args, host.slurs)) return message.channel.send("Hey, I'm not going to yell out offensive words.")
             if(args == "") {
                 config.users[message.author.id].name = null;
