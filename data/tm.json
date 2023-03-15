@@ -33,7 +33,7 @@
         "name": "Interrogator",
         "alignment": "City | Investigative",
         "abilities": "- You may choose an interrogation target during the day.\n- At night, you will be able to anonymously speak to your target.",
-        "artifacts": "- If your target is a Spy, they will not be able to see the private Spy chat."
+        "artifacts": "- If your target is a Spy, they will not be able to communicate with the Spies at night."
       },
       "hunter": {
         "name": "Hunter",

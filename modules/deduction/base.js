@@ -119,25 +119,36 @@ function dayCycle(guID) {
       gameInfo[guID].phase = 6;
       gameInfo[guID].trials = 2;
       gameInfo[guID].votesAgainst = {};
-      for(player of gameInfo[guID].players) {
-        gameInfo[guID].votesAgainst[player.id] = [];
-        gameInfo[guID].list[player.id].votedFor = null;
-        gameInfo[guID].list[player.id].attackers = 0;
-        gameInfo[guID].queued[player.id] = null;
-      }
       phase.setTitle("Day " + (gameInfo[guID].day + 1) + " - Night - 40s")
       phase.setColor("BLUE")
       phase.setDescription("Use your night abilities! `!target` is how most roles will perform. (you'll see a message otherwise.)")
       sendMessage({embeds: [phase]}, gameInfo[guID].viewers)
+      for(player of gameInfo[guID].viewers) {
+        if(!gameInfo[guID].list[player.id].player) continue;
+        gameInfo[guID].votesAgainst[player.id] = [];
+        gameInfo[guID].list[player.id].votedFor = null;
+        gameInfo[guID].list[player.id].attackers = 0;
+        if(gameInfo[guID].list[player.id].role.name == "Interrogator") {
+          if(!gameInfo[guID].queued[player.id]) {
+            player.send("You did not perform your day ability.")
+          } else {
+            gameInfo[guID].interrogation.push(player);
+            gameInfo[guID].interrogation.push(gameInfo[guID].queued[player.id]);
+            gameInfo[guID].queued[player.id].send("**You are being interrogated by an Interrogator!**")
+          }
+        }
+        gameInfo[guID].queued[player.id] = null;
+      }
       setTimeout(dayCycle, 40000, guID)
       gameInfo[guID].day++;
       break;
     case 6:
       let nna = {};
+      gameInfo[guID].interrogation = [];
       for(user of gameInfo[guID].viewers) { // first priority
         if(!gameInfo[guID].list[user.id].player) continue;
-        if(!gameInfo[guID].queued[user.id] && gameInfo[guID].list[user.id].role.name != "Outcast") {
-          user.send("You did not perform your night ability.") // outcasts do not have a night ability
+        if(!gameInfo[guID].queued[user.id] && gameInfo[guID].list[user.id].role.name != "Interrogator") {
+          if(gameInfo[guID].list[user.id].role.name != "Outcast" || gameInfo[guID].list[user.id].dead) user.send("You did not perform your night ability.") // outcasts and interrogators do not have a night ability
           nna[user.id] = true;
           continue;
         }
@@ -204,6 +215,11 @@ function dayCycle(guID) {
               gameInfo[guID].list[gameInfo[guID].queued[user.id].id].marked = true;
               user.send(gameInfo[guID].queued[user.id].username + " has successfully been marked for death.")
             }
+            break;
+          case roles.properties.neutral.outcast:
+            gameInfo[guID].list[gameInfo[guID].queued[user.id].id].attackers = 2;
+            gameInfo[guID].list[gameInfo[guID].queued[user.id].id].methods.push("shot by a gun");
+            gameInfo[guID].list[user.id].executed = 2;
             break;
         }
       }
@@ -279,6 +295,7 @@ function transitionTrial(guID) {
         gameInfo[guID].list[gameInfo[guID].trial.id].dead = true;
         gameInfo[guID].aliveCount = gameInfo[guID].aliveCount - 1;
         sendMessage("**" + gameInfo[guID].trial.username + "'s role was " + roleRevealResults(gameInfo[guID].list[gameInfo[guID].trial.id].role.name, true) + ".**", gameInfo[guID].viewers)
+        if(gameInfo[guID].list[gameInfo[guID].trial.id].role.name == "Outcast") gameInfo[guID].list[gameInfo[guID].trial.id].executed = 1;
         gameInfo[guID].phase = 2
         setTimeout(dayCycle, 5000, guID)
         return;
@@ -299,6 +316,7 @@ function startGame(viewers, guildID) {
   gameInfo[guildID].dead = [];
   gameInfo[guildID].announceDeaths = [];
   gameInfo[guildID].queued = {};
+  gameInfo[guildID].interrogation = [];
   for (viewer of gameInfo[guildID].viewers) {
     if (!gameInfo[guildID].list[viewer.id].player) {
       gameInfo[guildID].dead.push(viewer)
@@ -388,7 +406,35 @@ client.on('messageCreate', function(message) {
     sendMessage("**" + message.author.username + "**: " + message.content, currentGame.viewers);
     return;
   }
-  if(currentGame.list[message.author.id].dead) return sendMessage("*" + message.author.username + ": " + message.content + "*", currentGame.dead)
+  if(currentGame.list[message.author.id].dead) {
+    if(message.content.startsWith("!target ") && currentGame.list[message.author.id].role.name == "Outcast" && currentGame.list[message.author.id].executed == 1) {
+      let target = message.content.slice(8)
+      for(user of currentGame.viewers) {
+        if(!user.username.includes(target)) continue;
+        if(getTextInput(user, currentGame.dead, 2)) return message.channel.send("You can't kill a dead person!")
+        currentGame.queued[message.author.id] = user
+        return message.channel.send("You have decided to make " + user.username + " commit suicide.")
+      }
+    }
+    return sendMessage("*" + message.author.username + ": " + message.content + "*", currentGame.dead)
+  }
+  if(currentGame.list[message.author.id].role.name == "Interrogator" && message.content.startsWith("!target ")) {
+    let target = message.content.slice(8)
+    switch(currentGame.phase) {
+      case 1:
+      case 2:
+      case 8:
+        for(user of currentGame.viewers) {
+          if(user.username.toLowerCase().includes(target)) {
+            if(message.author.id == user.id) return message.channel.send("You can already interrogate yourself, it's called your brain.");
+              currentGame.queued[message.author.id] = user;
+              return message.channel.send("You have decided to interrogate " + user.username + " once night falls.");
+          }
+        }
+      default:
+        return message.channel.send("Your target may only be changed during the Discussion or Voting phases.")
+    }
+  }
   switch(currentGame.phase) {
     case -2:
     case -1:
@@ -500,11 +546,10 @@ client.on('messageCreate', function(message) {
                 if(getTextInput(user, currentGame.dead, 2)) return message.channel.send("They're already dead, so they're not going to be attacked again.")
                 currentGame.queued[message.author.id] = user
                 return message.channel.send("You have decided to hide in " + user.username + "'s house tonight.")*/
-              case roles.properties.city.interrogator:
-                return message.channel.send("You do not have a night ability - only a day ability.")
               case roles.properties.spies.hitman:
                 //if(message.author.id == user.id) return message.channel.send("You cannot kill yourself.")
                 if(getTextInput(user, currentGame.dead, 2)) return message.channel.send("You cannot kill someone who's..already dead.")
+                if(getTextInput(user, currentGame.spies, 2)) return message.channel.send("Killing a teammate is not ideal to the mission of the Spies.")
                 currentGame.queued[message.author.id] = user
                 return sendMessage(message.author.username + " has decided to kill " + user.username + " tonight.", currentGame.spies)
               case roles.properties.spies.agent:
@@ -520,12 +565,6 @@ client.on('messageCreate', function(message) {
                 if(message.author.id == user.id) return message.channel.send("Well, you're certainly not the smartest framer..")
                 currentGame.queued[message.author.id] = user
                 return sendMessage(message.author.username + " has decided to frame " + user.username + " tonight.", currentGame.spies)
-              /*case roles.properties.neutral.outcast:
-                if(getTextInput(user, currentGame.spies, 2)) return message.channel.send("What's the point in framing a teammate???")
-                if(getTextInput(user, currentGame.dead, 2)) return message.channel.send("What's the point in framing a dead person???")
-                if(message.author.id == user.id) return message.channel.send("Well, you're certainly not the smartest framer..")
-                currentGame.queued[message.author.id] = user
-                return sendMessage(message.author.username + " has decided to frame " + user.username + " tonight.", currentGame.spies)*/
               case roles.properties.neutral.serialkiller:
                 if(message.author.id == user.id) return message.channel.send("You cannot kill yourself.")
                 if(getTextInput(user, currentGame.dead, 2)) return message.channel.send("You cannot kill someone who's..already dead.")
@@ -540,6 +579,10 @@ client.on('messageCreate', function(message) {
             }
           }
         }
+      }
+      if(getTextInput(message.author, currentGame.interrogation, 2)) {
+        if(currentGame.list[message.author.id].role.name == "Interrogator") return sendMessage("**Interrogator**: " + message.content, currentGame.interrogation)
+        return sendMessage("**" + message.author.username + "**: " + message.content, currentGame.interrogation)
       }
       if(getTextInput(message.author, currentGame.spies, 2)) {
         return sendMessage("**" + message.author.username + "**: " + message.content, currentGame.spies)
