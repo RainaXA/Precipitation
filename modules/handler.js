@@ -73,11 +73,11 @@ function processCommand(message) { // used in editing messages + normal messages
     }
     if(!validCommand) message.channel.send("Sorry, but it appears this command is unknown.");
   } catch(err) {
-    log(err.stack, logging.error, "CATCH")
+    log(err.stack, logging.error, "error")
     let errorEmbed = new MessageEmbed()
-    .setTitle("Fatal Exception")
-    .setDescription("Here are the logs of the error:")
-    .addField("Details", err)
+    .setTitle(":zap: EXCEPTION")
+    .setDescription(String(err))
+    .setColor("YELLOW")
     .setFooter({text: "Precipitation " + host.version.external })
     message.channel.send({embeds: [errorEmbed]})
   }
@@ -122,6 +122,10 @@ client.on('interactionCreate', async interaction => {
       if(!interaction.member.permissions.has(permission)) return interaction.reply({ content: "You do not have permission to run this command."})
     }
   }
-  await command.execute.slash(interaction);
+  try {
+    await command.execute.slash(interaction);
+  } catch(err) {
+    log(err.stack, logging.error, "error")
+  }
   return;
 });

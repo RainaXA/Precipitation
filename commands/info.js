@@ -151,7 +151,7 @@ var commands = {
             discord: function(message, args) {
                 let embed = new MessageEmbed()
                 .setAuthor({ name: message.guild.name, iconURL: message.guild.iconURL() })
-                .addField("Dates", "**Created**: <t:" + parseInt(message.guild.createdTimestamp / 1000, 10) + ">\n**Precipitation Joined**: " + message.guild.joinedAt.toUTCString())
+                .addField("Dates", "**Created**: <t:" + parseInt(message.guild.createdTimestamp / 1000, 10) + ">\n**Precipitation Joined**: <t:" + parseInt(message.guild.joinedTimestamp / 1000, 10) + ">")
                 .addField("Members", "**Member Count**: " + message.guild.memberCount + "\n**Server Owner**: <@" + message.guild.ownerId + ">")
                 .addField("Misc.", "**Boosts:** " + message.guild.premiumSubscriptionCount)
                 .setColor(host.color)
@@ -161,7 +161,7 @@ var commands = {
             slash: async function (interaction) {
                 let embed = new MessageEmbed()
                 .setAuthor({ name: interaction.guild.name, iconURL: interaction.guild.iconURL() })
-                .addField("Dates", "**Created**: " + interaction.guild.createdAt.toUTCString() + "\n**Precipitation Joined**: " + interaction.guild.joinedAt.toUTCString())
+                .addField("Dates", "**Created**: <t:" + parseInt(interaction.guild.createdTimestamp / 1000, 10) + ">\n**Precipitation Joined**: <t:" + parseInt(interaction.guild.joinedTimestamp / 1000, 10) + ">")
                 .addField("Members", "**Member Count**: " + interaction.guild.memberCount + "\n**Server Owner**: <@" + interaction.guild.ownerId + ">")
                 .addField("Misc.", "**Boosts:** " + interaction.guild.premiumSubscriptionCount)
                 .setColor(host.color)

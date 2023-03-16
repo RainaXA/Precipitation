@@ -17,12 +17,18 @@ var command = {
             config.users[message.author.id].name = args;
             return message.channel.send("Sure, I'll refer to you by \"" + args + "\".")
         },
-        //slash: async function (interaction) { TODO: FIX LATER
-           // let rng = Math.floor(Math.random() * pingMessages.length)
-           // let startTime = Date.now()
-           // await interaction.reply({ content: "<:ping_receive:502755206841237505> " + pingMessages[rng] })
-           // await interaction.editReply({ content: "<:ping_transmit:502755300017700865> (" + (Date.now() - startTime) + "ms) Hey, " + interaction.user.username + "!" })
-        //}
+        slash: async function (interaction) {
+            let string = interaction.options.getString('name')
+            if(!string) {
+                config.users[interaction.user.id].name = null;
+                return interaction.reply({ content: "Sure. I'll refer to you by your username." })
+            }
+            if(string.length >= 75) return interaction.reply({ content: "That's too long of a name.", ephemeral: true })
+            if((string.includes("<@") && string.includes(">")) || string.includes("@everyone") || string.includes("@here")) return interaction.reply({ content: "I won't ping anyone.", ephemeral: true })
+            if(getTextInput(string, host.slurs)) return interaction.reply({ content: "Hey, I'm not going to yell out offensive words.", ephemeral: true })
+            config.users[interaction.user.id].name = string;
+            return interaction.reply({ content: "Sure, I'll refer to you by \"" + string + "\"." })
+        }
     },
     ver: "3.0.0",
     cat: "Personalization",
