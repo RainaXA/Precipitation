@@ -19,14 +19,14 @@
 var command = {
     name: "fraud",
     desc: "DEPRECATED: Fraud is deprecated, please use `pr:deduction` instead.",
-    args: "",
+    args: {},
     parameters: "",
     execute: {
         discord: function(message, args) {
           message.channel.send("Fraud is deprecated! Please use `pr:deduction` instead.")
         }
     },
-    ver: "3.0.0",
+    ver: "3.1.0",
     cat: "Fun",
     prereqs: {
         dm: false,

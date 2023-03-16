@@ -582,11 +582,11 @@ var commands = {
         name: "timeformat",
         desc: "Set preferences on how to display time.",
         args: {
-            "option": {
+            "setting": {
                 "desc": "Number corresponding to Day, Date, or Time",
                 "required": true
             },
-            "setting": {
+            "option": {
                 "desc": "Which setting to set Day, Date, or Time to",
                 "required": true
             }

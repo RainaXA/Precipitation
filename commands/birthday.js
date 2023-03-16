@@ -115,7 +115,12 @@ function getDaysInMonth(month, year) {
 var command = {
     name: "birthday",
     desc: "Sets your birthday.",
-    args: "**(mm/dd/yyyy)**",
+    args: {
+      "birthday": {
+        "desc": "What to set your birthday to in mm/dd/yyyy format",
+        "required": true
+      }
+    },
     parameters: "",
     execute: {
         discord: function(message, args) {
@@ -216,7 +221,7 @@ var command = {
             config.users[interaction.user.id].birthday.year = parseInt(year);
         }
     },
-    ver: "3.0.0",
+    ver: "3.1.0",
     cat: "Personalization",
     prereqs: {
         dm: true,

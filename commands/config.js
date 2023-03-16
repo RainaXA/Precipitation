@@ -44,7 +44,16 @@ try {
 var command = {
     name: "config",
     desc: "Changes server-specific properties.",
-    args: "",
+    args: {
+      "setting": {
+        "desc": "Which setting to change",
+        "required": true
+      },
+      "option": {
+        "desc": "What to change the setting to",
+        "required": true
+      }
+    },
     parameters: "",
     execute: {
         discord: function(message, args) {
@@ -107,7 +116,7 @@ var command = {
             }
         }
     },
-    ver: "3.0.0",
+    ver: "3.1.0",
     cat: "General",
     prereqs: {
         dm: false,
