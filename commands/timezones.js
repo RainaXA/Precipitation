@@ -275,8 +275,13 @@ function utcOffsetFromTimezone(location) {
 var commands = {
     "time": {
         name: "time",
-        desc: "See the time of another user.",
-        args: "(user)",
+        desc: "See the time of a user.",
+        args: {
+            "user": {
+                "desc": "The user to see the time of",
+                "required": false
+            }
+        },
         parameters: "",
         execute: {
             discord: function(message, args) {
@@ -507,7 +512,7 @@ var commands = {
                 }
             }
         },
-        ver: "3.0.0",
+        ver: "3.1.0",
         cat: "Time",
         prereqs: {
             dm: true,
@@ -520,7 +525,12 @@ var commands = {
     "settime": {
         name: "settime",
         desc: "Set your timezone.",
-        args: "**(UTC/GMT offset)**",
+        args: {
+            "timezone": {
+                "desc": "The offset or specified timezone to set your timezone as",
+                "required": true
+            }
+        },
         parameters: "",
         execute: {
             discord: function(message, args) {
@@ -558,7 +568,7 @@ var commands = {
                 }
             }
         },
-        ver: "3.0.0",
+        ver: "3.1.0",
         cat: "Time",
         prereqs: {
             dm: true,
@@ -571,7 +581,16 @@ var commands = {
     "timeformat": {
         name: "timeformat",
         desc: "Set preferences on how to display time.",
-        args: "**(day) (number)**",
+        args: {
+            "option": {
+                "desc": "Number corresponding to Day, Date, or Time",
+                "required": true
+            },
+            "setting": {
+                "desc": "Which setting to set Day, Date, or Time to",
+                "required": true
+            }
+        },
         parameters: "",
         execute: {
             discord: function(message, args) {
@@ -663,7 +682,7 @@ var commands = {
                 message.channel.send({embeds: [embed]})
             }
         },
-        ver: "3.0.0",
+        ver: "3.1.0",
         cat: "Time",
         prereqs: {
             dm: true,

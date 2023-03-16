@@ -50,8 +50,13 @@ try {
 var commands = {
     "warn": {
         name: "warn",
-        desc: "Warns a user.",
-        args: "**(user)**",
+        desc: "Warns a user. *(requires Manage Nicknames)*",
+        args: {
+            "user": {
+                "desc": "The user to give a warning to",
+                "required": true
+            }
+        },
         parameters: "",
         execute: {
             discord: function(message, args) {
@@ -88,7 +93,7 @@ var commands = {
                 warningStage[interaction.user.id] = 3; // no messages involved
             }
         },
-        ver: "3.0.0",
+        ver: "3.1.0",
         cat: "Moderation",
         prereqs: {
             dm: false,
@@ -101,7 +106,12 @@ var commands = {
     "lswarn": {
         name: "lswarn",
         desc: "See your current warnings, or see someone else's.",
-        args: "(user)",
+        args: {
+            "user": {
+                "desc": "The user to view warnings of *(requires Manage Nicknames to view user that is not you)*",
+                "required": false
+            }
+        },
         parameters: "",
         execute: {
             discord: function(message, args) {
@@ -169,7 +179,7 @@ var commands = {
                 return interaction.reply({embeds: [warningEmbed]})
             }
         },
-        ver: "3.0.0",
+        ver: "3.1.0",
         cat: "Moderation",
         prereqs: {
             dm: false,
@@ -181,8 +191,17 @@ var commands = {
     },
     "rmwarn": {
         name: "rmwarn",
-        desc: "Remove a warning from a user.",
-        args: "**(warning id) (user)**",
+        desc: "Remove a warning from a user. *(requires Manage Nicknames)*",
+        args: {
+            "warningid": {
+                "desc": "The warning number to remove",
+                "required": true
+            },
+            "user": {
+                "desc": "The user to remove the warning from",
+                "required": true
+            }
+        },
         parameters: "",
         execute: {
             discord: function(message, args) {
@@ -222,7 +241,7 @@ var commands = {
                 return interaction.reply({ content: "Removing warning #" + int + " from " + user.username + " (" + name(user) + "). Are you sure?" })
             }
         },
-        ver: "3.0.0",
+        ver: "3.1.0",
         cat: "Moderation",
         prereqs: {
             dm: false,

@@ -46,6 +46,7 @@ global.loadCommands = function() {
             if(props.execute.slash) commands.push(props.data.toJSON())
           }
           log("loaded command " + props.name)
+          if(props.ver == "3.0.0") log(props.name + " is not up to date with the new argument system", logging.warn, "handler")
         })
       } catch (err) {
         log("Sorry, but a command had an error: " + err.stack, logging.error, "LOADER")

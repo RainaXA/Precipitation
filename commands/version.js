@@ -24,7 +24,12 @@ var logs = require("../data/changelogs.json")
 var command = {
     name: "version",
     desc: "Shows the current bot version.",
-    args: "(version)",
+    args: {
+        "version": {
+            "desc": "The version to view changelogs of",
+            "required": false
+        }
+    },
     parameters: "[--internal]",
     execute: {
         discord: function(message, args, parameter) {
@@ -60,7 +65,7 @@ var command = {
             log("internal: " + host.version.internal + "\nexternal: " + host.version.external + "\nname: " + host.version.name, logging.output, "version")
         }
     },
-    ver: "3.0.0",
+    ver: "3.1.0",
     cat: "General",
     prereqs: {
         dm: true,

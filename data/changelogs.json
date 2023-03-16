@@ -1,5 +1,9 @@
 {
   "numerical": {
+    "3.0": {
+      "name": "Precipitation 3.0 Shorthair",
+      "changes": "US and Canada states/provinces are added\nTimezones!\nFraud Swap! mode\nBeta The Migration\nFixes"
+    },
     "2.1": {
       "name": "Precipitation 2.1 Manx",
       "changes": "RNG list\nNow wishes happy birthday on your birthday!\nLocation officially added, with all countries recognized"
@@ -70,6 +74,12 @@
     }
   },
   "versionName": {
+    "shorthair": {
+      "name": "Precipitation 3.0 Shorthair",
+      "changes": {
+        "3.0.0": "US and Canada states/provinces are added\nTimezones!\nFraud Swap! mode\nBeta The Migration\nFixes"
+      }
+    },
     "manx": {
       "name": "Precipitation 2.1 Manx",
       "changes": {

@@ -21,7 +21,12 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 var command = {
     name: "name",
     desc: "Sets the name for the bot to refer to you as.",
-    args: "(args)",
+    args: {
+        "name": {
+            "desc": "The text to set as a preferred name",
+            "required": false
+        }
+    },
     parameters: "",
     execute: {
         discord: function(message, args) {
@@ -48,7 +53,7 @@ var command = {
             return interaction.reply({ content: "Sure, I'll refer to you by \"" + string + "\"." })
         }
     },
-    ver: "3.0.0",
+    ver: "3.1.0",
     cat: "Personalization",
     prereqs: {
         dm: true,
@@ -70,5 +75,5 @@ module.exports.exports.name = function (user) {
 }; // export
 module.exports.data = new SlashCommandBuilder().setName(command.name).setDescription(command.desc).addStringOption(option =>
     option.setName('name')
-    .setDescription('Set the name for the bot to refer to you as.')
+    .setDescription(command.args["name"].desc)
     .setRequired(false))

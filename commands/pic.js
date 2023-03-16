@@ -28,7 +28,12 @@ try {
 var command = {
     name: "pic",
     desc: "Gets the profile picture of yourself or another user.",
-    args: "",
+    args: {
+        "user": {
+            "desc": "The user to get the profile picture of",
+            "required": false
+        }
+    },
     parameters: "",
     execute: {
         discord: function(message, args) {
@@ -53,7 +58,7 @@ var command = {
             await interaction.reply({ embeds: [embed] })
         }
     },
-    ver: "3.0.0",
+    ver: "3.1.0",
     cat: "General",
     prereqs: {
         dm: true,

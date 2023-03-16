@@ -21,7 +21,16 @@ var locations = require("../data/locations.json")
 var command = {
     name: "location",
     desc: "Sets your current location.",
-    args: "**(continent | country | state | province)**",
+    args: {
+        "type": {
+            "desc": "The type of location to set your location to\n`continent` `country` `state | province`",
+            "required": true
+        },
+        "location": {
+            "desc": "Which continent, country, or state/province to set",
+            "required": true
+        }
+    },
     parameters: "",
     execute: {
         discord: function(message, args) {
@@ -53,7 +62,7 @@ var command = {
             }
         }
     },
-    ver: "3.0.0",
+    ver: "3.1.0",
     cat: "Personalization",
     prereqs: {
         dm: true,
