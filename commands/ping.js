@@ -1,3 +1,21 @@
+/* ========================================================================= *\
+    Ping: Precipitation command to show the client latency
+    Copyright (C) 2023 Raina
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.  
+\* ========================================================================= */
+
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const pingMessages = ["Pinging...", "Ponging...", "pay my onlyfans", "doin ya mom", "don't care + didn't ask", "ooh, ee, ooh ah ah, ting tang, wallawallabingbang", "omg, you're a redditor AND a discord mod?", "i use arch btw", "I've come to make an announcement", "police crash green screen", "apparently i committed tax fraud but idk how that happened, i dont even pay tax????", "A Discord Bot where it can do anything and a moderation bot and made in discord.js!!!!", "did you know that 100% of people who drown die", "...\n\n\n\n\n\n\n\nwhoa what is this", "Fortnite Funnies Vol. 1", "Poopenfarten"]
 

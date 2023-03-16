@@ -1,10 +1,20 @@
-/*/
-  Precipitation: Multi-purpose modular flexible Discord bot
-  Written by Rain
+/* ========================================================================= *\
+    Precipitation: multi-purpose modular Discord bot
+    Copyright (C) 2023 Raina
 
-  This is free, open-source software, with no restrictions on use.
-  I don't even have a license. I don't care if someone steals this. I develop for the people, and the people can do whatever they'd like with this program.
-/*/
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.  
+\* ========================================================================= */
 
 const { Client, Intents } = require('discord.js');
 global.client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_PRESENCES, Intents.FLAGS.DIRECT_MESSAGES], partials: ["CHANNEL"] });
