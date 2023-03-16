@@ -18,7 +18,7 @@ var commands = {
         cat: "File System",
         prereqs: {
             dm: true,
-            owner: true,
+            owner: false,
             user: [],
             bot: []
         },
@@ -45,7 +45,7 @@ var commands = {
         cat: "Owner",
         prereqs: {
             dm: true,
-            owner: true,
+            owner: false,
             user: [],
             bot: []
         },
