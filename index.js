@@ -17,7 +17,7 @@
 \* ========================================================================= */
 
 const { Client, Intents } = require('discord.js');
-global.client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_PRESENCES, Intents.FLAGS.DIRECT_MESSAGES], partials: ["CHANNEL"] });
+global.client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_PRESENCES, Intents.FLAGS.DIRECT_MESSAGES, Intents.FLAGS.GUILD_VOICE_STATES, ], partials: ["CHANNEL"] });
 const fs = require('fs');
 const blessed = require('blessed');
 
@@ -287,5 +287,9 @@ client.on('guildCreate', function(guild) {
 })
 
 process.on('uncaughtException', error => {
+  log(error.stack, logging.error, "catch")
+})
+
+client.on('error', error => {
   log(error.stack, logging.error, "catch")
 })
