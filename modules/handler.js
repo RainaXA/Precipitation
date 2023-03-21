@@ -66,6 +66,7 @@ function processCommand(message) { // used in editing messages + normal messages
   }
   var command = fCommand[0]
   if(command == undefined) return message.channel.send("Sorry, but it appears this command is unknown.") // crash otherwise
+  if(getTextInput(command.toLowerCase(), config.guilds[message.guild.id].disabled, 2)) return message.channel.send("This command is disabled in this server.")
   var args = message.content.slice(messagePrefix.length + command.length + 1 + counter)
   var parameters = args.split("--")
   var parameter = parameters[1]
@@ -110,6 +111,7 @@ function initCommand(message) {
   } else {
     if(!config.guilds[message.guild.id].prefix) config.guilds[message.guild.id].prefix = host.prefix
     global.messagePrefix = config.guilds[message.guild.id].prefix
+    if(!config.guilds[message.guild.id].disabled) config.guilds[message.guild.id].disabled = [];
   }
   if(message.content.toLowerCase().startsWith(messagePrefix) && !message.author.bot) {
     if(!config.users[message.author.id]) config.users[message.author.id] = {}

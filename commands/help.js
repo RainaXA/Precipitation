@@ -89,6 +89,9 @@ var command = {
                 let helpp = {};
                 let cname;
                 client.commands.each(cmd => {
+                    if(message.guild) {
+                        if(getTextInput(cmd.name, config.guilds[message.guild.id].disabled, 2)) return;
+                    }
                     chelp = cmd.cat 
                     cname = cmd.name
                     if(!helpp[chelp]) {

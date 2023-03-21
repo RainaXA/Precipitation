@@ -61,6 +61,7 @@ var command = {
                             config.users[message.author.id].location.country = country.name;
                             config.users[message.author.id].location.continent = country.region;
                             valid = true;
+                            cityAffirm[message.author.id] = null;
                             return message.channel.send("Okay, you will now appear to be from " + country.name + ".")
                         }
                     })
@@ -70,23 +71,35 @@ var command = {
                     break;
                 case "state":
                 case "province":
-                    let validState = false;
+                    let stateee = [];
                     states.forEach(country => {
                         country.states.forEach(state => {
                             if(state.name.toLowerCase() == args || state.state_code.toLowerCase() == args) {
-                                config.users[message.author.id].location = {}
-                                config.users[message.author.id].location.state = state.name;
-                                config.users[message.author.id].location.country = country.name;
-                                config.users[message.author.id].location.continent = country.region;
-                                validState = true;
-                                return message.channel.send("Okay, you will now appear to be from " + state.name + ", " + country.name + ".")
+                                stateee.push(state.name + ", " + country.name)
                             }
                         })
                     })
-                    if(!validState) {
-                        return message.channel.send("Please enter a valid state/province.")
+                    if(stateee.length == 0) {
+                        cityAffirm[message.author.id] = null;
+                        return message.channel.send("That state/province wasn't found. Please ensure there are no typos.")
+                    } else if(stateee.length == 1) {
+                        let setItems = stateee[0].split(", ");
+                        config.users[message.author.id].location = {}
+                        config.users[message.author.id].location.state = setItems[0];
+                        config.users[message.author.id].location.country = setItems[1];
+                        cityAffirm[message.author.id] = null;
+                        return message.channel.send("Okay, you will now appear to be from " + stateee[0] + ".")
+                    } else {
+                        let list = "";
+                        for(let i = 0; i < stateee.length; i++) {
+                            list = list + "[" + i + "] " + stateee[i] + "\n";
+                        }
+                        cityAffirm[message.author.id] = {};
+                        cityAffirm[message.author.id].check = 1;
+                        cityAffirm[message.author.id].anger = 2;
+                        cityAffirm[message.author.id].states = stateee;
+                        return message.channel.send("There are multiple options for your state/province. Please type the number corresponding to one of the following:\n\n" + list);
                     }
-                    break;
                 case "city":
                     let cityyyy = [];
                     cities.forEach(city => {
@@ -95,6 +108,7 @@ var command = {
                         }
                     })
                     if(cityyyy.length == 0) {
+                        cityAffirm[message.author.id] = null;
                         return message.channel.send("That city wasn't found. Please ensure there are no typos.")
                     } else if(cityyyy.length == 1) {
                         let setItems = cityyyy[0].split(", ");
@@ -102,6 +116,7 @@ var command = {
                         config.users[message.author.id].location.city = setItems[0];
                         config.users[message.author.id].location.state = setItems[1];
                         config.users[message.author.id].location.country = setItems[2];
+                        cityAffirm[message.author.id] = null;
                         return message.channel.send("Okay, you will now appear to be from " + cityyyy[0] + ".")
                     } else {
                         let list = "";
@@ -110,6 +125,7 @@ var command = {
                         }
                         cityAffirm[message.author.id] = {};
                         cityAffirm[message.author.id].check = 1;
+                        cityAffirm[message.author.id].anger = 2;
                         cityAffirm[message.author.id].cities = cityyyy;
                         return message.channel.send("There are multiple options for your city. Please type the number corresponding to one of the following:\n\n" + list);
                     }
@@ -134,7 +150,15 @@ client.on('messageCreate', function(message) {
         if(message.content.toLowerCase() == "cancel") {
             cityAffirm[message.author.id] = null;
             return message.channel.send("Okay, cancelling.")
-        } else if(cityAffirm[message.author.id].cities[parseInt(message.content)]) {
+        } else if(cityAffirm[message.author.id].cities) {
+            if(!cityAffirm[message.author.id].cities[parseInt(message.content)]) {
+                cityAffirm[message.author.id].anger = cityAffirm[message.author.id].anger - 1;
+                if(cityAffirm[message.author.id].anger == 0) {
+                    cityAffirm[message.author.id] = null;
+                    return message.channel.send("I'm automatically cancelling the city input to prevent spam.")
+                }
+                return message.channel.send("Please input a valid number, or use `cancel` to exit out of this.")
+            }
             let setItems = cityAffirm[message.author.id].cities[parseInt(message.content)].split(", ");
             config.users[message.author.id].location = {}
             config.users[message.author.id].location.city = setItems[0];
@@ -142,8 +166,23 @@ client.on('messageCreate', function(message) {
             config.users[message.author.id].location.country = setItems[2];
             message.channel.send("Okay, you will now appear to be from " + cityAffirm[message.author.id].cities[parseInt(message.content)] + ".")
             cityAffirm[message.author.id] = null;
+        } else if(cityAffirm[message.author.id].states) {
+            if(!cityAffirm[message.author.id].states[parseInt(message.content)]) {
+                cityAffirm[message.author.id].anger = cityAffirm[message.author.id].anger - 1;
+                if(cityAffirm[message.author.id].anger == 0) {
+                    cityAffirm[message.author.id] = null;
+                    return message.channel.send("I'm automatically cancelling the state input to prevent spam.")
+                }
+                return message.channel.send("Please input a valid number, or use `cancel` to exit out of this.")
+            }
+            let setItems = cityAffirm[message.author.id].states[parseInt(message.content)].split(", ");
+            config.users[message.author.id].location = {}
+            config.users[message.author.id].location.state = setItems[0];
+            config.users[message.author.id].location.country = setItems[1];
+            message.channel.send("Okay, you will now appear to be from " + cityAffirm[message.author.id].states[parseInt(message.content)] + ".")
+            cityAffirm[message.author.id] = null;
         } else {
-            return message.channel.send("Please input a valid number, or use `cancel` to exit out of this.")
+            return message.channel.send("Uhhh..this shouldn't have happened.")
         }
     }
 });
