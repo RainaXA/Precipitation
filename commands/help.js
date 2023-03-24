@@ -16,7 +16,10 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.  
 \* ========================================================================= */
 
-const { MessageEmbed } = require('discord.js')
+const { MessageEmbed, MessageActionRow, MessageSelectMenu } = require('discord.js')
+
+let settingButton = {};
+let currentMessage = {};
 
 var command = {
     name: "help",
@@ -106,7 +109,28 @@ var command = {
                 }
                 helpEmbed.setColor(host.color)
                 helpEmbed.setFooter({ text: "Precipitation " + host.version.external, iconURL: client.user.displayAvatarURL() })
-                return message.channel.send({embeds: [helpEmbed]})
+                let count = 0;
+                let cmds = [];
+                client.commands.each(cmd => {
+                    if(count == 25) return;
+                    if(!cmd.prereqs.owner) cmds.push({
+                        label: cmd.name,
+                        description: cmd.desc,
+                        value: cmd.name,
+                    });
+                    count++;
+                })
+                let row = new MessageActionRow()
+                .addComponents(
+                    new MessageSelectMenu() 
+                        .setCustomId('select')
+                        .setPlaceholder('Select a command to view help on...')
+                        .addOptions(cmds)
+                );
+                return message.channel.send({embeds: [helpEmbed], components: [row]}).then(m => {
+                    settingButton[m.id] = message.author.id;
+                    currentMessage[message.author.id] = m;
+                })
             }
         }
     },
@@ -120,5 +144,33 @@ var command = {
     },
     unloadable: true
 }
+
+client.on('interactionCreate', interaction => { // receive button input from line 78
+    if (!interaction.isSelectMenu()) return;
+    if (settingButton[interaction.message.id] != interaction.user.id) return;
+    interaction.update({
+        components: interaction.components
+    }).then(m => {
+        let currentCmd = client.commands.get(interaction.values[0]);
+        let commandHelpEmbed = new MessageEmbed()
+                .setTitle("Precipitation Index || " + host.prefix + currentCmd.name)
+                .setColor(host.color)
+                .setFooter({ text: 'Precipitation ' + host.version.external + " || bolded is a required argument, () is an argument, [] is an option", iconURL: client.user.displayAvatarURL() });
+                let cmdArgs = "";
+                if(typeof currentCmd.args === 'object') {
+                    for(arg in currentCmd.args) {
+                        if(currentCmd.args[arg].required) { cmdArgs = cmdArgs + "**(" + arg + ")** "; continue; }
+                        cmdArgs = cmdArgs + "(" + arg + ") ";
+                    }
+                } else {
+                    cmdArgs = currentCmd.args;
+                }
+                commandHelpEmbed.addFields(
+                    { name: "Description", value: currentCmd.desc},
+                    { name: "Syntax", value: host.prefix + currentCmd.name + " " + cmdArgs + currentCmd.parameters }
+                )
+        return currentMessage[interaction.user.id].edit({embeds: [commandHelpEmbed]})
+    });
+});
 
 module.exports = command;

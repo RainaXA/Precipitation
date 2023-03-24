@@ -61,7 +61,7 @@ var commands = {
     },
     "enable": {
         name: "enable",
-        desc: "Unloads a command from memory.",
+        desc: "Allows a command to be executed in a server.",
         args: "(command)",
         parameters: "",
         execute: {
@@ -88,7 +88,7 @@ var commands = {
     },
     "disable": {
         name: "disable",
-        desc: "Unloads a command from memory.",
+        desc: "Disallows execution of a specified command in the server.",
         args: "(command)",
         parameters: "",
         execute: {

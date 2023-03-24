@@ -58,6 +58,7 @@ function toProperUSFormat(month, day, year) {
       wMonth = "December";
       break;
   }
+  if(year == 0) return wMonth + " " + placeValue(day)
   return wMonth + " " + placeValue(day) + ", " + year;
 };
 
@@ -128,7 +129,8 @@ var command = {
           let cmd = args.split("/");
           let year = new Date().getFullYear();
           let list = "Please:\n";
-          if(!cmd[0] || !cmd[1] || !cmd[2]) {
+          if(!cmd[2]) cmd[2] = "0"
+          if(!cmd[0] || !cmd[1]) {
             if(!cmd[0]) {
               list = list + "- input an argument"
             } else {
@@ -153,7 +155,7 @@ var command = {
             if(getDaysInMonth(parseInt(cmd[0]), parseInt(cmd[2])) < parseInt(cmd[1])) {
               list = list + "- make sure the month hasn't already ended\n"
             }
-            if(parseInt(cmd[2]) > year || parseInt(cmd[2]) < 1903) {
+            if((parseInt(cmd[2]) > year || parseInt(cmd[2]) < 1903) && cmd[2] != 0) {
               list = list + "- ensure you input the correct birthday\n"
             }
           }
