@@ -39,14 +39,15 @@ global.loadCommands = function() {
               client.commands.set(props[item].name, props[item]);
               counter++;
               if(props[item].execute.slash) commands.push(props[item].data.toJSON())
+              if(props.ver == "3.0.0") log(props.name + " is not up to date with the new argument system", logging.warn, "handler")
             }
           } else {
             client.commands.set(props.name, props);
             counter++;
             if(props.execute.slash) commands.push(props.data.toJSON())
+            if(props.ver == "3.0.0") log(props.name + " is not up to date with the new argument system", logging.warn, "handler")
           }
           log("loaded command " + props.name)
-          if(props.ver == "3.0.0") log(props.name + " is not up to date with the new argument system", logging.warn, "handler")
         })
       } catch (err) {
         log("Sorry, but a command had an error: " + err.stack, logging.error, "LOADER")

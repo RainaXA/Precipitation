@@ -16,10 +16,97 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.  
 \* ========================================================================= */
 
-const { MessageEmbed, MessageActionRow, MessageSelectMenu } = require('discord.js')
+const { MessageEmbed, MessageActionRow, MessageSelectMenu, Permissions } = require('discord.js')
 
 let settingButton = {};
 let currentMessage = {};
+
+function interpretPermission(permission) {
+    let permissions = Permissions.FLAGS;
+    switch(permission) { // in order of the actual permissions in discord because it makes me happy
+        case permissions.VIEW_CHANNEL:
+            return "View Channel";
+        case permissions.MANAGE_CHANNELS:
+            return "Manage Channels";
+        case permissions.MANAGE_ROLES:
+            return "Manage Roles";
+        case permissions.MANAGE_EMOJIS_AND_STICKERS:
+            return "Manage Emojis and Stickers";
+        case permissions.VIEW_AUDIT_LOG:
+            return "View Audit Log";
+        case permissions.MANAGE_WEBHOOKS:
+            return "Manage Webhooks";
+        case permissions.MANAGE_GUILD:
+            return "Manage Server";
+        case permissions.CREATE_INSTANT_INVITE:
+            return "Create Invite";
+        case permissions.CHANGE_NICKNAME:
+            return "Change Nickname";
+        case permissions.MANAGE_NICKNAMES:
+            return "Manage Nicknames";
+        case permissions.KICK_MEMBERS:
+            return "Kick Members";
+        case permissions.BAN_MEMBERS:
+            return "Ban Members";
+        case permissions.MODERATE_MEMBERS: 
+            return "Timeout Members";
+        case permissions.SEND_MESSAGES:
+            return "Send Messages and Create Posts";
+        case permissions.SEND_MESSAGES_IN_THREADS:
+            return "Send Messages in Threads and Posts";
+        case permissions.CREATE_PUBLIC_THREADS:
+            return "Create Public Threads";
+        case permissions.CREATE_PRIVATE_THREADS:
+            return "Create Private Threads";
+        case permissions.EMBED_LINKS:
+            return "Embed Links";
+        case permissions.ATTACH_FILES:
+            return "Attach Files";
+        case permissions.ADD_REACTIONS:
+            return "Add Reactions";
+        case permissions.USE_EXTERNAL_EMOJIS:
+            return "Use External Emojis";
+        case permissions.USE_EXTERNAL_STICKERS:
+            return "Use External Stickers";
+        case permissions.MENTION_EVERYONE:
+            return "Mention @everyonе, @herе, and All Roles"; // yes those are cyrillic e's
+        case permissions.MANAGE_MESSAGES:
+            return "Manage Messages";
+        case permissions.MANAGE_THREADS:
+            return "Manage Threads and Posts";
+        case permissions.READ_MESSAGE_HISTORY:
+            return "Read Message History";
+        case permissions.SEND_TTS_MESSAGES: 
+            return "Send Text-to-Speech Messages";
+        case permissions.USE_APPLICATION_COMMANDS:
+            return "Use Application Commands";
+        case permissions.CONNECT:
+            return "Connect";
+        case permissions.SPEAK:
+            return "Speak";
+        case permissions.STREAM:
+            return "Video";
+        case permissions.USE_EMBEDDED_ACTIVITIES:
+            return "Use Activities";
+        //case permissions.USE_SOUNDBOARD: // Use Soundboard
+            //return "Manage Threads and Posts";
+        case permissions.USE_VAD:
+            return "Use Voice Activity";
+        case permissions.PRIORITY_SPEAKER:
+            return "Priority Speaker";
+        case permissions.MUTE_MEMBERS: 
+            return "Mute Members";
+        case permissions.DEAFEN_MEMBERS:
+            return "Deafen Members";
+        case permissions.MOVE_MEMBERS:
+            return "Move Members";
+        case permissions.MANAGE_EVENTS:
+            return "Manage Events";
+        case permissions.ADMINISTRATOR:
+            return "Administrator";
+    }
+    return permission; //if not found
+}
 
 var command = {
     name: "help",
@@ -80,8 +167,21 @@ var command = {
                 } else {
                     cmdArgs = currentCmd.args;
                 }
+                let permList = "";
+                for(permission of currentCmd.prereqs.user) {
+                    permList = permList + interpretPermission(permission) + "\n"
+                }
+                if(permList === "") permList = "*None.*"
+                let botList = "";
+                for(permission of currentCmd.prereqs.bot) {
+                    botList = botList + interpretPermission(permission) + "\n"
+                }
+                if(botList === "") botList = "*None.*"
                 commandHelpEmbed.addFields(
-                    { name: "Description", value: currentCmd.desc},
+                    { name: "Description", value: currentCmd.desc, inline: true },
+                    { name: "Command Version", value: currentCmd.ver, inline: false },
+                    { name: "User Permissions", value: permList, inline: true },
+                    { name: "Bot Permissions", value: botList, inline: true },
                     { name: "Syntax", value: host.prefix + cmdHelp + " " + cmdArgs + currentCmd.parameters }
                 )
                 return message.channel.send({embeds: [commandHelpEmbed]})
