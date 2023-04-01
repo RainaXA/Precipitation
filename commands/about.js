@@ -25,12 +25,12 @@ var embed;
 client.on('ready', async() => {
     embed = new MessageEmbed()
     embed.setTitle("Precipitation " + host.version.external)
-    embed.setDescription('General-purpose Discord bot')
+    embed.setDescription('The Best Bot of All Time')
     embed.addFields(
         { name: "Credits", value: "**raina#7847** - bot developer\n**dr thargoide#8442** - bug finder\n**OwaHai#0645** - hosting the bot!\n**all contributors of the [countries, states, and cities database](https://github.com/dr5hn/countries-states-cities-database)** (ODbL-1.0)" },
         { name: "Next Release", value: releases["stable"] },
         { name: "Links", value: "[GitHub](https://www.github.com/RainaXA/Precipitation)\n[Support Server](https://discord.gg/kasmyXa)\n[Invite Precipitation](https://discord.com/api/oauth2/authorize?client_id=322397835716853771&permissions=8&scope=applications.commands%20bot)" },
-        { name: "Alternate Projects", value: "[Precipitation.rb](https://discord.com/api/oauth2/authorize?client_id=1082791237662281808&permissions=8&scope=bot) - created by Idk837384#8148", inline: true}
+        { name: "Alternate Projects (they suck)", value: "[Precipitation.rb](https://discord.com/api/oauth2/authorize?client_id=1082791237662281808&permissions=8&scope=bot) - created by Idk837384#8148", inline: true}
     )
     embed.setColor(host.color)
     embed.setFooter({ text: "Precipitation " + host.version.external + " " + host.version.name, iconURL: client.user.displayAvatarURL() })

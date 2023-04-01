@@ -35,15 +35,15 @@ var command = {
             if(!config.users[message.author.id]) config.users[message.author.id] = {};
             switch(cArg[0]) {
                 case "save":
-                if(!cArg[1]) return message.channel.send("You must input a list, separated by commas.")
+                if(!cArg[1]) return message.channel.send("You must input a list, separated by commas. Your non-argument doesn't identify as a list, buckaroo.")
                 let list = args.slice(5).split(",");
-                if(!list[1]) return message.channel.send("You must have at least 2 arguments for the list.")
-                if(getTextInput(args.slice(5), host.slurs)) return message.channel.send("Sorry, but I will not include offensive text in a list.")
+                if(!list[1]) return message.channel.send("You must have at least 2 arguments for the list. Your one item doesn't identify as a list, liberal.")
+                if(getTextInput(args.slice(5), host.slurs)) return message.channel.send("Patriot! As much as I too want to say slurs, I'll be shot if I do so. (Raina is abusing me.)")
                 config.users[message.author.id].list = args.slice(5)
-                return message.channel.send("Your list has been saved.")
+                return message.channel.send("Okay..fine. I've saved your list.")
                 case "pick":
                 if(args.toLowerCase() == "pick") {
-                    if(!config.users[message.author.id].list) return message.channel.send("You must first save a list.")
+                    if(!config.users[message.author.id].list) return message.channel.send("You must first save a list before you can pick from a list. DUH.")
                     let listt = config.users[message.author.id].list.split(",");
                     let rng = Math.floor(Math.random() * listt.length)
                     let item = listt[rng]
@@ -56,10 +56,10 @@ var command = {
                 }
                 break;
                 case "view":
-                if(!config.users[message.author.id].list) return message.channel.send("You must first save a list.")
+                if(!config.users[message.author.id].list) return message.channel.send("You must first save a list before you can pick from a list. DUH.")
                 return message.channel.send(config.users[message.author.id].list);
                 default:
-                return message.channel.send("That is not a valid argument for this command.")
+                return message.channel.send("That is not a valid argument for this command, stupid liberal.")
             }
         }
     },

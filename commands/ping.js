@@ -17,7 +17,7 @@
 \* ========================================================================= */
 
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const pingMessages = ["Pinging...", "Ponging...", "pay my onlyfans", "doin ya mom", "don't care + didn't ask", "omg, you're a redditor AND a discord mod?", "apparently i committed tax fraud but idk how that happened, i dont even pay tax????", "A Discord Bot where it can do anything and a moderation bot and made in discord.js!!!!", "...\n\n\n\n\n\n\n\nwhoa what is this", "Fortnite Funnies Vol. 1", "Poopenfarten", "good people don't brag about how good they are", "https://pbs.twimg.com/media/FXBaEuFWIAA6LtD.png"]
+const pingMessages = ["I've lost all hope", "hot single moms in your area"]
 
 try {
     var name = require('./name.js').exports.name;
@@ -30,7 +30,7 @@ try {
 
 var command = {
     name: "ping",
-    desc: "Gets the current latency of the bot.",
+    desc: "Checks how long it takes you to ejaculate :^)",
     args: {},
     parameters: "",
     execute: {
@@ -39,14 +39,17 @@ var command = {
             let rng = Math.floor(Math.random() * pingMessages.length)
             let startTime = Date.now()
             message.channel.send("<:ping_receive:502755206841237505> " + pingMessages[rng]).then(function(message) {
-                message.edit("<:ping_transmit:502755300017700865> (" + (Date.now() - startTime) + "ms) Hey, " + user + "!");
+                let pingTime = (Date.now() - startTime);
+                let pMessage = "Damn, you do it fast!";
+                if(pingTime < 300) pMessage = "Damn, that's fast, although I've seen worse.";
+                message.edit("<:ping_transmit:502755300017700865> (" + (pingTime) + "ms) sup, " + user + "? " + pMessage);
             })
         },
         slash: async function (interaction) {
             let rng = Math.floor(Math.random() * pingMessages.length)
             let startTime = Date.now()
             await interaction.reply({ content: "<:ping_receive:502755206841237505> " + pingMessages[rng] })
-            await interaction.editReply({ content: "<:ping_transmit:502755300017700865> (" + (Date.now() - startTime) + "ms) Hey, " + name(interaction.user) + "!" })
+            await interaction.editReply({ content: "<:ping_transmit:502755300017700865> (" + (Date.now() - startTime) + "ms) Hey, " + name(interaction.user) + "! Damn, that's fast as hell." })
         },
         console: function() {
             log("testing with the new handler!", logging.output, "PING")

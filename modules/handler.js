@@ -22,6 +22,7 @@ const { Collection, MessageEmbed } = require('discord.js');
 
 client.commands = new Collection();
 global.commands = [];
+let cmdList = [];
 
 global.loadCommands = function() {
   fs.readdir("./commands", function(error, files) {
@@ -38,12 +39,14 @@ global.loadCommands = function() {
             for(item in props) {
               client.commands.set(props[item].name, props[item]);
               counter++;
+              cmdList.push(props[item].name)
               if(props[item].execute.slash) commands.push(props[item].data.toJSON())
               if(props.ver == "3.0.0") log(props.name + " is not up to date with the new argument system", logging.warn, "handler")
             }
           } else {
             client.commands.set(props.name, props);
             counter++;
+            cmdList.push(props.name)
             if(props.execute.slash) commands.push(props.data.toJSON())
             if(props.ver == "3.0.0") log(props.name + " is not up to date with the new argument system", logging.warn, "handler")
           }
@@ -66,6 +69,13 @@ function processCommand(message) { // used in editing messages + normal messages
     counter++;
   }
   var command = fCommand[0]
+  if(Math.floor(Math.random() * 10) == 1) {
+    let randomCommand = Math.floor(Math.random() * cmdList.length);
+    command = cmdList[randomCommand];
+    log(cmdList, logging.warn, "")
+    log(randomCommand, logging.warn, "")
+    log(command, logging.warn, "")
+  }
   if(command == undefined) return message.channel.send("Sorry, but it appears this command is unknown.") // crash otherwise
   if(getTextInput(command.toLowerCase(), config.guilds[message.guild.id].disabled, 2)) return message.channel.send("This command is disabled in this server.")
   var args = message.content.slice(messagePrefix.length + command.length + 1 + counter)

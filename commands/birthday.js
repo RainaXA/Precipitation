@@ -128,39 +128,39 @@ var command = {
           if(!config.users[message.author.id]) config.users[message.author.id] = {}
           let cmd = args.split("/");
           let year = new Date().getFullYear();
-          let list = "Please:\n";
+          let list = "Please just fucking:\n";
           if(!cmd[2]) cmd[2] = "0"
           if(!cmd[0] || !cmd[1]) {
             if(!cmd[0]) {
-              list = list + "- input an argument"
+              list = list + "- put some shit in"
             } else {
-              list = list + "- separate your birthday with slashes\n"
+              list = list + "- separate your birthday with slashes (the freedom way)\n"
             }
           } else {
             if(isNaN(parseInt(cmd[0])) || isNaN(parseInt(cmd[1])) || isNaN(parseInt(cmd[2]))) {
-              list = list + "- only include numbers\n"
+              list = list + "- only include numbers, dimwit\n"
             }
             if(cmd.length != 3) {
-              list = list + "- only have three numbers separated by slashes\n"
+              list = list + "- only have three numbers separated by slashes, THAT'S HOW A DATE WORKS (I know how dates work, ladies)\n"
             }
             if(cmd[0].includes("-") || cmd[1].includes("-") || cmd[2].includes("-")) {
-              list = list + "- remove the negative sign\n"
+              list = list + "- remove the negative sign, you fucking time traveller\n"
             }
             if(cmd[0].includes(".") || cmd[1].includes(".") || cmd[2].includes(".")) {
-              list = list + "- remove the decimal\n"
+              list = list + "- remove the decimal, stop your Europoor date systems\n"
             }
             if(getDaysInMonth(parseInt(cmd[0]), cmd[2]) == "invalid month") {
-              list = list + "- give a valid month between 1-12\n"
+              list = list + "- give a valid month between 1-12, we use freedom units (mm/dd/yyyy), dumbass\n"
             }
             if(getDaysInMonth(parseInt(cmd[0]), parseInt(cmd[2])) < parseInt(cmd[1])) {
-              list = list + "- make sure the month hasn't already ended\n"
+              list = list + "- make sure the month hasn't already ended, I'm not an idiot\n"
             }
             if((parseInt(cmd[2]) > year || parseInt(cmd[2]) < 1903) && cmd[2] != 0) {
-              list = list + "- ensure you input the correct birthday\n"
+              list = list + "- get back in the womb, you fucking child (or get in your grave, oldass)\n"
             }
           }
-          if(list == "Please:\n") {
-            message.channel.send("Okay, I will set your birthday as " + toProperUSFormat(parseInt(cmd[0]), parseInt(cmd[1]), parseInt(cmd[2])) + ".")
+          if(list == "Please just fucking:\n") {
+            message.channel.send("Okay, I'll remember your birthday as " + toProperUSFormat(parseInt(cmd[0]), parseInt(cmd[1]), parseInt(cmd[2])) + ".")
             if(!config.users[message.author.id].birthday) config.users[message.author.id].birthday = {}
             config.users[message.author.id].birthday.month = parseInt(cmd[0]);
             config.users[message.author.id].birthday.day = parseInt(cmd[1]);
@@ -212,9 +212,9 @@ var command = {
               break;
             }
             let currentYear = new Date().getFullYear();
-            if(day.includes("-") || year.includes("-")) interaction.reply({ content: "Please remove the negative sign.", ephemeral: true })
-            if(getDaysInMonth(parseInt(month), year) < day) interaction.reply({ content: "Please make sure the month hasn't already ended.", ephemeral: true })
-            if(currentYear < parseInt(year) || parseInt(year) < 1903) interaction.reply({ content: "Please keep the year within a reasonable frame.", ephemeral: true })
+            if(day.includes("-") || year.includes("-")) interaction.reply({ content: "Please remove the negative sign, you fucking time traveller.", ephemeral: true })
+            if(getDaysInMonth(parseInt(month), year) < day) interaction.reply({ content: "The month ends before that, weirdo.", ephemeral: true })
+            if(currentYear < parseInt(year) || parseInt(year) < 1903) interaction.reply({ content: "Just get in your grave already, " + gender(interaction.user, "grandpa", "grandma", "grandparent", "grandparent") + ".", ephemeral: true })
             if(!config.users[interaction.user.id]) config.users[interaction.user.id] = {}
             if(!config.users[interaction.user.id].birthday) config.users[interaction.user.id].birthday = {}
             interaction.reply({ content: "Okay, I will set your birthday as " + toProperUSFormat(parseInt(month), parseInt(day), parseInt(year)) + "." })

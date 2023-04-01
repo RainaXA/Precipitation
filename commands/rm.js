@@ -21,7 +21,7 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 
 var command = {
     name: "rm",
-    desc: "Bulk delete messages. *(requires Manage Messsages)*",
+    desc: "Bulk delete messages, instead of doing it yourself, you lazy fuck.",
     args: {
         "number": {
             "desc": "The number of messages to bulk delete (between 1-99)",
@@ -31,17 +31,17 @@ var command = {
     parameters: "",
     execute: {
         discord: function(message, args) {
-            if(parseInt(args) == 0) return message.channel.send("Okay, I didn't delete any messages.")
-            if(parseInt(args) > 99 || parseInt(args) < 0) return message.channel.send("Please keep your number between 1-99.")
+            if(parseInt(args) == 0) return message.channel.send("Lmao I didn't delete any messages, dumbass")
+            if(parseInt(args) > 99 || parseInt(args) < 0) return message.channel.send("I'm not your slave asshole, you have to go below 99 messages.")
             try {
                 if(parseInt(args) == 1) {
                 return message.channel.bulkDelete(2, { filterOld: true }).then(messages => {
-                    message.channel.send("Okay, I've deleted the above message. (really?)") // it's funny
+                    message.channel.send("Okay, I deleted the above message for you, because you're too lazy to do it yourself.") // it's funny
                 })
                 }
                 return message.channel.bulkDelete(parseInt(args) + 1, { filterOld: true }).then(messages => {
                 if(parseInt(args) + 1 == messages.size) {
-                    message.channel.send("Okay, I've deleted " + args + " messages.")
+                    message.channel.send("Okay, I've deleted " + args + " messages, because you apparently can't do that.")
                 } else {
                     message.channel.send("Unfortunately, due to Discord limitations, I could only delete " + messages.size + " messages.")
                 }

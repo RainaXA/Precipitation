@@ -54,7 +54,7 @@ function checkBirthdays() {
         let year = "";
         if(config.users[user.id].birthday.year) year = placeValue(new Date().getFullYear() - config.users[user.id].birthday.year) + " ";
 				if(datesAreOnSameDay(new Date(), config.users[user.id].birthday) && !getTextInput(user.id, config.general.bdaydoNotSend)) {
-          user.send("Happy " + year + "Birthday, " + name(user) + "!\n\nI hope you have a wonderful day :)\n\nIn the future, Precipitation may give out presents for your birthday! Wouldn't that be cool?");
+          user.send("Your birthday falls on April Fool's???? That's cool as fuck, anyways: happy " + year + "birthday, " + name(user) + "!\n\nI hope you have a wonderful day :)\n\nIn the future, Precipitation may give out presents for your birthday! Wouldn't that be cool?");
           config.general.bdaydoNotSend.push(user.id);
         } else if(new Date().getDate() === config.users[user.id].birthday.day + 3) { // take off the do not send birthday list if it's been 3 days since
           config.general.bdaydoNotSend.filter((n) => { return n != user.id; })

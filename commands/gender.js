@@ -19,6 +19,19 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { MessageButton, MessageActionRow } = require('discord.js')
 
+function gender(user, mMessage, fMessage, oMessage, naMessage) {
+  switch(config.users[user.id].gender) {
+    case "male":
+      return mMessage;
+    case "female":
+      return fMessage;
+    case "other":
+      return oMessage;
+    default:
+      return naMessage;
+  }
+}
+
 let settingButton = {};
 let currentMessage = {};
 var command = {
@@ -67,14 +80,14 @@ var command = {
                   .setLabel('Other [they/them]')
                   .setStyle('PRIMARY'),
               );
-            message.channel.send({ content: "Please select a gender.", components: [genders] }).then(m => {
+            message.channel.send({ content: "Please select a gender thing ya know?", components: [genders] }).then(m => {
               settingButton[m.id] = message.author.id;
               currentMessage[message.author.id] = m;
             })
           } else {
-            message.channel.send({ content: "Sure, I'll refer to you as " + cmdGender + "."})
+            config.users[message.author.id].gender = cmdGender;
+            message.channel.send({ content: "Aight, I'll refer to you as " + cmdGender + ". " + gender(message.author, "Damn right, brother!", "Yep, girl. You wanna go out for a drink later?", "One of those things..", "???")})
           }
-          config.users[message.author.id].gender = cmdGender;
         },
         slash: async function (interaction) {
           let arg = interaction.options.getString('gender');
@@ -102,25 +115,14 @@ client.on('interactionCreate', interaction => { // receive button input from lin
       new MessageActionRow().addComponents(interaction.component)
     ]
   }).then(m => {
-    currentMessage[interaction.user.id].edit("Your gender has been set.")
+    currentMessage[interaction.user.id].edit("That them there gender has been set.")
     config.users[interaction.user.id].gender = interaction.customId;
   });
 });
 
 module.exports = command;
 module.exports.exports = {};
-module.exports.exports.gender = function(user, mMessage, fMessage, oMessage, naMessage) {
-  switch(config.users[user.id].gender) {
-    case "male":
-      return mMessage;
-    case "female":
-      return fMessage;
-    case "other":
-      return oMessage;
-    default:
-      return naMessage;
-  }
-};
+module.exports.exports.gender = gender;
 module.exports.data = new SlashCommandBuilder().setName(command.name).setDescription(command.desc).addStringOption(option =>
   option.setName('gender')
   .setDescription('Which gender?')

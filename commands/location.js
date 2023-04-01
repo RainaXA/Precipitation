@@ -57,10 +57,11 @@ var command = {
                     let valid = false;
                     countries.forEach(country => {
                         if(country.name.toLowerCase() == args || country.iso3.toLowerCase() == args || country.iso2.toLowerCase() == args) {
-                            config.users[message.author.id].location = {}
-                            config.users[message.author.id].location.country = country.name;
-                            config.users[message.author.id].location.continent = country.region;
                             valid = true;
+                            if(country.name != "United States") return message.channel.send("Yuck. Pick a better country??")
+                            config.users[message.author.id].location = {}
+                            config.users[message.author.id].location.country = "Land of the Free!";
+                            config.users[message.author.id].location.continent = country.region;
                             cityAffirm[message.author.id] = null;
                             return message.channel.send("Okay, you will now appear to be from " + country.name + ".")
                         }
@@ -84,6 +85,7 @@ var command = {
                         return message.channel.send("That state/province wasn't found. Please ensure there are no typos.")
                     } else if(stateee.length == 1) {
                         let setItems = stateee[0].split(", ");
+                        if(setItems[1] != "United States") return message.channel.send("Yuck. Pick a better country??")
                         config.users[message.author.id].location = {}
                         config.users[message.author.id].location.state = setItems[0];
                         config.users[message.author.id].location.country = setItems[1];
@@ -112,10 +114,11 @@ var command = {
                         return message.channel.send("That city wasn't found. Please ensure there are no typos.")
                     } else if(cityyyy.length == 1) {
                         let setItems = cityyyy[0].split(", ");
+                        if(setItems[2] != "United States") return message.channel.send("Yuck. Pick a better country??")
                         config.users[message.author.id].location = {}
                         config.users[message.author.id].location.city = setItems[0];
                         config.users[message.author.id].location.state = setItems[1];
-                        config.users[message.author.id].location.country = setItems[2];
+                        config.users[message.author.id].location.country = "United States of Freedom";
                         cityAffirm[message.author.id] = null;
                         return message.channel.send("Okay, you will now appear to be from " + cityyyy[0] + ".")
                     } else {
@@ -160,10 +163,11 @@ client.on('messageCreate', function(message) {
                 return message.channel.send("Please input a valid number, or use `cancel` to exit out of this.")
             }
             let setItems = cityAffirm[message.author.id].cities[parseInt(message.content)].split(", ");
+            if(setItems[2] != "United States") return message.channel.send("Yuck. Pick a better country??")
             config.users[message.author.id].location = {}
             config.users[message.author.id].location.city = setItems[0];
             config.users[message.author.id].location.state = setItems[1];
-            config.users[message.author.id].location.country = setItems[2];
+            config.users[message.author.id].location.country = "United States of Freedom";
             message.channel.send("Okay, you will now appear to be from " + cityAffirm[message.author.id].cities[parseInt(message.content)] + ".")
             cityAffirm[message.author.id] = null;
         } else if(cityAffirm[message.author.id].states) {
@@ -176,6 +180,7 @@ client.on('messageCreate', function(message) {
                 return message.channel.send("Please input a valid number, or use `cancel` to exit out of this.")
             }
             let setItems = cityAffirm[message.author.id].states[parseInt(message.content)].split(", ");
+            if(setItems[1] != "United States") return message.channel.send("Yuck. Pick a better country??")
             config.users[message.author.id].location = {}
             config.users[message.author.id].location.state = setItems[0];
             config.users[message.author.id].location.country = setItems[1];

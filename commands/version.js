@@ -56,10 +56,10 @@ var command = {
                 return message.channel.send({embeds:[embed]});
                 }
             }
-            return message.channel.send("Precipitation " + host.version.external + " " + host.version.name);
+            return message.channel.send("Precipitation " + host.version.external + " " + host.version.name + " (Freedom Edition)");
         },
         slash: async function (interaction) {
-            await interaction.reply({ content: "Precipitation " + host.version.external + " " + host.version.name + " (" + host.version.internal + ")" })
+            await interaction.reply({ content: "Precipitation " + host.version.external + " " + host.version.name + " (Freedom Edition)" })
         },
         console: function() {
             log("internal: " + host.version.internal + "\nexternal: " + host.version.external + "\nname: " + host.version.name, logging.output, "version")

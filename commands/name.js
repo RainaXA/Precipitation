@@ -18,6 +18,15 @@
 
 const { SlashCommandBuilder } = require('@discordjs/builders');
 
+try {
+    var gender = require('./gender.js').exports.gender;
+  } catch(err) {
+    log("gender function not found - will display visible error.", logging.warn, "uinfo")
+    function gender() {
+      return "`gender()` 404";
+    }
+}
+
 var command = {
     name: "name",
     desc: "Sets the name for the bot to refer to you as.",
@@ -30,16 +39,16 @@ var command = {
     parameters: "",
     execute: {
         discord: function(message, args) {
-            if(args.length >= 75) return message.channel.send("That's too long of a name.")
-            if((args.includes("<@") && args.includes(">")) || args.includes("@everyone") || args.includes("@here")) return message.channel.send("I won't ping anyone.")
-            if(getTextInput(args, host.slurs)) return message.channel.send("Hey, I'm not going to yell out offensive words.")
-            if(args.includes("\n")) return message.channel.send("Please keep your name inside of one line.")
+            if(args.length >= 75) return message.channel.send("You liberals and your stupidly long names. Make it shorter.")
+            if((args.includes("<@") && args.includes(">")) || args.includes("@everyone") || args.includes("@here")) return message.channel.send("You have your First Amendment rights to do that pingin' all you want, but you'd better get and not have me do that.")
+            if(getTextInput(args, host.slurs)) return message.channel.send("Ayyyy, " + gender(message.author, "brother", "sister", "patriot", "patriot") + "! I'm sorry but Raina would kill me if I said one of them words. Glad you had the courage to stand up against the liberal agenda of silencing our First Amendment rights, however.")
+            if(args.includes("\n")) return message.channel.send("You liberals and your WEIRD names. Just use one line.")
             if(args == "") {
                 config.users[message.author.id].name = null;
-                return message.channel.send("Sure, I'll refer to you by your username.")
+                return message.channel.send("I'll call you by whatever that them there thing says.")
             }
             config.users[message.author.id].name = args;
-            return message.channel.send("Sure, I'll refer to you by \"" + args + "\".")
+            return message.channel.send("I hope you're not one of them there transgendereds, like Raina. However, I have to call you that anyways.")
         },
         slash: async function (interaction) {
             let string = interaction.options.getString('name')

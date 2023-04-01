@@ -69,7 +69,7 @@ var commands = {
                 let uinfoUser;
                 if(args && find) {
                     uinfoUser = find(args.toLowerCase(), 1)
-                    if(!uinfoUser) return message.channel.send("Couldn't find a user by that name.")
+                    if(!uinfoUser) return message.channel.send("Couldn't find a user by that name, dumbass.")
                 } else {
                     uinfoUser = message.author;
                 }
@@ -88,7 +88,7 @@ var commands = {
                 } else {
                     setloc = "*not set*"
                 }
-                let botInfo = "**Name**: " + name(uinfoUser) + "\n**Gender**: " + gender(uinfoUser, "Male", "Female", "Other", "*not set*") + "\n**Birthday**: " + birthday + "\n**Location**: " + setloc
+                let botInfo = "**Name**: " + name(uinfoUser) + "\n**Gender**: " + gender(uinfoUser, "Awesome Person", "Yuck", "Object", "I don't know lol") + "\n**Birthday**: " + birthday + "\n**Location**: " + setloc
                 let uinfoMember;
                 message.guild.members.cache.each(member => {
                     if(uinfoUser.id == member.id) {
@@ -127,7 +127,7 @@ var commands = {
                 } else {
                     setloc = "*not set*"
                 }
-                let botInfo = "**Name**: " + name(uinfoUser) + "\n**Gender**: " + gender(uinfoUser, "Male", "Female", "Other", "*not set*") + "\n**Birthday**: " + birthday + "\n**Location**: " + setloc
+                let botInfo = "**Name**: " + name(uinfoUser) + "\n**Gender**: " + gender(uinfoUser, "Awesome Person", "Yuck", "Object", "I don't know lol") + "\n**Birthday**: " + birthday + "\n**Location**: " + setloc
                 let uinfoMember;
                 interaction.guild.members.cache.each(member => {
                     if(uinfoUser.id == member.id) {
