@@ -21,7 +21,7 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 
 var command = {
     name: "rm",
-    desc: "Bulk delete messages. *(requires Manage Messsages)*",
+    desc: "Bulk delete messages.",
     args: {
         "number": {
             "desc": "The number of messages to bulk delete (between 1-99)",

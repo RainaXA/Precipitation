@@ -68,7 +68,7 @@ var command = {
                 { name: "Results", value: findList.list}
             )
             .setColor(host.color)
-            .setFooter({ text: 'Precipitation ' + bottomText });
+            .setFooter({ text: "Precipitation " + bottomText, iconURL: client.user.displayAvatarURL() });
             return message.channel.send({embeds: [embed]})
         }
     },

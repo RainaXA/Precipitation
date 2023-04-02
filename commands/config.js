@@ -33,7 +33,7 @@ client.on('ready', async() => { // init guilds on start
   })
 
 try {
-  var name = require('./name.js').name;
+  var name = require('./name.js').exports.name;
 } catch(err) {
   log("name function not found - using discord username.", logging.warn, "config")
   function name(user) {

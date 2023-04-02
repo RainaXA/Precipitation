@@ -614,7 +614,7 @@ var commands = {
                                 .setTitle("Time Display Preferences >> Day")
                                 .addField("Time Options", "**(1)** Thursday\n**(2)** Thurs\n**(3)** Th")
                                 .setColor(host.color)
-                                .setFooter({text: "Precipitation " + host.version.external})
+                                .setFooter({ text: "Precipitation " + bottomText, iconURL: client.user.displayAvatarURL() });
                                 return message.channel.send({embeds: [embed]})
                         }
                     case 2:
@@ -648,7 +648,7 @@ var commands = {
                                 .setTitle("Time Display Preferences >> Date")
                                 .addField("Time Options", "**(1)** January 1st, 1970\n**(2)** January 1 1970\n**(3)** Jan 1 1970\n**(4)** 1 Jan 1970\n**(5)** January 1st\n**(6)** January 1\n**(7)** Jan 1\n**(8)** 1 Jan")
                                 .setColor(host.color)
-                                .setFooter({text: "Precipitation " + host.version.external})
+                                .setFooter({ text: "Precipitation " + bottomText, iconURL: client.user.displayAvatarURL() });
                                 return message.channel.send({embeds: [embed]})
                         }
                     case 3:
@@ -670,7 +670,7 @@ var commands = {
                                 .setTitle("Time Display Preferences >> Time")
                                 .addField("Time Options", "**(1)** 12:00:00AM\n**(2)** 00:00:00\n**(3)** 12:00AM\n**(4)** 00:00")
                                 .setColor(host.color)
-                                .setFooter({text: "Precipitation " + host.version.external})
+                                .setFooter({ text: "Precipitation " + bottomText, iconURL: client.user.displayAvatarURL() });
                                 return message.channel.send({embeds: [embed]})
                         }
                 }
@@ -678,7 +678,7 @@ var commands = {
                 .setTitle("Time Display Preferences")
                 .addField("Options", "**(1)** Day\n**(2)** Date\n**(3)** Time")
                 .setColor(host.color)
-                .setFooter({text: "Precipitation " + host.version.external})
+                .setFooter({ text: "Precipitation " + bottomText, iconURL: client.user.displayAvatarURL() });
                 message.channel.send({embeds: [embed]})
             }
         },

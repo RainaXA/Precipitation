@@ -184,7 +184,25 @@ var command = {
                     { name: "Bot Permissions", value: botList, inline: true },
                     { name: "Syntax", value: host.prefix + cmdHelp + " " + cmdArgs + currentCmd.parameters }
                 )
-                return message.channel.send({embeds: [commandHelpEmbed]})
+                let cmds = []; // cannot be over 25 commands - KEEP IN MIND
+                client.commands.each(cmd => {
+                    if(cmd.execute.discord && !cmd.prereqs.owner) cmds.push({
+                        label: cmd.name,
+                        description: cmd.desc,
+                        value: cmd.name,
+                    });
+                })
+                let row = new MessageActionRow()
+                .addComponents(
+                    new MessageSelectMenu() 
+                        .setCustomId('select')
+                        .setPlaceholder('Select a command to view help on...')
+                        .addOptions(cmds)
+                );
+                return message.channel.send({embeds: [commandHelpEmbed], components: [row]}).then(m => {
+                    settingButton[m.id] = message.author.id;
+                    currentMessage[message.author.id] = m;
+                })
             } else {
                 let helpEmbed = new MessageEmbed()
                 helpEmbed.setTitle("Precipitation Index")
@@ -208,17 +226,14 @@ var command = {
                     if(category == "Secrets" && parameter == "easter-eggs") helpEmbed.addField(category, helpp[category], true) // only add Secrets if parameter is specified
                 }
                 helpEmbed.setColor(host.color)
-                helpEmbed.setFooter({ text: "Precipitation " + host.version.external, iconURL: client.user.displayAvatarURL() })
-                let count = 0;
-                let cmds = [];
+                helpEmbed.setFooter({ text: "Precipitation " + host.version.external + " " + host.version.name, iconURL: client.user.displayAvatarURL() })
+                let cmds = []; // cannot be over 25 commands - KEEP IN MIND
                 client.commands.each(cmd => {
-                    if(count == 25) return;
-                    if(!cmd.prereqs.owner) cmds.push({
+                    if(cmd.execute.discord && !cmd.prereqs.owner) cmds.push({
                         label: cmd.name,
                         description: cmd.desc,
                         value: cmd.name,
                     });
-                    count++;
                 })
                 let row = new MessageActionRow()
                 .addComponents(

@@ -50,7 +50,7 @@ try {
 var commands = {
     "warn": {
         name: "warn",
-        desc: "Warns a user. *(requires Manage Nicknames)*",
+        desc: "Warns a user.",
         args: {
             "user": {
                 "desc": "The user to give a warning to",
@@ -134,7 +134,7 @@ var commands = {
                     let warningEmbed = new MessageEmbed()
                     .setTitle("Warnings List for " + user.tag)
                     .setColor(host.color)
-                    .setFooter({ text: 'Precipitation ' + host.version.external })
+                    .setFooter({ text: "Precipitation " + bottomText, iconURL: client.user.displayAvatarURL() });
                     for(let i = 0; i < warnings.length; i++) {
                     warningEmbed.addField("Warning #" + (i + 1), "*" + warnings[i] + "*")
                     }
@@ -147,7 +147,7 @@ var commands = {
                     let warningEmbed = new MessageEmbed()
                     .setTitle("Warnings List for " + message.author.tag)
                     .setColor(host.color)
-                    .setFooter({ text: 'Precipitation ' + host.version.external })
+                    .setFooter({ text: "Precipitation " + bottomText, iconURL: client.user.displayAvatarURL() });
                     for(let i = 0; i < warnings.length; i++) {
                     warningEmbed.addField("Warning #" + (i + 1), "*" + warnings[i] + "*")
                     }
@@ -172,7 +172,7 @@ var commands = {
                 let warningEmbed = new MessageEmbed()
                 .setTitle("Warnings List for " + user.tag)
                 .setColor(host.color)
-                .setFooter({ text: 'Precipitation ' + host.version.external })
+                .setFooter({ text: "Precipitation " + bottomText, iconURL: client.user.displayAvatarURL() });
                 for(let i = 0; i < warnings.length; i++) {
                     warningEmbed.addField("Warning #" + (i + 1), "*" + warnings[i] + "*")
                 }
@@ -191,7 +191,7 @@ var commands = {
     },
     "rmwarn": {
         name: "rmwarn",
-        desc: "Remove a warning from a user. *(requires Manage Nicknames)*",
+        desc: "Remove a warning from a user.",
         args: {
             "warningid": {
                 "desc": "The warning number to remove",
