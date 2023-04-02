@@ -1,8 +1,8 @@
 {
   "version": {
     "external": "3.1",
-    "name": "Toyger Alpha",
-    "internal": "3.1.0-dev"
+    "name": "Toyger",
+    "internal": "3.1.0"
   },
   "developer": {
     "startConnect": true,
