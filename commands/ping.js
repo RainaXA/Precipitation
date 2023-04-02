@@ -17,7 +17,7 @@
 \* ========================================================================= */
 
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const pingMessages = ["Pinging...", "Ponging...", "pay my onlyfans", "doin ya mom", "don't care + didn't ask", "ooh, ee, ooh ah ah, ting tang, wallawallabingbang", "omg, you're a redditor AND a discord mod?", "i use arch btw", "I've come to make an announcement", "police crash green screen", "apparently i committed tax fraud but idk how that happened, i dont even pay tax????", "A Discord Bot where it can do anything and a moderation bot and made in discord.js!!!!", "did you know that 100% of people who drown die", "...\n\n\n\n\n\n\n\nwhoa what is this", "Fortnite Funnies Vol. 1", "Poopenfarten"]
+const pingMessages = ["Pinging...", "Ponging...", "pay my onlyfans", "doin ya mom", "don't care + didn't ask", "omg, you're a redditor AND a discord mod?", "apparently i committed tax fraud but idk how that happened, i dont even pay tax????", "A Discord Bot where it can do anything and a moderation bot and made in discord.js!!!!", "...\n\n\n\n\n\n\n\nwhoa what is this", "Fortnite Funnies Vol. 1", "Poopenfarten", "good people don't brag about how good they are", "https://pbs.twimg.com/media/FXBaEuFWIAA6LtD.png"]
 
 try {
     var name = require('./name.js').exports.name;

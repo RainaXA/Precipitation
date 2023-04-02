@@ -559,11 +559,12 @@ client.on('messageCreate', function(message) {
                 if(getTextInput(user, currentGame.dead, 2)) return message.channel.send("They're already dead, so they're not going to be attacked again.")
                 currentGame.queued[message.author.id] = user
                 return message.channel.send("You have decided to hide in " + user.username + "'s house tonight.")*/
-              /*case roles.properties.city.merchant:
+              case roles.properties.city.merchant:
+                return message.channel.send("Merchant does not use `!target`, but instead, uses `!protect` and `!info`.")
                 if(message.author.id == user.id) return message.channel.send("Staying at home would make no difference!")
                 if(getTextInput(user, currentGame.dead, 2)) return message.channel.send("They're already dead, so they're not going to be attacked again.")
                 currentGame.queued[message.author.id] = user
-                return message.channel.send("You have decided to hide in " + user.username + "'s house tonight.")*/
+                return message.channel.send("You have decided to hide in " + user.username + "'s house tonight.")
               case roles.properties.spies.hitman:
                 //if(message.author.id == user.id) return message.channel.send("You cannot kill yourself.")
                 if(getTextInput(user, currentGame.dead, 2)) return message.channel.send("You cannot kill someone who's..already dead.")

@@ -33,7 +33,7 @@ client.on('ready', async() => { // init guilds on start
   })
 
 try {
-  var name = require('./name.js').name;
+  var name = require('./name.js').exports.name;
 } catch(err) {
   log("name function not found - using discord username.", logging.warn, "config")
   function name(user) {
@@ -44,7 +44,16 @@ try {
 var command = {
     name: "config",
     desc: "Changes server-specific properties.",
-    args: "",
+    args: {
+      "setting": {
+        "desc": "Which setting to change",
+        "required": true
+      },
+      "option": {
+        "desc": "What to change the setting to",
+        "required": true
+      }
+    },
     parameters: "",
     execute: {
         discord: function(message, args) {
@@ -107,7 +116,7 @@ var command = {
             }
         }
     },
-    ver: "3.0.0",
+    ver: "3.1.0",
     cat: "General",
     prereqs: {
         dm: false,

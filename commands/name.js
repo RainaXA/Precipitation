@@ -33,6 +33,7 @@ var command = {
             if(args.length >= 75) return message.channel.send("That's too long of a name.")
             if((args.includes("<@") && args.includes(">")) || args.includes("@everyone") || args.includes("@here")) return message.channel.send("I won't ping anyone.")
             if(getTextInput(args, host.slurs)) return message.channel.send("Hey, I'm not going to yell out offensive words.")
+            if(args.includes("\n")) return message.channel.send("Please keep your name inside of one line.")
             if(args == "") {
                 config.users[message.author.id].name = null;
                 return message.channel.send("Sure, I'll refer to you by your username.")

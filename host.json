@@ -1,8 +1,8 @@
 {
   "version": {
-    "external": "3.0",
-    "name": "Shorthair",
-    "internal": "3.0.0"
+    "external": "3.1",
+    "name": "Toyger Alpha",
+    "internal": "3.1.0-dev"
   },
   "developer": {
     "startConnect": true,

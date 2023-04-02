@@ -16,7 +16,97 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.  
 \* ========================================================================= */
 
-const { MessageEmbed } = require('discord.js')
+const { MessageEmbed, MessageActionRow, MessageSelectMenu, Permissions } = require('discord.js')
+
+let settingButton = {};
+let currentMessage = {};
+
+function interpretPermission(permission) {
+    let permissions = Permissions.FLAGS;
+    switch(permission) { // in order of the actual permissions in discord because it makes me happy
+        case permissions.VIEW_CHANNEL:
+            return "View Channel";
+        case permissions.MANAGE_CHANNELS:
+            return "Manage Channels";
+        case permissions.MANAGE_ROLES:
+            return "Manage Roles";
+        case permissions.MANAGE_EMOJIS_AND_STICKERS:
+            return "Manage Emojis and Stickers";
+        case permissions.VIEW_AUDIT_LOG:
+            return "View Audit Log";
+        case permissions.MANAGE_WEBHOOKS:
+            return "Manage Webhooks";
+        case permissions.MANAGE_GUILD:
+            return "Manage Server";
+        case permissions.CREATE_INSTANT_INVITE:
+            return "Create Invite";
+        case permissions.CHANGE_NICKNAME:
+            return "Change Nickname";
+        case permissions.MANAGE_NICKNAMES:
+            return "Manage Nicknames";
+        case permissions.KICK_MEMBERS:
+            return "Kick Members";
+        case permissions.BAN_MEMBERS:
+            return "Ban Members";
+        case permissions.MODERATE_MEMBERS: 
+            return "Timeout Members";
+        case permissions.SEND_MESSAGES:
+            return "Send Messages and Create Posts";
+        case permissions.SEND_MESSAGES_IN_THREADS:
+            return "Send Messages in Threads and Posts";
+        case permissions.CREATE_PUBLIC_THREADS:
+            return "Create Public Threads";
+        case permissions.CREATE_PRIVATE_THREADS:
+            return "Create Private Threads";
+        case permissions.EMBED_LINKS:
+            return "Embed Links";
+        case permissions.ATTACH_FILES:
+            return "Attach Files";
+        case permissions.ADD_REACTIONS:
+            return "Add Reactions";
+        case permissions.USE_EXTERNAL_EMOJIS:
+            return "Use External Emojis";
+        case permissions.USE_EXTERNAL_STICKERS:
+            return "Use External Stickers";
+        case permissions.MENTION_EVERYONE:
+            return "Mention @everyonе, @herе, and All Roles"; // yes those are cyrillic e's
+        case permissions.MANAGE_MESSAGES:
+            return "Manage Messages";
+        case permissions.MANAGE_THREADS:
+            return "Manage Threads and Posts";
+        case permissions.READ_MESSAGE_HISTORY:
+            return "Read Message History";
+        case permissions.SEND_TTS_MESSAGES: 
+            return "Send Text-to-Speech Messages";
+        case permissions.USE_APPLICATION_COMMANDS:
+            return "Use Application Commands";
+        case permissions.CONNECT:
+            return "Connect";
+        case permissions.SPEAK:
+            return "Speak";
+        case permissions.STREAM:
+            return "Video";
+        case permissions.USE_EMBEDDED_ACTIVITIES:
+            return "Use Activities";
+        //case permissions.USE_SOUNDBOARD: // Use Soundboard
+            //return "Manage Threads and Posts";
+        case permissions.USE_VAD:
+            return "Use Voice Activity";
+        case permissions.PRIORITY_SPEAKER:
+            return "Priority Speaker";
+        case permissions.MUTE_MEMBERS: 
+            return "Mute Members";
+        case permissions.DEAFEN_MEMBERS:
+            return "Deafen Members";
+        case permissions.MOVE_MEMBERS:
+            return "Move Members";
+        case permissions.MANAGE_EVENTS:
+            return "Manage Events";
+        case permissions.ADMINISTRATOR:
+            return "Administrator";
+    }
+    return permission; //if not found
+}
 
 var command = {
     name: "help",
@@ -77,11 +167,42 @@ var command = {
                 } else {
                     cmdArgs = currentCmd.args;
                 }
+                let permList = "";
+                for(permission of currentCmd.prereqs.user) {
+                    permList = permList + interpretPermission(permission) + "\n"
+                }
+                if(permList === "") permList = "*None.*"
+                let botList = "";
+                for(permission of currentCmd.prereqs.bot) {
+                    botList = botList + interpretPermission(permission) + "\n"
+                }
+                if(botList === "") botList = "*None.*"
                 commandHelpEmbed.addFields(
-                    { name: "Description", value: currentCmd.desc},
+                    { name: "Description", value: currentCmd.desc, inline: true },
+                    { name: "Command Version", value: currentCmd.ver, inline: false },
+                    { name: "User Permissions", value: permList, inline: true },
+                    { name: "Bot Permissions", value: botList, inline: true },
                     { name: "Syntax", value: host.prefix + cmdHelp + " " + cmdArgs + currentCmd.parameters }
                 )
-                return message.channel.send({embeds: [commandHelpEmbed]})
+                let cmds = []; // cannot be over 25 commands - KEEP IN MIND
+                client.commands.each(cmd => {
+                    if(cmd.execute.discord && !cmd.prereqs.owner) cmds.push({
+                        label: cmd.name,
+                        description: cmd.desc,
+                        value: cmd.name,
+                    });
+                })
+                let row = new MessageActionRow()
+                .addComponents(
+                    new MessageSelectMenu() 
+                        .setCustomId('select')
+                        .setPlaceholder('Select a command to view help on...')
+                        .addOptions(cmds)
+                );
+                return message.channel.send({embeds: [commandHelpEmbed], components: [row]}).then(m => {
+                    settingButton[m.id] = message.author.id;
+                    currentMessage[message.author.id] = m;
+                })
             } else {
                 let helpEmbed = new MessageEmbed()
                 helpEmbed.setTitle("Precipitation Index")
@@ -89,6 +210,9 @@ var command = {
                 let helpp = {};
                 let cname;
                 client.commands.each(cmd => {
+                    if(message.guild) {
+                        if(getTextInput(cmd.name, config.guilds[message.guild.id].disabled, 2)) return;
+                    }
                     chelp = cmd.cat 
                     cname = cmd.name
                     if(!helpp[chelp]) {
@@ -102,8 +226,26 @@ var command = {
                     if(category == "Secrets" && parameter == "easter-eggs") helpEmbed.addField(category, helpp[category], true) // only add Secrets if parameter is specified
                 }
                 helpEmbed.setColor(host.color)
-                helpEmbed.setFooter({ text: "Precipitation " + host.version.external, iconURL: client.user.displayAvatarURL() })
-                return message.channel.send({embeds: [helpEmbed]})
+                helpEmbed.setFooter({ text: "Precipitation " + host.version.external + " " + host.version.name, iconURL: client.user.displayAvatarURL() })
+                let cmds = []; // cannot be over 25 commands - KEEP IN MIND
+                client.commands.each(cmd => {
+                    if(cmd.execute.discord && !cmd.prereqs.owner) cmds.push({
+                        label: cmd.name,
+                        description: cmd.desc,
+                        value: cmd.name,
+                    });
+                })
+                let row = new MessageActionRow()
+                .addComponents(
+                    new MessageSelectMenu() 
+                        .setCustomId('select')
+                        .setPlaceholder('Select a command to view help on...')
+                        .addOptions(cmds)
+                );
+                return message.channel.send({embeds: [helpEmbed], components: [row]}).then(m => {
+                    settingButton[m.id] = message.author.id;
+                    currentMessage[message.author.id] = m;
+                })
             }
         }
     },
@@ -117,5 +259,33 @@ var command = {
     },
     unloadable: true
 }
+
+client.on('interactionCreate', interaction => { // receive button input from line 78
+    if (!interaction.isSelectMenu()) return;
+    if (settingButton[interaction.message.id] != interaction.user.id) return;
+    interaction.update({
+        components: interaction.components
+    }).then(m => {
+        let currentCmd = client.commands.get(interaction.values[0]);
+        let commandHelpEmbed = new MessageEmbed()
+                .setTitle("Precipitation Index || " + host.prefix + currentCmd.name)
+                .setColor(host.color)
+                .setFooter({ text: 'Precipitation ' + host.version.external + " || bolded is a required argument, () is an argument, [] is an option", iconURL: client.user.displayAvatarURL() });
+                let cmdArgs = "";
+                if(typeof currentCmd.args === 'object') {
+                    for(arg in currentCmd.args) {
+                        if(currentCmd.args[arg].required) { cmdArgs = cmdArgs + "**(" + arg + ")** "; continue; }
+                        cmdArgs = cmdArgs + "(" + arg + ") ";
+                    }
+                } else {
+                    cmdArgs = currentCmd.args;
+                }
+                commandHelpEmbed.addFields(
+                    { name: "Description", value: currentCmd.desc},
+                    { name: "Syntax", value: host.prefix + currentCmd.name + " " + cmdArgs + currentCmd.parameters }
+                )
+        return currentMessage[interaction.user.id].edit({embeds: [commandHelpEmbed]})
+    });
+});
 
 module.exports = command;

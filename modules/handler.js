@@ -39,14 +39,15 @@ global.loadCommands = function() {
               client.commands.set(props[item].name, props[item]);
               counter++;
               if(props[item].execute.slash) commands.push(props[item].data.toJSON())
+              if(props.ver == "3.0.0") log(props.name + " is not up to date with the new argument system", logging.warn, "handler")
             }
           } else {
             client.commands.set(props.name, props);
             counter++;
             if(props.execute.slash) commands.push(props.data.toJSON())
+            if(props.ver == "3.0.0") log(props.name + " is not up to date with the new argument system", logging.warn, "handler")
           }
           log("loaded command " + props.name)
-          if(props.ver == "3.0.0") log(props.name + " is not up to date with the new argument system", logging.warn, "handler")
         })
       } catch (err) {
         log("Sorry, but a command had an error: " + err.stack, logging.error, "LOADER")
@@ -66,6 +67,7 @@ function processCommand(message) { // used in editing messages + normal messages
   }
   var command = fCommand[0]
   if(command == undefined) return message.channel.send("Sorry, but it appears this command is unknown.") // crash otherwise
+  if(getTextInput(command.toLowerCase(), config.guilds[message.guild.id].disabled, 2)) return message.channel.send("This command is disabled in this server.")
   var args = message.content.slice(messagePrefix.length + command.length + 1 + counter)
   var parameters = args.split("--")
   var parameter = parameters[1]
@@ -110,6 +112,7 @@ function initCommand(message) {
   } else {
     if(!config.guilds[message.guild.id].prefix) config.guilds[message.guild.id].prefix = host.prefix
     global.messagePrefix = config.guilds[message.guild.id].prefix
+    if(!config.guilds[message.guild.id].disabled) config.guilds[message.guild.id].disabled = [];
   }
   if(message.content.toLowerCase().startsWith(messagePrefix) && !message.author.bot) {
     if(!config.users[message.author.id]) config.users[message.author.id] = {}

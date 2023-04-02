@@ -17,7 +17,7 @@
 \* ========================================================================= */
 
 let fs = require('fs')
-if(!fs.existsSync('./commands/fraud.js')) log("Could not find a command to start Fraud games. This module may be dysfunctional.", logging.warn, 2)
+if(!fs.existsSync('./commands/deduction.js')) log("Could not find a command to start Fraud games. This module may be dysfunctional.", logging.warn, "classic")
 
 const { MessageEmbed } = require('discord.js');
 

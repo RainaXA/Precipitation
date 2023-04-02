@@ -135,7 +135,16 @@ fs.readdir("./modules/deduction", function(error, files) {
 var command = {
     name: "deduction",
     desc: "Manage Deduction games.",
-    args: "**(start | join | create | list | rules | leave | disband | settings | public)** (join: spectator | player)",
+    args: {
+      "action": {
+        "desc": "What action to do inside the lobby\n`start` - starts the game if you are the host\n`join` - joins the lobby in the server\n`create, list, rules, leave, disband, settings, public`",
+        "required": true
+      },
+      "type": {
+        "desc": "An additional argument to an action\n`create` - what mode to create as\n`join` - specify player or spectator\n`settings` - what setting to change (using a third argument, what to change it to)",
+        "required": false
+      }
+    },
     parameters: "",
     execute: {
         discord: function(message, args) {
@@ -407,7 +416,7 @@ var command = {
               }
         }
     },
-    ver: "3.0.0",
+    ver: "3.1.0",
     cat: "Fun",
     prereqs: {
         dm: false,

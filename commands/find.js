@@ -45,7 +45,12 @@ function find(query, amount) {
 var command = {
     name: "find",
     desc: "Searches for a user using a query.",
-    args: "**(query)**",
+    args: {
+      "query": {
+        "desc": "What to search for in the user list",
+        "required": true
+      }
+    },
     parameters: "",
     execute: {
         discord: function(message, args) {
@@ -63,11 +68,11 @@ var command = {
                 { name: "Results", value: findList.list}
             )
             .setColor(host.color)
-            .setFooter({ text: 'Precipitation ' + bottomText });
+            .setFooter({ text: "Precipitation " + bottomText, iconURL: client.user.displayAvatarURL() });
             return message.channel.send({embeds: [embed]})
         }
     },
-    ver: "3.0.0",
+    ver: "3.1.0",
     cat: "Moderation",
     prereqs: {
         dm: true,

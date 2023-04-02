@@ -24,7 +24,12 @@ let currentMessage = {};
 var command = {
     name: "gender",
     desc: "Sets the gender for the bot to refer to you as.",
-    args: "(male | female | other)",
+    args: {
+      "gender": {
+        "desc": "What gender for the bot to refer to you as\n`male` - uses he/him pronouns\n`female` - uses she/her pronouns\n`other` - uses they/them pronouns",
+        "required": false
+      }
+    },
     parameters: "",
     execute: {
         discord: function(message, args) {
@@ -77,7 +82,7 @@ var command = {
           interaction.reply({ content: "Sure, I'll refer to you as " + arg + "." })
         }
     },
-    ver: "3.0.0",
+    ver: "3.1.0",
     cat: "Personalization",
     prereqs: {
         dm: true,

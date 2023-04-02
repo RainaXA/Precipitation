@@ -17,7 +17,7 @@
 \* ========================================================================= */
 
 const { Client, Intents } = require('discord.js');
-global.client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_PRESENCES, Intents.FLAGS.DIRECT_MESSAGES], partials: ["CHANNEL"] });
+global.client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_PRESENCES, Intents.FLAGS.DIRECT_MESSAGES, Intents.FLAGS.GUILD_VOICE_STATES, ], partials: ["CHANNEL"] });
 const fs = require('fs');
 const blessed = require('blessed');
 
@@ -40,7 +40,7 @@ var titleBox = blessed.text({
   tags: true,
   style: {
       fg: 'white',
-      bg: 'blue'
+      bg: host.color.toLowerCase()
   },
   padding: {
       left: 1
@@ -71,13 +71,13 @@ var logBox = blessed.log({
   scrollOnInput: true,
   scrollbar: {
     style: {
-      bg: 'blue'
+      bg: host.color.toLowerCase()
     }
   }
 });
 screen.append(logBox);
 
-var textBox = blessed.textbox({
+global.textBox = blessed.textbox({
   top: "100%-2",
   left: -1,
   width: "100%+2",
@@ -121,10 +121,15 @@ textBox.key('down', function() {
 })
 
 textBox.on('submit', function() {
-  var cmd = textBox.getText().slice(2);
-
+  let cmd = textBox.getText().slice(2)
+  let thing = "> ";
+  if(currentDirectory) {
+    cmd = textBox.getText().slice(2 + currentDirectory.length)
+    thing = currentDirectory + "> "
+  }
+  
   log("> " + cmd, logging.input)
-  textBox.setValue("> ");
+  textBox.setValue(thing);
   textBox.focus();
 
   var fcCommand = cmd.split(" ")
@@ -287,5 +292,9 @@ client.on('guildCreate', function(guild) {
 })
 
 process.on('uncaughtException', error => {
+  log(error.stack, logging.error, "catch")
+})
+
+client.on('error', error => {
   log(error.stack, logging.error, "catch")
 })

@@ -17,6 +17,33 @@
 \* ========================================================================= */
 
 const fs = require('fs');
+const path = require('path')
+
+// DIRECTORY
+global.currentDirectory = path.resolve("./");
+
+// SHUTDOWN
+let shutdown = false;
+let shutdownMessage;
+let ignore = false;
+
+function cancelShutdown(code) {
+    if(!shutdown) return;
+    shutdown = false;
+    ignore = false;
+    switch(code) {
+        case 0: // time
+            return shutdownMessage.edit("*The shutdown has been cancelled because the time has expired.*")
+        case 1: // improper save
+            return shutdownMessage.edit("*The shutdown has been cancelled because the configuration file couldn't be properly saved.*")
+        default:
+            return shutdownMessage.edit("*The shutdown has been cancelled because of an unknown reason.*")
+    }
+}
+
+client.on('ready', async() => {
+    textBox.setValue(currentDirectory + "> ");
+})
 
 var commands = {
     "vd": {
@@ -26,7 +53,20 @@ var commands = {
         parameters: "",
         execute: {
             console: function(args) {
-                
+                let path = currentDirectory;
+                if(args) path = args;
+                fs.readdir(path, {withFileTypes: true}, (err, files) => {
+                    let list = "";
+                    files.forEach(file => {
+                        //console.log(file)
+                        if(file.isDirectory()) {
+                            list += "\x1b[34m" + file.name + " <dir>\x1b[0m\n"
+                        } else {
+                            list += /*"\x1b[90m" +*/ file.name + " \x1b[0m\n"
+                        }
+                    })
+                    log("directory of " + path + "\n\n" + list, logging.output, "fs")
+                })
             }
         },
         ver: "3.0.0",
@@ -42,9 +82,54 @@ var commands = {
     "shutdown": {
         name: "shutdown",
         desc: "Shuts down the bot.",
-        args: "",
-        parameters: "",
+        args: {},
+        parameters: "[--disregard / --ignore-config]",
         execute: {
+            discord: function(message, args, parameter) {
+                if(parameter.toLowerCase() == "disregard") {
+                    message.channel.send("Precipitation is now saving configuration, and then will exit.").then(m => {
+                        fs.writeFile('config.json', JSON.stringify(config), function (err) {
+                            if (!err) {
+                                m.edit("Precipitation is now offline.").then(m => {
+                                    process.exit()
+                                })
+                            }
+                            if (err) {
+                                m.edit("Precipitation will not be shut down because of a serious error while saving the configuration file.")
+                            }
+                        })
+                    })
+                    return;
+                } else if(parameter.toLowerCase() == "ignore-config") ignore = true;
+                if(!shutdown) {
+                    shutdown = true;
+                    let sdmsg = "**WARNING:** This will shut down the bot, leaving it unusable until it is turned back on! This should only be done in EXTREME circumstances, such as a serious exploit.\nIf you wish to restart the bot to update, it is better practice to perform this command through the console anyways.\n\nIf you wish to shut down the bot anyways, please execute `" + host.prefix + "shutdown` again. After 30 seconds, this message will be changed and the shutdown process will be cancelled.";
+                    if(ignore) sdmsg = "**WARNING:** This will shut down the bot, leaving it unusable until it is turned back on! This should only be done in EXTREME circumstances, such as a serious exploit.\nIf you wish to restart the bot to update, it is better practice to perform this command through the console anyways.\n\n**The configuration file will not be saved - so data may not be saved.**\n\nIf you wish to shut down the bot anyways, please execute `" + host.prefix + "shutdown` again. After 30 seconds, this message will be changed and the shutdown process will be cancelled.";
+                    message.channel.send(sdmsg).then(m => {
+                        shutdownMessage = m;
+                        setTimeout(cancelShutdown, 30000, 0);
+                    })
+                } else {
+                    if(ignore) {
+                        message.channel.send("Precipitation is now offline.").then(m => {
+                            process.exit();
+                        })
+                    }
+                    message.channel.send("Precipitation is now saving configuration, and then will exit.").then(m => {
+                        fs.writeFile('config.json', JSON.stringify(config), function (err) {
+                            if (!err) {
+                                m.edit("Precipitation is now offline.").then(m => {
+                                    process.exit()
+                                })
+                            }
+                            if (err) {
+                                cancelShutdown(1);
+                                m.edit("Precipitation will not be shut down because of a serious error while saving the configuration file.")
+                            }
+                        })
+                    })
+                }
+            },
             console: function(args) {
                 log("saving configuration file", logging.success, "shutdown")
                 fs.writeFile('config.json', JSON.stringify(config), function (err) {
@@ -56,7 +141,7 @@ var commands = {
                   })
             }
         },
-        ver: "3.0.0",
+        ver: "3.1.0",
         cat: "Owner",
         prereqs: {
             dm: true,

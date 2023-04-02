@@ -19,7 +19,15 @@
 var command = {
     name: "list",
     desc: "Pick from a list of items.",
-    args: "**(save | pick | view)** (**what to save** | custom unsaved list)",
+    args: {
+        "action": {
+            "desc": "What action to perform with lists\n`save` - save a list provided by the next argument\n`pick` - pick from your saved list, or provide an additional argument to pick from a list that will not save\n`view` - view your saved list",
+            "required": true
+        },
+        "list": {
+            "desc": "Depends on previous argument\n`save` - the list to save\n`pick` - the unsaved list to pick from"
+        }
+    },
     parameters: "",
     execute: {
         discord: function(message, args) {
@@ -55,7 +63,7 @@ var command = {
             }
         }
     },
-    ver: "3.0.0",
+    ver: "3.1.0",
     cat: "Miscellaneous",
     prereqs: {
         dm: true,
