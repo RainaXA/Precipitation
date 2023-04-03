@@ -1,5 +1,5 @@
 /* ========================================================================= *\
-    Gender: Precipitation command to set preferred pronouns
+    Pronouns: Precipitation command to set preferred pronouns
     Copyright (C) 2023 Raina
 
     This program is free software: you can redistribute it and/or modify
@@ -22,34 +22,32 @@ const { MessageButton, MessageActionRow } = require('discord.js')
 let settingButton = {};
 let currentMessage = {};
 var command = {
-    name: "gender",
-    desc: "Sets the gender for the bot to refer to you as.",
+    name: "pronouns",
+    desc: "Sets the preferred pronouns for the bot to refer to you as.",
     args: {
       "gender": {
-        "desc": "What gender for the bot to refer to you as\n`male` - uses he/him pronouns\n`female` - uses she/her pronouns\n`other` - uses they/them pronouns",
+        "desc": "What pronouns for the bot to refer to you as",
         "required": false
       }
     },
     parameters: "",
     execute: {
-        /*discord: function(message, args) {
-          let cmdGender;
-          switch(args.toLowerCase()) {
-            case "female":
-            case "she/her":
-            case "f":
-              cmdGender = "female";
-              break;
-            case "male":
-            case "he/him":
-            case "m":
-              cmdGender = "male";
-              break;
-            case "other":
-            case "they/them":
-            case "o":
-              cmdGender = "other";
-              break;
+        discord: function(message, args) {
+          let noArgs = "You must have four arguments containing your preferred pronouns. In order, it must be `subject/object/possessive/reflexive`.\n\nFor example, `he/him/his/himself`, `she/her/hers/herself`, or `they/them/theirs/themself`."
+          let aargs = args.split("/")
+          if(!aargs[3] || aargs[4]) {
+            return message.channel.send(noArgs);
+          } else { // do some checks for bad shit
+            if((args.includes("<@") && args.includes(">")) || args.includes("@everyone") || args.includes("@here")) return message.channel.send("Your pronouns cannot involve pinging others.")
+            if(getTextInput(args, host.slurs)) return message.channel.send("Hey, I'm not going to yell out offensive words.")
+            if(args.includes("\n")) return message.channel.send("Please keep your pronouns inside of one line.")
+            if(aargs[0].length >= 10) return message.channel.send("Your subject pronoun needs to be kept below 10 characters.")
+            if(aargs[1].length >= 10) return message.channel.send("Your object pronoun needs to be kept below 10 characters.")
+            if(aargs[2].length >= 10) return message.channel.send("Your possessive pronoun needs to be kept below 10 characters.")
+            if(aargs[3].length >= 15) return message.channel.send("Your reflexive pronoun needs to be kept below 15 characters.")
+            if(aargs[0].length == 0 || aargs[1].length == 0 || aargs[2].length == 0 || aargs[3].length == 0) return message.channel.send(noArgs);
+            config.users[message.author.id].pronouns = args;
+            return message.channel.send("From now on, I will now refer to you using the pronouns " + args + ".")
           }
           if (!cmdGender) {
             let genders = new MessageActionRow()
@@ -71,16 +69,14 @@ var command = {
               settingButton[m.id] = message.author.id;
               currentMessage[message.author.id] = m;
             })
-          } else {
-            message.channel.send({ content: "Sure, I'll refer to you as " + cmdGender + "."})
           }
           config.users[message.author.id].gender = cmdGender;
-        },*/
-        slash: async function (interaction) {
+        },
+        /*slash: async function (interaction) {
           let arg = interaction.options.getString('gender');
           config.users[interaction.user.id].gender = arg;
           interaction.reply({ content: "Sure, I'll refer to you as " + arg + "." })
-        }
+        }*/
     },
     ver: "3.1.0",
     cat: "Personalization",
@@ -93,7 +89,7 @@ var command = {
     unloadable: true
 }
 
-client.on('interactionCreate', interaction => { // receive button input from line 78
+client.on('interactionCreate', interaction => {
 	if (!interaction.isButton()) return;
   if (settingButton[interaction.message.id] != interaction.user.id) return;
   interaction.component.setStyle("SUCCESS");
@@ -109,22 +105,23 @@ client.on('interactionCreate', interaction => { // receive button input from lin
 
 module.exports = command;
 module.exports.exports = {};
-module.exports.exports.gender = function(user, mMessage, fMessage, oMessage, naMessage) { // this function will be deprecated in 4.0
-  switch(config.users[user.id].gender) {                                                  // it remains usable to maintain backwards compatibility
-    case "male":
-      return mMessage;
-    case "female":
-      return fMessage;
-    case "other":
-      return oMessage;
-    default:
-      return naMessage;
-  }
+module.exports.exports.pronouns = function(user, naMessage, returnPronoun) { // 0 = subject, 1 = object, 2 = possessive, 3 = reflexive (she/her/hers/herself)
+  if(!config.users[user.id].pronouns) return naMessage;
+  return config.users[user.id].pronouns.split("/")[returnPronoun];
 };
 module.exports.data = new SlashCommandBuilder().setName(command.name).setDescription(command.desc).addStringOption(option =>
-  option.setName('gender')
-  .setDescription('Which gender?')
-  .setRequired(true)
-  .addChoice("Male [he/him]", "male")
-  .addChoice("Female [she/her]", "female")
-  .addChoice("Other [they/them]", "other"))
+  option.setName('subject')
+  .setDescription('Which subject pronoun (examples: he, she, they)')
+  .setRequired(true))
+  .addStringOption(option =>
+    option.setName('object')
+    .setDescription('Which object pronoun (examples: him, her, them)')
+    .setRequired(true))
+  .addStringOption(option =>
+    option.setName('possessive')
+    .setDescription('Which possessive pronoun (examples: his, hers, theirs)')
+    .setRequired(true))
+  .addStringOption(option =>
+    option.setName('reflexive')
+    .setDescription('Which reflexive pronoun (examples: himself, herself, themself)')
+    .setRequired(true))
