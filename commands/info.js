@@ -164,7 +164,7 @@ var commands = {
                 return interaction.reply({embeds: [uinfo]})
             }
         },
-        ver: "3.1.0",
+        ver: "3.2.0",
         cat: "Moderation",
         prereqs: {
             dm: true,

@@ -93,7 +93,7 @@ var commands = {
                 warningStage[interaction.user.id] = 3; // no messages involved
             }
         },
-        ver: "3.1.0",
+        ver: "3.2.0",
         cat: "Moderation",
         prereqs: {
             dm: false,

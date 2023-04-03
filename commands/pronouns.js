@@ -72,13 +72,29 @@ var command = {
           }
           config.users[message.author.id].gender = cmdGender;
         },
-        /*slash: async function (interaction) {
-          let arg = interaction.options.getString('gender');
-          config.users[interaction.user.id].gender = arg;
-          interaction.reply({ content: "Sure, I'll refer to you as " + arg + "." })
-        }*/
+        slash: async function (interaction) {
+          let subject = interaction.options.getString('subject');
+          let object = interaction.options.getString('object');
+          let possessive = interaction.options.getString('possessive');
+          let reflexive = interaction.options.getString('reflexive');
+          if((subject.includes("<@") && subject.includes(">")) || subject.includes("@everyone") || subject.includes("@here")) return message.channel.send("Your subject pronoun cannot involve pinging others.")
+          if((object.includes("<@") && object.includes(">")) || object.includes("@everyone") || object.includes("@here")) return message.channel.send("Your object pronoun cannot involve pinging others.")
+          if((possessive.includes("<@") && possessive.includes(">")) || possessive.includes("@everyone") || possessive.includes("@here")) return message.channel.send("Your possessive pronoun cannot involve pinging others.")
+          if((reflexive.includes("<@") && reflexive.includes(">")) || reflexive.includes("@everyone") || reflexive.includes("@here")) return message.channel.send("Your reflexive pronoun cannot involve pinging others.")
+          if(getTextInput(subject, host.slurs)) return message.channel.send("Hey, I'm not going to yell out offensive words.")
+          if(getTextInput(object, host.slurs)) return message.channel.send("Hey, I'm not going to yell out offensive words.")
+          if(getTextInput(possessive, host.slurs)) return message.channel.send("Hey, I'm not going to yell out offensive words.")
+          if(getTextInput(reflexive, host.slurs)) return message.channel.send("Hey, I'm not going to yell out offensive words.")
+          if(subject.length >= 10) return message.channel.send("Your subject pronoun needs to be kept below 10 characters.")
+          if(object.length >= 10) return message.channel.send("Your object pronoun needs to be kept below 10 characters.")
+          if(possessive.length >= 10) return message.channel.send("Your possessive pronoun needs to be kept below 10 characters.")
+          if(reflexive.length >= 15) return message.channel.send("Your reflexive pronoun needs to be kept below 15 characters.")
+          let pronouns = subject + "/" + object + "/" + possessive + "/" + reflexive
+          config.users[interaction.user.id].pronouns = pronouns;
+          interaction.reply({ content: "From now on, I will now refer to you using the pronouns " + pronouns + "." })
+        }
     },
-    ver: "3.1.0",
+    ver: "3.2.0",
     cat: "Personalization",
     prereqs: {
         dm: true,

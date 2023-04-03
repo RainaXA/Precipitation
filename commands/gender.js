@@ -82,7 +82,7 @@ var command = {
           interaction.reply({ content: "Sure, I'll refer to you as " + arg + "." })
         }
     },
-    ver: "3.1.0",
+    ver: "3.2.0",
     cat: "Personalization",
     prereqs: {
         dm: true,
