@@ -38,6 +38,15 @@ try {
 }
 
 try {
+    var pronouns = require('./pronouns.js').exports.pronouns;
+  } catch(err) {
+    log("pronouns function not found - will display Unknown", logging.warn, "uinfo");
+    function pronouns() {
+      return "Unknown";
+    }
+}
+
+try {
     var find = require('./find.js').exports.find;
   } catch(err) {
     log("find function not found - will display message author.", logging.warn, "uinfo")
@@ -93,7 +102,7 @@ var commands = {
                 } else {
                     setloc = "*not set*"
                 }
-                let botInfo = "**Name**: " + name(uinfoUser) + "\n**Gender**: " + gender(uinfoUser, "Male", "Female", "Other", "*not set*") + "\n**Birthday**: " + birthday + "\n**Location**: " + setloc
+                let botInfo = "**Name**: " + name(uinfoUser) + "\n**Pronouns**: " + pronouns(uinfoUser, "*not set*") + "\n**Birthday**: " + birthday + "\n**Location**: " + setloc
                 let uinfoMember;
                 message.guild.members.cache.each(member => {
                     if(uinfoUser.id == member.id) {
@@ -132,7 +141,7 @@ var commands = {
                 } else {
                     setloc = "*not set*"
                 }
-                let botInfo = "**Name**: " + name(uinfoUser) + "\n**Gender**: " + gender(uinfoUser, "Male", "Female", "Other", "*not set*") + "\n**Birthday**: " + birthday + "\n**Location**: " + setloc
+                let botInfo = "**Name**: " + name(uinfoUser) + "\n**Pronouns**: " + pronouns(uinfoUser, "*not set*") + "\n**Birthday**: " + birthday + "\n**Location**: " + setloc
                 let uinfoMember;
                 interaction.guild.members.cache.each(member => {
                     if(uinfoUser.id == member.id) {

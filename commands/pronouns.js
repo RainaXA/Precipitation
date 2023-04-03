@@ -25,7 +25,7 @@ var command = {
     name: "pronouns",
     desc: "Sets the preferred pronouns for the bot to refer to you as.",
     args: {
-      "gender": {
+      "pronouns": {
         "desc": "What pronouns for the bot to refer to you as",
         "required": false
       }
@@ -107,8 +107,10 @@ module.exports = command;
 module.exports.exports = {};
 module.exports.exports.pronouns = function(user, naMessage, returnPronoun) { // 0 = subject, 1 = object, 2 = possessive, 3 = reflexive (she/her/hers/herself)
   if(!config.users[user.id].pronouns) return naMessage;
+  if(!returnPronoun) return config.users[user.id].pronouns; // return full list if no desired returnPronoun
   return config.users[user.id].pronouns.split("/")[returnPronoun];
 };
+
 module.exports.data = new SlashCommandBuilder().setName(command.name).setDescription(command.desc).addStringOption(option =>
   option.setName('subject')
   .setDescription('Which subject pronoun (examples: he, she, they)')
