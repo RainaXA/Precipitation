@@ -62,7 +62,12 @@ var commands = {
     "uinfo": {
         name: "uinfo",
         desc: "Get information on a particular user.",
-        args: "(user)",
+        args: {
+            "user": {
+                "desc": "Which user to get info on",
+                "required": false
+            }
+        },
         parameters: "",
         execute: {
             discord: function(message, args) {
@@ -150,7 +155,7 @@ var commands = {
                 return interaction.reply({embeds: [uinfo]})
             }
         },
-        ver: "3.0.0",
+        ver: "3.1.0",
         cat: "Moderation",
         prereqs: {
             dm: true,
@@ -163,7 +168,7 @@ var commands = {
     "sinfo": {
         name: "sinfo",
         desc: "Get information on the server.",
-        args: "",
+        args: {},
         parameters: "",
         execute: {
             discord: function(message, args) {
@@ -187,7 +192,7 @@ var commands = {
                 await interaction.reply({embeds: [embed]})
             }
         },
-        ver: "3.0.0",
+        ver: "3.1.0",
         cat: "General",
         prereqs: {
             dm: false,
