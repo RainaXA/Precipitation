@@ -16,15 +16,15 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.  
 \* ========================================================================= */
 
-client.on('reconnecting', function() {
-    log("Precipitation is currently disconnected and attempting to reconnect.", logging.warning, "CONNECTION");
+client.on('shardReconnecting', function() { // these have never worked so I want to see if they'll work now
+    log("Precipitation is currently disconnected and attempting to reconnect.", logging.warn, "connection");
 });
 
-client.on('disconnect', function() {
-    log("\nPrecipitation has disconnected and will not reconnect.", logging.error, "CONNECTION");
-    log("You'll need to restart Precipitation to reconnect.", logging.output, "CONNECTION")
+client.on('shardDisconnect', function() {
+    log("\nPrecipitation has disconnected and will not reconnect.", logging.error, "connection");
+    log("You'll need to restart Precipitation to reconnect.", logging.output, "connection")
 });
 
-client.on('resume', function(replayed) {
-  log("Precipitation has reconnected - " + replayed + " events were replayed.", logging.success, "CONNECTION")
+client.on('shardResume', function(replayed) {
+  log("Precipitation has reconnected - " + replayed + " events were replayed.", logging.success, "connection")
 })
