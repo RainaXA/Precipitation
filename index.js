@@ -201,6 +201,10 @@ global.getTextInput = function(text, list, type) { // true = don't check caps
     for(let i = 0; i < list.length; i++) {
       if(text == list[i]) return true;
     }
+  } else if (type == 3) { // remove spaces, case-insensitive
+    for(let i = 0; i < list.length; i++) {
+      if(text.replace(/\s+/g, '').toLowerCase().includes(list[i])) return true;
+    }
   }
   return false;
 }
