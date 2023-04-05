@@ -109,8 +109,9 @@ client.on('interactionCreate', interaction => { // receive button input from lin
 
 module.exports = command;
 module.exports.exports = {};
-module.exports.exports.gender = function(user, mMessage, fMessage, oMessage, naMessage) { // this function will be deprecated in 4.0
-  switch(config.users[user.id].gender) {                                                  // it remains usable to maintain backwards compatibility
+module.exports.exports.gender = function(user, mMessage, fMessage, oMessage, naMessage) {   // this function will be deprecated in 4.0
+  log("gender() is a deprecated function, please use pronouns()", logging.warn, "gender");  // it remains usable to maintain backwards compatibility
+  switch(config.users[user.id].gender) {                                                  
     case "male":
       return mMessage;
     case "female":

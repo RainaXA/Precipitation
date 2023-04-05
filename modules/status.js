@@ -70,7 +70,11 @@ function setStatus() {
       if(seconds == 25 || seconds == 55) { // last 5 seconds update to next phase instead of going to 30 seconds
         status.phase = 0;
       }
-      setTimeout(setStatus, 5000)
+      if(seconds == 1 || seconds == 31) {
+        setTimeout(setStatus, 4000) // I DON'T FEEL LIKE A PROPER FIX LMAO
+      } else {
+        setTimeout(setStatus, 5000)
+      }
       break;
   }
   client.user.setActivity(status.content);

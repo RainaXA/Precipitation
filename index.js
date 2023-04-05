@@ -262,18 +262,19 @@ fs.readdir("./modules", function(error, files) {
     } catch (err) {
       log("Sorry, but a module had an error: " + err.stack, logging.error, 3)
     }
-    log("Loaded " + counter + " modules.", logging.success, "modules")
+    log("loaded " + counter + " modules.", logging.success, "modules")
   }
 })
 
 client.on('ready', async() => {
-  log('Precipitation has started!', logging.success, "READY")
-  log("Running on version " + host.version.internal, logging.success, "READY")
+  log('successfully started precipitation', logging.success, "ready")
+  log("running on version " + host.version.internal, logging.success, "ready")
+  log("running in " + client.guilds.cache.size + " guilds, with " + client.users.cache.size + " total users", logging.info, "ready");
   setTimeout(saveConfiguration, 120000)
   client.guilds.cache.each(guild => {
     if(!config.guilds[guild.id]) {
       config.guilds[guild.id] = {};
-      log("Initialized " + guild.name + " as guild.", logging.info, "READY")
+      log("Initialized " + guild.name + " as guild.", logging.info, "ready")
     }
   })
   const rest = new REST({
