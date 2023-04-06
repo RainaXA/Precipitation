@@ -23,6 +23,7 @@ let settingButton = {};
 let currentMessage = {};
 var command = {
     name: "pronouns",
+    alias: ["gender"],
     desc: "Sets the preferred pronouns for the bot to refer to you as.",
     args: {
       "pronouns": {
@@ -103,7 +104,7 @@ var command = {
     },
     unloadable: true
 }
-
+sw
 client.on('interactionCreate', interaction => {
 	if (!interaction.isButton()) return;
   if (settingButton[interaction.message.id] != interaction.user.id) return;
