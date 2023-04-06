@@ -70,6 +70,7 @@ try {
 var commands = {
     "uinfo": {
         name: "uinfo",
+        alias: ["userinfo"],
         desc: "Get information on a particular user.",
         args: {
             "user": {
@@ -176,6 +177,7 @@ var commands = {
     },
     "sinfo": {
         name: "sinfo",
+        alias: ["serverinfo"],
         desc: "Get information on the server.",
         args: {},
         parameters: "",
@@ -201,7 +203,7 @@ var commands = {
                 await interaction.reply({embeds: [embed]})
             }
         },
-        ver: "3.1.0",
+        ver: "3.2.0",
         cat: "General",
         prereqs: {
             dm: false,

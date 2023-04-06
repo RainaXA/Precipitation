@@ -21,6 +21,7 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 
 var command = {
     name: "rm",
+    alias: ["purge"],
     desc: "Bulk delete messages.",
     args: {
         "number": {
@@ -75,7 +76,7 @@ var command = {
             log("testing with the new handler!", logging.output, "PING")
         }
     },
-    ver: "3.1.0",
+    ver: "3.2.0",
     cat: "Moderation",
     prereqs: {
         dm: false,

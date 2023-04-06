@@ -134,6 +134,7 @@ fs.readdir("./modules/deduction", function(error, files) {
 
 var command = {
     name: "deduction",
+    alias: ["sd", "deduct"],
     desc: "Manage Deduction games.",
     args: {
       "action": {
@@ -416,7 +417,7 @@ var command = {
               }
         }
     },
-    ver: "3.1.0",
+    ver: "3.2.0",
     cat: "Fun",
     prereqs: {
         dm: false,

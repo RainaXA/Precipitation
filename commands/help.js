@@ -110,6 +110,7 @@ function interpretPermission(permission) {
 
 var command = {
     name: "help",
+    alias: [],
     desc: "Gets a list of commands, or shows information about a command.",
     args: {
         "command": {
@@ -249,7 +250,7 @@ var command = {
             }
         }
     },
-    ver: "3.1.0",
+    ver: "3.2.0",
     cat: "General",
     prereqs: {
         dm: true,

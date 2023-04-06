@@ -18,6 +18,7 @@
 
 var command = {
     name: "list",
+    alias: [],
     desc: "Pick from a list of items.",
     args: {
         "action": {
@@ -63,7 +64,7 @@ var command = {
             }
         }
     },
-    ver: "3.1.0",
+    ver: "3.2.0",
     cat: "Miscellaneous",
     prereqs: {
         dm: true,

@@ -275,6 +275,7 @@ function utcOffsetFromTimezone(location) {
 var commands = {
     "time": {
         name: "time",
+        alias: [],
         desc: "See the time of a user.",
         args: {
             "user": {
@@ -512,7 +513,7 @@ var commands = {
                 }
             }
         },
-        ver: "3.1.0",
+        ver: "3.2.0",
         cat: "Time",
         prereqs: {
             dm: true,
@@ -524,6 +525,7 @@ var commands = {
     },
     "settime": {
         name: "settime",
+        alias: [],
         desc: "Set your timezone.",
         args: {
             "timezone": {
@@ -568,7 +570,7 @@ var commands = {
                 }
             }
         },
-        ver: "3.1.0",
+        ver: "3.2.0",
         cat: "Time",
         prereqs: {
             dm: true,
@@ -580,6 +582,7 @@ var commands = {
     },
     "timeformat": {
         name: "timeformat",
+        alias: [],
         desc: "Set preferences on how to display time.",
         args: {
             "setting": {
@@ -682,7 +685,7 @@ var commands = {
                 message.channel.send({embeds: [embed]})
             }
         },
-        ver: "3.1.0",
+        ver: "3.2.0",
         cat: "Time",
         prereqs: {
             dm: true,

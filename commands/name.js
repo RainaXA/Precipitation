@@ -20,6 +20,7 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 
 var command = {
     name: "name",
+    alias: [],
     desc: "Sets the name for the bot to refer to you as.",
     args: {
         "name": {
@@ -54,7 +55,7 @@ var command = {
             return interaction.reply({ content: "Sure, I'll refer to you by \"" + string + "\"." })
         }
     },
-    ver: "3.1.0",
+    ver: "3.2.0",
     cat: "Personalization",
     prereqs: {
         dm: true,

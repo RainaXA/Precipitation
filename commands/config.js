@@ -43,6 +43,7 @@ try {
 
 var command = {
     name: "config",
+    alias: [],
     desc: "Changes server-specific properties.",
     args: {
       "setting": {
@@ -116,7 +117,7 @@ var command = {
             }
         }
     },
-    ver: "3.1.0",
+    ver: "3.2.0",
     cat: "General",
     prereqs: {
         dm: false,

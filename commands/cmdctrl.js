@@ -23,6 +23,7 @@ const fs = require('fs');
 var commands = {
     "load": {
         name: "load",
+        alias: [],
         desc: "Load a command into memory.",
         args: {
             "option": {
@@ -60,7 +61,7 @@ var commands = {
                 }
             }
         },
-        ver: "3.1.0",
+        ver: "3.2.0",
         cat: "Owner",
         prereqs: {
             dm: true,
@@ -72,6 +73,7 @@ var commands = {
     },
     "unload": {
         name: "unload",
+        alias: [],
         desc: "Unloads a command from memory.",
         args: {
             "command": {
@@ -109,7 +111,7 @@ var commands = {
                 
             }
         },
-        ver: "3.1.0",
+        ver: "3.2.0",
         cat: "Owner",
         prereqs: {
             dm: true,
@@ -121,6 +123,7 @@ var commands = {
     },
     "enable": {
         name: "enable",
+        alias: [],
         desc: "Allows a command to be executed in a server.",
         args: {
             "command": {
@@ -142,7 +145,7 @@ var commands = {
                 message.channel.send("Okay, the command `" + args.toLowerCase() + "` is now enabled in this server.");
             }
         },
-        ver: "3.1.0",
+        ver: "3.2.0",
         cat: "Commands",
         prereqs: {
             dm: false,
@@ -154,6 +157,7 @@ var commands = {
     },
     "disable": {
         name: "disable",
+        alias: [],
         desc: "Disallows execution of a specified command in the server.",
         args: {
             "command": {
@@ -187,7 +191,7 @@ var commands = {
                 }
             }
         },
-        ver: "3.1.0",
+        ver: "3.2.0",
         cat: "Commands",
         prereqs: {
             dm: false,

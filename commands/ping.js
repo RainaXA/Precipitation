@@ -30,6 +30,7 @@ try {
 
 var command = {
     name: "ping",
+    alias: [],
     desc: "Gets the current latency of the bot.",
     args: {},
     parameters: "",
@@ -52,7 +53,7 @@ var command = {
             log("testing with the new handler!", logging.output, "PING")
         }
     },
-    ver: "3.1.0",
+    ver: "3.2.0",
     cat: "General",
     prereqs: {
         dm: true,

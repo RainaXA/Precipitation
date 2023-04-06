@@ -58,6 +58,23 @@ global.loadCommands = function() {
 }
 loadCommands();
 
+function executeCommand(message, args, parameter, cmd) {
+  if(!cmd.help) {
+    if(message.guild) {
+      for(permission of cmd.prereqs.bot) {
+        if(!message.guild.me.permissions.has(permission)) return message.channel.send("I do not have permission to run this command.")
+      }
+      for(permission of cmd.prereqs.user) {
+        if(!message.member.permissions.has(permission)) return message.channel.send("You do not have permission to run this command.")
+      }
+    }
+    if(cmd.prereqs.owner && message.author.id != host.id["owner"]) return message.channel.send("Only the owner may use this command.")
+    if(!cmd.execute.discord) return message.channel.send("This command cannot be executed as a Discord command.")
+    if(!cmd.prereqs.dm && !message.guild) return message.channel.send("This command cannot be executed in a direct message.")
+    return cmd.execute.discord(message, args, parameter)
+  }
+}
+
 function processCommand(message) { // used in editing messages + normal messages
   var fCommand = message.content.slice(messagePrefix.length).split(" ")
   let counter = 0;
@@ -79,19 +96,16 @@ function processCommand(message) { // used in editing messages + normal messages
   try {
     if(cmd) {
       validCommand = true;
-      if(!cmd.help) {
-        if(message.guild) {
-          for(permission of cmd.prereqs.bot) {
-            if(!message.guild.me.permissions.has(permission)) return message.channel.send("I do not have permission to run this command.")
-          }
-          for(permission of cmd.prereqs.user) {
-            if(!message.member.permissions.has(permission)) return message.channel.send("You do not have permission to run this command.")
-          }
+      executeCommand(message, args, parameter, cmd);
+    } else {
+      client.commands.forEach(item => {
+        if(item.alias) {
+          if(getTextInput(command, item.alias, 0)) cmd = item;
         }
-        if(cmd.prereqs.owner && message.author.id != host.id["owner"]) return message.channel.send("Only the owner may use this command.")
-        if(!cmd.execute.discord) return message.channel.send("This command cannot be executed as a Discord command.")
-        if(!cmd.prereqs.dm && !message.guild) return message.channel.send("This command cannot be executed in a direct message.")
-        return cmd.execute.discord(message, args, parameter)
+      })
+      if(cmd) {
+        validCommand = true;
+        executeCommand(message, args, parameter, cmd);
       }
     }
     if(!validCommand) message.channel.send("Sorry, but it appears this command is unknown.");

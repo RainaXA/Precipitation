@@ -38,6 +38,7 @@ client.on('ready', async() => {
 
 var command = {
     name: "about",
+    alias: [],
     desc: "Gives information on the bot, as well as credits.",
     args: {},
     parameters: "",
@@ -52,7 +53,7 @@ var command = {
             log("Precipitation " + host.version.external + " - a discord bot brought upon us", logging.output, "about")
         }
     },
-    ver: "3.1.0",
+    ver: "3.2.0",
     cat: "General",
     prereqs: {
         dm: true,

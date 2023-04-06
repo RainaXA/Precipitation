@@ -50,6 +50,7 @@ try {
 var commands = {
     "warn": {
         name: "warn",
+        alias: [],
         desc: "Warns a user.",
         args: {
             "user": {
@@ -105,6 +106,7 @@ var commands = {
     },
     "lswarn": {
         name: "lswarn",
+        alias: [],
         desc: "See your current warnings, or see someone else's.",
         args: {
             "user": {
@@ -179,7 +181,7 @@ var commands = {
                 return interaction.reply({embeds: [warningEmbed]})
             }
         },
-        ver: "3.1.0",
+        ver: "3.2.0",
         cat: "Moderation",
         prereqs: {
             dm: false,
@@ -191,6 +193,7 @@ var commands = {
     },
     "rmwarn": {
         name: "rmwarn",
+        alias: [],
         desc: "Remove a warning from a user.",
         args: {
             "warningid": {
@@ -241,7 +244,7 @@ var commands = {
                 return interaction.reply({ content: "Removing warning #" + int + " from " + user.username + " (" + name(user) + "). Are you sure?" })
             }
         },
-        ver: "3.1.0",
+        ver: "3.2.0",
         cat: "Moderation",
         prereqs: {
             dm: false,

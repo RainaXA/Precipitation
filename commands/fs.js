@@ -48,8 +48,9 @@ client.on('ready', async() => {
 var commands = {
     "vd": {
         name: "vd",
+        alias: [],
         desc: "View the current directory.",
-        args: "",
+        args: {},
         parameters: "",
         execute: {
             console: function(args) {
@@ -69,7 +70,7 @@ var commands = {
                 })
             }
         },
-        ver: "3.0.0",
+        ver: "3.2.0",
         cat: "File System",
         prereqs: {
             dm: true,
@@ -81,6 +82,7 @@ var commands = {
     },
     "shutdown": {
         name: "shutdown",
+        alias: [],
         desc: "Shuts down the bot.",
         args: {},
         parameters: "[--disregard / --ignore-config]",
@@ -141,7 +143,7 @@ var commands = {
                   })
             }
         },
-        ver: "3.1.0",
+        ver: "3.2.0",
         cat: "Owner",
         prereqs: {
             dm: true,
