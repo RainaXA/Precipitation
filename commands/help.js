@@ -178,15 +178,22 @@ var command = {
                     botList = botList + interpretPermission(permission) + "\n"
                 }
                 if(botList === "") botList = "*None.*"
+                let aliasList = "";
+                for(alias of currentCmd.alias) {
+                    aliasList = aliasList + alias + "\n";
+                }
+                if(aliasList === "") aliasList = "*None.*"
                 commandHelpEmbed.addFields(
                     { name: "Description", value: currentCmd.desc, inline: true },
                     { name: "Command Version", value: currentCmd.ver, inline: false },
                     { name: "User Permissions", value: permList, inline: true },
                     { name: "Bot Permissions", value: botList, inline: true },
+                    { name: "Aliases", value: aliasList, inline: true},
                     { name: "Syntax", value: host.prefix + cmdHelp + " " + cmdArgs + currentCmd.parameters }
                 )
                 let cmds = []; // cannot be over 25 commands - KEEP IN MIND
                 client.commands.each(cmd => {
+                    if(!cmd.execute) return;
                     if(cmd.execute.discord && !cmd.prereqs.owner) cmds.push({
                         label: cmd.name,
                         description: cmd.desc,

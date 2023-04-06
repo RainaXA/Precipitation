@@ -104,7 +104,7 @@ var command = {
     },
     unloadable: true
 }
-sw
+
 client.on('interactionCreate', interaction => {
 	if (!interaction.isButton()) return;
   if (settingButton[interaction.message.id] != interaction.user.id) return;
