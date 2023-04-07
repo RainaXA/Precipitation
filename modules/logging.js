@@ -61,6 +61,7 @@ client.on('messageUpdate', function(oldMessage, newMessage) {
 
 client.on('guildMemberAdd', async function(member) {
 	if(!config.guilds[member.guild.id].settings) return;
+	if(!config.guilds[member.guild.id].settings.logging) return;
   	if(!config.guilds[member.guild.id].settings.logging.members) return;
 	let infoDisplay = new MessageEmbed()
 	.setAuthor({name: member.user.tag, iconURL: member.user.displayAvatarURL})
@@ -71,6 +72,7 @@ client.on('guildMemberAdd', async function(member) {
 
 client.on('guildMemberRemove', async function(member) {
 	if(!config.guilds[member.guild.id].settings) return;
+	if(!config.guilds[member.guild.id].settings.logging) return;
   	if(!config.guilds[member.guild.id].settings.logging.members) return;
 	member.guild.channels.cache.get(config.guilds[member.guild.id].settings.logging.members).send(":door: <@" + member.user.id + "> [" + member.user.tag + "]")
 });
