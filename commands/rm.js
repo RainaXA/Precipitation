@@ -71,9 +71,6 @@ var command = {
             } catch(err) {
                 interaction.reply({ content: "Due to a fatal error, I couldn't delete any messages.", ephemeral: true })
             }
-        },
-        console: function() {
-            log("testing with the new handler!", logging.output, "PING")
         }
     },
     ver: "3.2.0",

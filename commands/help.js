@@ -179,10 +179,14 @@ var command = {
                 }
                 if(botList === "") botList = "*None.*"
                 let aliasList = "";
-                for(alias of currentCmd.alias) {
-                    aliasList = aliasList + alias + "\n";
+                if(currentCmd.alias) {
+                    for(alias of currentCmd.alias) {
+                        aliasList = aliasList + alias + "\n";
+                    }
+                    if(aliasList === "") aliasList = "*None.*"
+                } else {
+                    if(aliasList === "") aliasList = "This command is not updated to handle command aliases yet."
                 }
-                if(aliasList === "") aliasList = "*None.*"
                 commandHelpEmbed.addFields(
                     { name: "Description", value: currentCmd.desc, inline: true },
                     { name: "Command Version", value: currentCmd.ver, inline: false },
@@ -221,6 +225,7 @@ var command = {
                     if(message.guild) {
                         if(getTextInput(cmd.name, config.guilds[message.guild.id].disabled, 2)) return;
                     }
+                    if(!cmd.execute.discord) return; // don't show commands that can't be executed in discord
                     chelp = cmd.cat 
                     cname = cmd.name
                     if(!helpp[chelp]) {
@@ -230,8 +235,8 @@ var command = {
                     }
                 })
                 for(category in helpp) {
-                    if(category != "Secrets") helpEmbed.addField(category, helpp[category], true)
-                    if(category == "Secrets" && parameter == "easter-eggs") helpEmbed.addField(category, helpp[category], true) // only add Secrets if parameter is specified
+                    if(category != "Secrets") helpEmbed.addFields({ name: category, value: helpp[category], inline: true })
+                    if(category == "Secrets" && parameter == "easter-eggs") helpEmbed.addField({ name: category, value: helpp[category], inline: true}) // only add Secrets if parameter is specified
                 }
                 helpEmbed.setColor(host.color)
                 helpEmbed.setFooter({ text: "Precipitation " + host.version.external + " " + host.version.name, iconURL: client.user.displayAvatarURL() })
@@ -254,6 +259,23 @@ var command = {
                     settingButton[m.id] = message.author.id;
                     currentMessage[message.author.id] = m;
                 })
+            }
+        },
+        console: function (args) {
+            let cmdList = {};
+            client.commands.each(cmd => {
+                if(!cmd.execute.console) return;
+                let chelp = cmd.cat 
+                let cname = cmd.name
+                if(!cmdList[chelp]) {
+                    cmdList[chelp] = cname;
+                } else {
+                    cmdList[chelp] = cmdList[chelp] + ", " + cname
+                }
+            })
+            log("here is a list of all commands that can be executed in the console\n", logging.output, "help")
+            for(category in cmdList) {
+                log(cmdList[category], logging.output, category.toLowerCase())
             }
         }
     },

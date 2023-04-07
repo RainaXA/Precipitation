@@ -80,6 +80,32 @@ var commands = {
         },
         unloadable: false
     },
+    "cd": {
+        name: "cd",
+        alias: [],
+        desc: "Change the current directory.",
+        args: {
+            "directory": {
+                "desc": "The new directory to switch to",
+                "required": true
+            }
+        },
+        parameters: "",
+        execute: {
+            console: function(args) {
+                log("This command isn't finished yet - expect it in 3.2 or 3.3. See you soon!", logging.info, "fs")
+            }
+        },
+        ver: "3.2.0",
+        cat: "File System",
+        prereqs: {
+            dm: true,
+            owner: true,
+            user: [],
+            bot: []
+        },
+        unloadable: false
+    },
     "shutdown": {
         name: "shutdown",
         alias: [],
