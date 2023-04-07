@@ -1,5 +1,9 @@
 {
   "numerical": {
+    "3.1.1": {
+      "name": "Precipitation 3.1.1 Toyger",
+      "changes": "DM commands now work again\nSwap! now functions correctly once someone has been placed on trial\nNo more errors when used in guilds without logging settings"
+    },
     "3.1": {
       "name": "Precipitation 3.1 Toyger",
       "changes": "States & Cities (using a database)\nArgumentative help\nDrop-down menu in `help`\n`help` now shows the command version and required permissions (for user and bot)\nNames can no longer be more than one line\nBirthdays don't have to have a year anymore\nEnabling and disabling commands within a server is now possible\nAll embeds show Precipitation's icon again (& more fixes!)\n\nViewing the directory of the `index.js` file is now possible within Precipitation's console\nThe top bar now changes color based on `host.color`\n`shutdown` now has an associated Discord command\n`load` and `unload` are now implemented as Discord commands"
@@ -81,6 +85,7 @@
     "toyger": {
       "name": "Precipitation 3.1 Toyger",
       "changes": {
+        "3.1.1": "DM commands now work again\nSwap! now functions correctly once someone has been placed on trial\nNo more errors when used in guilds without logging settings",
         "3.1.0": "States & Cities (using a database)\nArgumentative help\nDrop-down menu in `help`\n`help` now shows the command version and required permissions (for user and bot)\nNames can no longer be more than one line\nBirthdays don't have to have a year anymore\nEnabling and disabling commands within a server is now possible\nAll embeds show Precipitation's icon again (& more fixes!)\n\nViewing the directory of the `index.js` file is now possible within Precipitation's console\nThe top bar now changes color based on `host.color`\n`shutdown` now has an associated Discord command\n`load` and `unload` are now implemented as Discord commands"
       }
     },
