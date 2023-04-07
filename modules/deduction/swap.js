@@ -328,7 +328,7 @@ client.on('messageCreate', function(message) {
           currentGame.trial = user;
           currentGame.trials = currentGame.trials - 1;
           sendMessage("**The majority have elected to put " + user.name + " on trial.** You have forty-five seconds to provide a defense for your actions.", currentGame.viewers)
-          transitionTrial(currentlyPlaying[message.author.id].toString()); // begin the trial!
+          transitionTrial(String(currentlyPlaying[message.author.id].id)); // begin the trial!
         }
       } else {
         break;
