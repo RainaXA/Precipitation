@@ -67,7 +67,9 @@ function processCommand(message) { // used in editing messages + normal messages
   }
   var command = fCommand[0]
   if(command == undefined) return message.channel.send("Sorry, but it appears this command is unknown.") // crash otherwise
-  if(getTextInput(command.toLowerCase(), config.guilds[message.guild.id].disabled, 2)) return message.channel.send("This command is disabled in this server.")
+  if(message.guild) {
+    if(getTextInput(command.toLowerCase(), config.guilds[message.guild.id].disabled, 2)) return message.channel.send("This command is disabled in this server.")
+  }
   var args = message.content.slice(messagePrefix.length + command.length + 1 + counter)
   var parameters = args.split("--")
   var parameter = parameters[1]
