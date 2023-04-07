@@ -43,7 +43,7 @@ client.on('messageDelete', async function(message) {
 client.on('messageUpdate', function(oldMessage, newMessage) {
 	if(!oldMessage.guild) return;
 	if(!config.guilds[oldMessage.guild.id].settings) return;
-	if(!config.guilds[message.guild.id].settings.logging) return;
+	if(!config.guilds[oldMessage.guild.id].settings.logging) return;
   	if(!config.guilds[oldMessage.guild.id].settings.logging.messages) return;
 	if(oldMessage.content == newMessage.content) return; // if they're the exact same, don't show it!
 	if(oldMessage.author.id == client.user.id) return;
