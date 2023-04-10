@@ -158,6 +158,9 @@ var command = {
                     if(mode) {
                       setMode = mode.help.name
                       listedGame = mode.help.game
+                    } else {
+                      setMode = "Classic";
+                      listedGame = "Fraud";
                     }
                   } else {
                     setMode = "Classic";
