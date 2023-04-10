@@ -1,5 +1,5 @@
 /* ========================================================================= *\
-    Connection: simple non-functional module for Precipitation lolol
+    Connection: simple module used for logging connection states
     Copyright (C) 2023 Raina
 
     This program is free software: you can redistribute it and/or modify
