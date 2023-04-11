@@ -21,15 +21,21 @@ const fs = require('fs');
 var commands = {
     "eval": {
         name: "eval",
+        alias: [],
         desc: "Run a line of code.",
-        args: "(code)",
+        args: {
+            "code": {
+                "desc": "The code to execute",
+                "required": true
+            }
+        },
         parameters: "",
         execute: {
             console: function(args) {
                 eval(args)
             }
         },
-        ver: "3.0.0",
+        ver: "3.2.0",
         cat: "Owner",
         prereqs: {
             dm: true,
