@@ -16,8 +16,11 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.  
 \* ========================================================================= */
 
-const { Permissions, MessageEmbed } = require('discord.js')
+const { Permissions, MessageEmbed, MessageActionRow, MessageSelectMenu, TextInputComponent } = require('discord.js')
 //const { SlashCommandBuilder } = require('@discordjs/builders');
+
+let settingButton = {};
+let currentMessage = {};
 
 client.on('ready', async() => { // init guilds on start
     client.guilds.cache.each(guild => {
@@ -115,7 +118,23 @@ var command = {
                   )
                   .setColor(host.color)
                   .setFooter({ text: "Precipitation " + host.version.external, iconURL: client.user.displayAvatarURL() })
-                  return message.channel.send({embeds: [configuration]})
+                  let row = new MessageActionRow()
+                  .addComponents(
+                      new MessageSelectMenu() 
+                          .setCustomId('select')
+                          .setPlaceholder('Select a server option to change...')
+                          .addOptions([
+                            { label: "Prefix", description: "Changes the prefix that Precipitation listens for in this server.", value: "Prefix" },
+                            { label: "Slur Filter", description: "Changes whether or not Precipitation will delete messages containing slurs.", value: "Slur Filter" },
+                            { label: "Message Logging", description: "Changes where Precipitation logs edited and deleted messages.", value: "Message Logging" },
+                            { label: "Member Logging", description: "Changes where Precipitation logs arriving and departing members.", value: "Member Logging" },
+                            { label: "I HATE UPDOG", description: "Changes whether or not Precipitation gets upset when anyone says updog.", value: "I HATE UPDOG" }
+                          ])
+                  );
+                  return message.channel.send({embeds: [configuration], components: [row]}).then(m => {
+                    settingButton[m.id] = message.author.id;
+                    currentMessage[message.author.id] = m;
+                })
             }
         }
     },
@@ -152,3 +171,45 @@ client.on('messageCreate', message => {
     if(message.author.id != client.user.id) message.channel.send("<@" + message.author.id + ">, https://cdn.discordapp.com/attachments/626264483513499649/1084593676317106247/IMG_4632.jpg")
   }
 })
+
+client.on('interactionCreate', interaction => { 
+  if (!interaction.isSelectMenu()) return;
+  if (settingButton[interaction.message.id] != interaction.user.id) return;
+  interaction.update({
+      components: interaction.components
+  }).then(m => {
+      let option = interaction.values[0];
+      let value = "Undefined Value";
+      switch(option) {
+        case "Prefix":
+          value = config.guilds[interaction.guild.id].prefix;
+          break;
+        case "Slur Filter":
+          value = String(config.guilds[interaction.guild.id].settings.filter).replace("false", "Disabled").replace("true", "Enabled").replace("undefined", "Disabled");
+          break;
+        case "Message Logging":
+          value = String(config.guilds[interaction.guild.id].settings.logging.messages).replace("null", "Disabled").replace("undefined", "Disabled");
+          break;
+        case "Member Logging":
+          value = String(config.guilds[interaction.guild.id].settings.logging.members).replace("null", "Disabled").replace("undefined", "Disabled");
+          break;
+        case "I HATE UPDOG":
+          value = String(config.guilds[interaction.guild.id].settings.updog).replace("false", "Disabled").replace("undefined", "Disabled").replace("true", "Enabled");
+          break;
+      }
+      let configuration = new MessageEmbed()
+      .setTitle("Server Configuration || " + interaction.guild.name + " >> " + option)
+      .addFields({ name: "Current Value", value: value })
+      .setColor(host.color)
+      .setFooter({ text: "Precipitation " + host.version.external, iconURL: client.user.displayAvatarURL() })
+      /*let rowa = new MessageActionRow() produces fucking stupid error
+        .addComponents(
+          new TextInputComponent() 
+            .setCustomId('newOption')
+            .setPlaceholder('Hmm')
+            .setLabel("How's it looking?")
+            .setStyle("SHORT")
+        )*/
+        return currentMessage[interaction.user.id].edit({embeds: [configuration], /*components: [rowa]*/})
+  });
+});
