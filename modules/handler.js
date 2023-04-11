@@ -68,7 +68,7 @@ function executeCommand(message, args, parameter, cmd) {
   if(!cmd.help) {
     if(message.guild) {
       for(permission of cmd.prereqs.bot) {
-        if(!message.guild.me.permissions.has(permission)) return message.channel.send("I do not have permission to run this command.")
+        if(!message.guild.members.me.permissions.has(permission)) return message.channel.send("I do not have permission to run this command.")
       }
       for(permission of cmd.prereqs.user) {
         if(!message.member.permissions.has(permission)) return message.channel.send("You do not have permission to run this command.")
@@ -160,7 +160,7 @@ client.on('interactionCreate', async interaction => {
   if(!command.prereqs.dm && !interaction.guild) return interaction.reply({ content: "Sorry, but this command is not permitted in a direct message.", ephemeral: true })
   if(interaction.guild) {
     for(permission of command.prereqs.bot) {
-      if(!interaction.guild.me.permissions.has(permission)) return interaction.reply({ content: "I do not have permission to run this command."})
+      if(!interaction.guild.members.me.permissions.has(permission)) return interaction.reply({ content: "I do not have permission to run this command."})
     }
     for(permission of command.prereqs.user) {
       if(!interaction.member.permissions.has(permission)) return interaction.reply({ content: "You do not have permission to run this command."})

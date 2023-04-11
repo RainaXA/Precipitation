@@ -64,56 +64,58 @@ var command = {
             if(!cArg[1] && cArg[0]) return message.channel.send("Please add another argument.")
             switch(cArg[0].toLowerCase()) {
                 case "prefix":
-                if(getTextInput(cArg[1], host.slurs)) return message.channel.send("Sorry, but the chosen prefix contains offensive language and will not be used by Precipitation.")
-                config.guilds[message.guild.id].prefix = cArg[1].toLowerCase()
-                return message.channel.send("Okay, I've set your server prefix to `" + cArg[1].toLowerCase() + "`.");
+                  if(getTextInput(cArg[1], host.slurs)) return message.channel.send("Sorry, but the chosen prefix contains offensive language and will not be used by Precipitation.")
+                  config.guilds[message.guild.id].prefix = cArg[1].toLowerCase()
+                  return message.channel.send("Okay, I've set your server prefix to `" + cArg[1].toLowerCase() + "`.");
                 case "filter":
-                if(cArg[1].toLowerCase() == "true") {
-                    config.guilds[message.guild.id].settings.filter = true;
-                    return message.channel.send("Okay, I'm setting your filter to `true`.");
-                } else {
-                    config.guilds[message.guild.id].settings.filter = false;
-                    return message.channel.send("Okay, I'm setting your filter to `false`.");
-                }
+                  if(cArg[1].toLowerCase() == "true") {
+                      config.guilds[message.guild.id].settings.filter = true;
+                      return message.channel.send("Okay, I'm setting your filter to `true`.");
+                  } else {
+                      config.guilds[message.guild.id].settings.filter = false;
+                      return message.channel.send("Okay, I'm setting your filter to `false`.");
+                  }
                 case "mlog":
-                if(cArg[1].toLowerCase() == "none") {
-                    config.guilds[message.guild.id].settings.logging.messages = null
-                    return message.channel.send("Okay, you will no longer have messages logged.")
-                } else {
-                    if(message.guild.channels.cache.get(cArg[1]) === undefined) return message.channel.send("This channel does not exist. Please use `none` to disable the feature.")
-                    config.guilds[message.guild.id].settings.logging.messages = cArg[1]
-                    return message.channel.send("Okay, I will log messages in " + message.guild.channels.cache.get(cArg[1]).name + ".")
-                }
+                  if(cArg[1].toLowerCase() == "none") {
+                      config.guilds[message.guild.id].settings.logging.messages = null
+                      return message.channel.send("Okay, you will no longer have messages logged.")
+                  } else {
+                      if(message.guild.channels.cache.get(cArg[1]) === undefined) return message.channel.send("This channel does not exist. Please use `none` to disable the feature.")
+                      config.guilds[message.guild.id].settings.logging.messages = cArg[1]
+                      return message.channel.send("Okay, I will log messages in " + message.guild.channels.cache.get(cArg[1]).name + ".")
+                  }
                 case "mblog":
-                if(cArg[1].toLowerCase() == "none") {
-                    config.guilds[message.guild.id].settings.logging.members = null
-                    return message.channel.send("Okay, you will no longer have members logged.")
-                } else {
-                    if(message.guild.channels.cache.get(cArg[1]) === undefined) return message.channel.send("This channel does not exist. Please use `none` to disable the feature.")
-                    config.guilds[message.guild.id].settings.logging.members = cArg[1]
-                    return message.channel.send("Okay, I will log members in " + message.guild.channels.cache.get(cArg[1]).name + ".")
-                }
+                  if(cArg[1].toLowerCase() == "none") {
+                      config.guilds[message.guild.id].settings.logging.members = null
+                      return message.channel.send("Okay, you will no longer have members logged.")
+                  } else {
+                      if(message.guild.channels.cache.get(cArg[1]) === undefined) return message.channel.send("This channel does not exist. Please use `none` to disable the feature.")
+                      config.guilds[message.guild.id].settings.logging.members = cArg[1]
+                      return message.channel.send("Okay, I will log members in " + message.guild.channels.cache.get(cArg[1]).name + ".")
+                  }
                 case "updog":
-                if(cArg[1].toLowerCase() == "true") {
-                    return message.channel.send("This feature is fairly offensive, as it was designed for a friend. It is not advised to use this feature unless you AND your server members are absolutely okay with ironic suicidal remarks.\n\nTo mitigate this warning, please re-execute the command using `YES` instead of `true`.")
-                } else if(cArg[1] == "YES") {
-                  config.guilds[message.guild.id].settings.updog = true;
-                  return message.channel.send("Okay, I'm setting the updog anger to `true`.");
-                } else {
-                    config.guilds[message.guild.id].settings.updog = false;
-                    return message.channel.send("Okay, I'm setting the updog anger to `false`.");
-                }
+                  if(cArg[1].toLowerCase() == "true") {
+                      return message.channel.send("This feature is fairly offensive, as it was designed for a friend. It is not advised to use this feature unless you AND your server members are absolutely okay with ironic suicidal remarks.\n\nTo mitigate this warning, please re-execute the command using `YES` instead of `true`.")
+                  } else if(cArg[1] == "YES") {
+                    config.guilds[message.guild.id].settings.updog = true;
+                    return message.channel.send("Okay, I'm setting the updog anger to `true`.");
+                  } else {
+                      config.guilds[message.guild.id].settings.updog = false;
+                      return message.channel.send("Okay, I'm setting the updog anger to `false`.");
+                  }
                 default:
-                let configuration = new MessageEmbed()
-                .setTitle("Server Configuration || " + message.guild.name)
-                .addField("Prefix (prefix)", config.guilds[message.guild.id].prefix)
-                .addField("Slur Filter (filter)", String(config.guilds[message.guild.id].settings.filter).replace("false", "Disabled").replace("true", "Enabled").replace("undefined", "Disabled"))
-                .addField("Message Logging (mlog)", String(config.guilds[message.guild.id].settings.logging.messages).replace("null", "Disabled").replace("undefined", "Disabled")) // set to string, if null or undefined, replace with Disabled. damn i feel cool!
-                .addField("Member Logging (mblog)", String(config.guilds[message.guild.id].settings.logging.members).replace("null", "Disabled").replace("undefined", "Disabled"))
-                .addField("I HATE UPDOG (updog)", String(config.guilds[message.guild.id].settings.updog).replace("false", "Disabled").replace("undefined", "Disabled").replace("true", "Enabled"))
-                .setColor(host.color)
-                .setFooter({ text: "Precipitation " + host.version.external, iconURL: client.user.displayAvatarURL() })
-                return message.channel.send({embeds: [configuration]})
+                  let configuration = new MessageEmbed()
+                  .setTitle("Server Configuration || " + message.guild.name)
+                  .addFields(
+                    { name: "Prefix (prefix)", value: config.guilds[message.guild.id].prefix },
+                    { name: "Slur Filter (filter)", value: String(config.guilds[message.guild.id].settings.filter).replace("false", "Disabled").replace("true", "Enabled").replace("undefined", "Disabled") },
+                    { name: "Message Logging (mlog)", value: String(config.guilds[message.guild.id].settings.logging.messages).replace("null", "Disabled").replace("undefined", "Disabled") },
+                    { name: "Member Logging (mblog)", value: String(config.guilds[message.guild.id].settings.logging.members).replace("null", "Disabled").replace("undefined", "Disabled") },
+                    { name: "I HATE UPDOG (updog)", value: String(config.guilds[message.guild.id].settings.updog).replace("false", "Disabled").replace("undefined", "Disabled").replace("true", "Enabled") }
+                  )
+                  .setColor(host.color)
+                  .setFooter({ text: "Precipitation " + host.version.external, iconURL: client.user.displayAvatarURL() })
+                  return message.channel.send({embeds: [configuration]})
             }
         }
     },
