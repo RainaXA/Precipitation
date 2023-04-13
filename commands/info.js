@@ -105,11 +105,13 @@ var commands = {
                 }
                 let botInfo = "**Name**: " + name(uinfoUser) + "\n**Pronouns**: " + pronouns(uinfoUser, "*not set*") + "\n**Birthday**: " + birthday + "\n**Location**: " + setloc
                 let uinfoMember;
-                message.guild.members.cache.each(member => {
-                    if(uinfoUser.id == member.id) {
-                    return uinfoMember = member; // search all members in the guild and if they are in the guild, then display more results
-                    }
-                })
+                if(message.guild) {
+                    message.guild.members.cache.each(member => {
+                        if(uinfoUser.id == member.id) {
+                        return uinfoMember = member; // search all members in the guild and if they are in the guild, then display more results
+                        }
+                    })
+                }
                 if (uinfoMember) {
                     accDates = accDates + "\n**Join Date**: <t:" + parseInt(uinfoMember.joinedTimestamp / 1000, 10) + ">"
                     names = names + "\n**Display Name**: " + uinfoMember.displayName
@@ -144,11 +146,13 @@ var commands = {
                 }
                 let botInfo = "**Name**: " + name(uinfoUser) + "\n**Pronouns**: " + pronouns(uinfoUser, "*not set*") + "\n**Birthday**: " + birthday + "\n**Location**: " + setloc
                 let uinfoMember;
-                interaction.guild.members.cache.each(member => {
-                    if(uinfoUser.id == member.id) {
-                    return uinfoMember = member; // search all members in the guild and if they are in the guild, then display more results
-                    }
-                })
+                if(interaction.guild) {
+                    interaction.guild.members.cache.each(member => {
+                        if(uinfoUser.id == member.id) {
+                        return uinfoMember = member; // search all members in the guild and if they are in the guild, then display more results
+                        }
+                    })
+                }
                 if (uinfoMember) {
                     accDates = accDates + "\n**Join Date**: <t:" + parseInt(uinfoMember.joinedTimestamp / 1000, 10) + ">"
                     names = names + "\n**Display Name**: " + uinfoMember.displayName
