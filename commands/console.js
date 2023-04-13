@@ -17,6 +17,7 @@
 \* ========================================================================= */
 
 const fs = require('fs');
+const { MessageEmbed } = require('discord.js')
 
 var commands = {
     "eval": {
@@ -31,6 +32,35 @@ var commands = {
         },
         parameters: "",
         execute: {
+            discord: function(message, args) {
+                try {
+                    if(args.includes("host") && args.includes("token")) return message.channel.send("Whoa! Be careful Raina, don't go messing with the token! You could reveal it!")
+                    if(!args.includes(".send")) {
+                        let evaled = eval(args);
+                        //console.log(evaled)
+                        let embed = new MessageEmbed()
+                        .setTitle("Precipitation Code Evaluation")
+                        .addFields(
+                            { name: "Input", value: "```js\n" + args + "```" },
+                            { name: "Output", value: "```js\n" + String(evaled) + "```" }
+                        )
+                        .setColor(host.color)
+                        .setFooter({ text: "Precipitation " + host.version.external, iconURL: client.user.displayAvatarURL() })
+                        .setTimestamp()
+                        message.channel.send({embeds: [embed]})
+                    } else { // if we're sending something to a channel, then don't bother sending the evaluation embed
+                        eval(args)
+                    }
+                } catch(err) {
+                    let eEmbed = new MessageEmbed()
+                    .setTitle("Precipitation Code Evaluation Exception")
+                    .setDescription(String(err))
+                    .setColor("RED")
+                    .setFooter({ text: "Precipitation " + host.version.external, iconURL: client.user.displayAvatarURL() })
+                    .setTimestamp()
+                    message.channel.send({embeds: [eEmbed]})
+                }
+            },
             console: function(args) {
                 eval(args)
             }
