@@ -27,6 +27,7 @@ try {
 
 var command = {
     name: "pic",
+    alias: ["pfp", "avatar"],
     desc: "Gets the profile picture of yourself or another user.",
     args: {
         "user": {
@@ -58,7 +59,7 @@ var command = {
             await interaction.reply({ embeds: [embed] })
         }
     },
-    ver: "3.1.0",
+    ver: "3.2.0",
     cat: "General",
     prereqs: {
         dm: true,

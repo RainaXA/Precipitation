@@ -36,16 +36,22 @@ global.loadCommands = function() {
           let props = require(`../commands/${f}`);
           if(!props.name) {
             for(item in props) {
+              if(!props[item].execute) return; // IF THERE IS NOTHING TO EXECUTE DON'T LOAD
               client.commands.set(props[item].name, props[item]);
               counter++;
               if(props[item].execute.slash) commands.push(props[item].data.toJSON())
-              if(props.ver == "3.0.0") log(props.name + " is not up to date with the new argument system", logging.warn, "handler")
+              if(props[item].ver == "3.0.0") log(props[item].name + " is not up to date with the new argument system", logging.warn, "handler")
+              if(props[item].ver == "3.1.0") log(props[item].name + " is not up to date with the new alias system", logging.warn, "handler")
             }
           } else {
+            if(!props.execute) return; // IF THERE IS NOTHING TO EXECUTE DON'T LOAD
             client.commands.set(props.name, props);
             counter++;
-            if(props.execute.slash) commands.push(props.data.toJSON())
+            if(props.execute) {
+              if(props.execute.slash) commands.push(props.data.toJSON())
+            }
             if(props.ver == "3.0.0") log(props.name + " is not up to date with the new argument system", logging.warn, "handler")
+            if(props.ver == "3.1.0") log(props.name + " is not up to date with the new alias system", logging.warn, "handler")
           }
           log("loaded command " + props.name)
         })
@@ -57,6 +63,23 @@ global.loadCommands = function() {
   })
 }
 loadCommands();
+
+function executeCommand(message, args, parameter, cmd) {
+  if(!cmd.help) {
+    if(message.guild) {
+      for(permission of cmd.prereqs.bot) {
+        if(!message.guild.members.me.permissions.has(permission)) return message.channel.send("I do not have permission to run this command.")
+      }
+      for(permission of cmd.prereqs.user) {
+        if(!message.member.permissions.has(permission)) return message.channel.send("You do not have permission to run this command.")
+      }
+    }
+    if(cmd.prereqs.owner && message.author.id != host.id["owner"]) return message.channel.send("Only the owner may use this command.")
+    if(!cmd.execute.discord) return message.channel.send("This command cannot be executed as a Discord command.")
+    if(!cmd.prereqs.dm && !message.guild) return message.channel.send("This command cannot be executed in a direct message.")
+    return cmd.execute.discord(message, args, parameter)
+  }
+}
 
 function processCommand(message) { // used in editing messages + normal messages
   var fCommand = message.content.slice(messagePrefix.length).split(" ")
@@ -79,19 +102,16 @@ function processCommand(message) { // used in editing messages + normal messages
   try {
     if(cmd) {
       validCommand = true;
-      if(!cmd.help) {
-        if(message.guild) {
-          for(permission of cmd.prereqs.bot) {
-            if(!message.guild.me.permissions.has(permission)) return message.channel.send("I do not have permission to run this command.")
-          }
-          for(permission of cmd.prereqs.user) {
-            if(!message.member.permissions.has(permission)) return message.channel.send("You do not have permission to run this command.")
-          }
+      executeCommand(message, args, parameter, cmd);
+    } else {
+      client.commands.forEach(item => {
+        if(item.alias) {
+          if(getTextInput(command, item.alias, 0)) cmd = item;
         }
-        if(cmd.prereqs.owner && message.author.id != host.id["owner"]) return message.channel.send("Only the owner may use this command.")
-        if(!cmd.execute.discord) return message.channel.send("This command cannot be executed as a Discord command.")
-        if(!cmd.prereqs.dm && !message.guild) return message.channel.send("This command cannot be executed in a direct message.")
-        return cmd.execute.discord(message, args, parameter)
+      })
+      if(cmd) {
+        validCommand = true;
+        executeCommand(message, args, parameter, cmd);
       }
     }
     if(!validCommand) message.channel.send("Sorry, but it appears this command is unknown.");
@@ -140,7 +160,7 @@ client.on('interactionCreate', async interaction => {
   if(!command.prereqs.dm && !interaction.guild) return interaction.reply({ content: "Sorry, but this command is not permitted in a direct message.", ephemeral: true })
   if(interaction.guild) {
     for(permission of command.prereqs.bot) {
-      if(!interaction.guild.me.permissions.has(permission)) return interaction.reply({ content: "I do not have permission to run this command."})
+      if(!interaction.guild.members.me.permissions.has(permission)) return interaction.reply({ content: "I do not have permission to run this command."})
     }
     for(permission of command.prereqs.user) {
       if(!interaction.member.permissions.has(permission)) return interaction.reply({ content: "You do not have permission to run this command."})

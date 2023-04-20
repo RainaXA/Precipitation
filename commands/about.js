@@ -38,11 +38,30 @@ client.on('ready', async() => {
 
 var command = {
     name: "about",
+    alias: [],
     desc: "Gives information on the bot, as well as credits.",
-    args: {},
+    args: {
+        "bugs": {
+            "desc": "Shows a list of known bugs",
+            "required": false
+        }
+    },
     parameters: "",
     execute: {
-        discord: function(message) {
+        discord: function(message, args) {
+            if(args.toLowerCase() == "bugs") {
+                let bugList = "";
+                for(bug of host.bugs) {
+                    bugList += bug + "\n"
+                }
+                if(bugList == "") bugList = "*None.*"
+                let bugs = new MessageEmbed()
+                .setTitle("Precipitation " + host.version.external + " > Known Bugs")
+                .setDescription(bugList)
+                .setColor(host.color)
+                .setFooter({ text: "Precipitation " + host.version.external + " " + host.version.name, iconURL: client.user.displayAvatarURL() })
+                return message.channel.send({embeds: [bugs]});
+            }
             message.channel.send({embeds: [embed]});
         },
         slash: async function (interaction) {
@@ -52,7 +71,7 @@ var command = {
             log("Precipitation " + host.version.external + " - a discord bot brought upon us", logging.output, "about")
         }
     },
-    ver: "3.1.0",
+    ver: "3.2.0",
     cat: "General",
     prereqs: {
         dm: true,

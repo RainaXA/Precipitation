@@ -28,6 +28,7 @@ var cityAffirm = {};
 
 var command = {
     name: "location",
+    alias: [],
     desc: "Sets your current location.",
     args: {
         "type": {
@@ -132,7 +133,7 @@ var command = {
             }
         }
     },
-    ver: "3.1.0",
+    ver: "3.2.0",
     cat: "Personalization",
     prereqs: {
         dm: true,

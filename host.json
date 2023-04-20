@@ -1,8 +1,8 @@
 {
   "version": {
-    "external": "3.1",
-    "name": "Toyger",
-    "internal": "3.1.2"
+    "external": "3.2",
+    "name": "Curl",
+    "internal": "3.2.0"
   },
   "developer": {
     "startConnect": true,
@@ -11,7 +11,7 @@
   },
   "prefix": "pr:",
   "color": "BLUE",
-  "slurs": ["nigger", "nigga", "retard", "fag"],
+  "slurs": ["nigger", "nigga", "retard", "fag", "tranny", "testingwordforprecipitationslurs"],
   "token": "",
   "id": {
     "owner": "297201585090723841",
@@ -20,5 +20,6 @@
     "stable": "322397835716853771",
     "roll": "982907885535236118",
     "bleed": "982908116163260416"
-  }
+  },
+  "bugs": []
 }

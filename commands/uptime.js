@@ -20,6 +20,7 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 
 var command = {
     name: "uptime",
+    alias: [],
     desc: "See how long Precipitation has been online.",
     args: {},
     parameters: "",
@@ -88,7 +89,7 @@ var command = {
             log(days + "d " + hours + "h " + minutes + "m " + seconds + "s", logging.output, "uptime")
         }
     },
-    ver: "3.1.0",
+    ver: "3.2.0",
     cat: "General",
     prereqs: {
         dm: true,

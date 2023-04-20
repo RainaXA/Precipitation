@@ -134,6 +134,7 @@ fs.readdir("./modules/deduction", function(error, files) {
 
 var command = {
     name: "deduction",
+    alias: ["sd", "deduct"],
     desc: "Manage Deduction games.",
     args: {
       "action": {
@@ -154,7 +155,7 @@ var command = {
                   let setMode;
                   let listedGame;
                   if(multiargs[1]) {
-                    let mode = client.gameModes.get(multiargs[1].toLowerCase());
+                    let mode = client.gameModes.get(args.slice(1 + multiargs[0].length).toLowerCase());
                     if(mode) {
                       setMode = mode.help.name
                       listedGame = mode.help.game
@@ -237,7 +238,7 @@ var command = {
                   if(gameInfo[message.guild.id].players[0].id != message.author.id) return message.channel.send("You are not the host, so you may not start the game.")
                   if(gameInfo[message.guild.id].started) return message.channel.send("The game has already been started!")
                   let mode = client.gameModes.get(gameInfo[message.guild.id].mode.toLowerCase());
-                  if(gameInfo[message.guild.id].players.length < mode.help.minPlayers) return message.channel.send("A minimum of " + mode.help.minPlayers + " players are required for the game to start.")
+                  //if(gameInfo[message.guild.id].players.length < mode.help.minPlayers) return message.channel.send("A minimum of " + mode.help.minPlayers + " players are required for the game to start.")
                   mode.startGame(gameInfo[message.guild.id].viewers, message.guild.id)
                   gameInfo[message.guild.id].started = true;
                   message.channel.send("Please check your DM's. The game is starting.")
@@ -419,7 +420,7 @@ var command = {
               }
         }
     },
-    ver: "3.1.0",
+    ver: "3.2.0",
     cat: "Fun",
     prereqs: {
         dm: false,

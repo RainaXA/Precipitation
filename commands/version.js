@@ -23,6 +23,7 @@ var logs = require("../data/changelogs.json")
 
 var command = {
     name: "version",
+    alias: ["ver"],
     desc: "Shows the current bot version.",
     args: {
         "version": {
@@ -65,7 +66,7 @@ var command = {
             log("internal: " + host.version.internal + "\nexternal: " + host.version.external + "\nname: " + host.version.name, logging.output, "version")
         }
     },
-    ver: "3.1.0",
+    ver: "3.2.0",
     cat: "General",
     prereqs: {
         dm: true,

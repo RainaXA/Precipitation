@@ -39,17 +39,18 @@ var warnedUser = {};
 var removeWarnNumber = {};
 
 try {
-  var gender = require('./gender.js').exports.gender;
-} catch(err) {
-  log("gender function not found - defaulting to \"them.\"", logging.warn, "warnings")
-  function gender() {
-    return "them";
+    var pronouns = require('./pronouns.js').exports.pronouns;
+  } catch(err) {
+    log("pronouns function not found - defaulting to \"them.\"", logging.warn, "warnings")
+    function pronouns() {
+      return "them";
+    }
   }
-}
 
 var commands = {
     "warn": {
         name: "warn",
+        alias: [],
         desc: "Warns a user.",
         args: {
             "user": {
@@ -93,7 +94,7 @@ var commands = {
                 warningStage[interaction.user.id] = 3; // no messages involved
             }
         },
-        ver: "3.1.0",
+        ver: "3.2.0",
         cat: "Moderation",
         prereqs: {
             dm: false,
@@ -105,6 +106,7 @@ var commands = {
     },
     "lswarn": {
         name: "lswarn",
+        alias: [],
         desc: "See your current warnings, or see someone else's.",
         args: {
             "user": {
@@ -179,7 +181,7 @@ var commands = {
                 return interaction.reply({embeds: [warningEmbed]})
             }
         },
-        ver: "3.1.0",
+        ver: "3.2.0",
         cat: "Moderation",
         prereqs: {
             dm: false,
@@ -191,6 +193,7 @@ var commands = {
     },
     "rmwarn": {
         name: "rmwarn",
+        alias: [],
         desc: "Remove a warning from a user.",
         args: {
             "warningid": {
@@ -241,7 +244,7 @@ var commands = {
                 return interaction.reply({ content: "Removing warning #" + int + " from " + user.username + " (" + name(user) + "). Are you sure?" })
             }
         },
-        ver: "3.1.0",
+        ver: "3.2.0",
         cat: "Moderation",
         prereqs: {
             dm: false,
@@ -256,16 +259,16 @@ var commands = {
 client.on('messageCreate', function(message) {
     if(warningStage[message.author.id] == 3) {
     warningStage[message.author.id] = 0;
-    if(message.content.toLowerCase() == "cancel") return message.channel.send("Okay, I won't warn " + gender(warnedUser[message.author.id], "him", "her", "them", "them") + ".")
+    if(message.content.toLowerCase() == "cancel") return message.channel.send("Okay, I won't warn " + pronouns(warnedUser[message.author.id], "them", 1) + ".")
     if(getTextInput(message.content, host.slurs) == true) return message.channel.send("Sorry, but I personally won't warn for any offensive reason.")
     if(message.content.length > 200) return message.channel.send("Sorry, but your reason is too long. Please shorten it.")
     config.guilds[message.guild.id].warnings[warnedUser[message.author.id].id].push(message.content)
-    return message.channel.send("Okay, I've warned " + gender(warnedUser[message.author.id], "him", "her", "them", "them") + " for \"" + message.content + "\".")
+    return message.channel.send("Okay, I've warned " + pronouns(warnedUser[message.author.id], "them", 1) + " for \"" + message.content + "\".")
   } else if(warningStage[message.author.id] == 4) {
     if(message.content.toLowerCase() == "y" || message.content.toLowerCase() == "yes") {
       config.guilds[message.guild.id].warnings[warnedUser[message.author.id].id].splice(removeWarnNumber[message.author.id] - 1, 1)
       warningStage[message.author.id] = 0
-      return message.channel.send("Okay, I've removed this warning from " + gender(warnedUser[message.author.id], "him", "her", "them", "them") + ".")
+      return message.channel.send("Okay, I've removed this warning from " + pronouns(warnedUser[message.author.id], "them", 1) + ".")
     }
     warningStage[message.author.id] = 0;
     return message.channel.send("Okay, cancelling.")

@@ -115,6 +115,7 @@ function getDaysInMonth(month, year) {
 
 var command = {
     name: "birthday",
+    alias: [],
     desc: "Sets your birthday.",
     args: {
       "birthday": {
@@ -223,7 +224,7 @@ var command = {
             config.users[interaction.user.id].birthday.year = parseInt(year);
         }
     },
-    ver: "3.1.0",
+    ver: "3.2.0",
     cat: "Personalization",
     prereqs: {
         dm: true,

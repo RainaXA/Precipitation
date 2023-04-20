@@ -44,6 +44,7 @@ function find(query, amount) {
 
 var command = {
     name: "find",
+    alias: [],
     desc: "Searches for a user using a query.",
     args: {
       "query": {
@@ -72,7 +73,7 @@ var command = {
             return message.channel.send({embeds: [embed]})
         }
     },
-    ver: "3.1.0",
+    ver: "3.2.0",
     cat: "Moderation",
     prereqs: {
         dm: true,

@@ -110,6 +110,7 @@ function interpretPermission(permission) {
 
 var command = {
     name: "help",
+    alias: [],
     desc: "Gets a list of commands, or shows information about a command.",
     args: {
         "command": {
@@ -177,15 +178,26 @@ var command = {
                     botList = botList + interpretPermission(permission) + "\n"
                 }
                 if(botList === "") botList = "*None.*"
+                let aliasList = "";
+                if(currentCmd.alias) {
+                    for(alias of currentCmd.alias) {
+                        aliasList = aliasList + alias + "\n";
+                    }
+                    if(aliasList === "") aliasList = "*None.*"
+                } else {
+                    if(aliasList === "") aliasList = "This command is not updated to handle command aliases yet."
+                }
                 commandHelpEmbed.addFields(
                     { name: "Description", value: currentCmd.desc, inline: true },
                     { name: "Command Version", value: currentCmd.ver, inline: false },
                     { name: "User Permissions", value: permList, inline: true },
                     { name: "Bot Permissions", value: botList, inline: true },
+                    { name: "Aliases", value: aliasList, inline: true},
                     { name: "Syntax", value: host.prefix + cmdHelp + " " + cmdArgs + currentCmd.parameters }
                 )
                 let cmds = []; // cannot be over 25 commands - KEEP IN MIND
                 client.commands.each(cmd => {
+                    if(!cmd.execute) return;
                     if(cmd.execute.discord && !cmd.prereqs.owner) cmds.push({
                         label: cmd.name,
                         description: cmd.desc,
@@ -213,6 +225,7 @@ var command = {
                     if(message.guild) {
                         if(getTextInput(cmd.name, config.guilds[message.guild.id].disabled, 2)) return;
                     }
+                    if(!cmd.execute.discord) return; // don't show commands that can't be executed in discord
                     chelp = cmd.cat 
                     cname = cmd.name
                     if(!helpp[chelp]) {
@@ -222,8 +235,8 @@ var command = {
                     }
                 })
                 for(category in helpp) {
-                    if(category != "Secrets") helpEmbed.addField(category, helpp[category], true)
-                    if(category == "Secrets" && parameter == "easter-eggs") helpEmbed.addField(category, helpp[category], true) // only add Secrets if parameter is specified
+                    if(category != "Secrets") helpEmbed.addFields({ name: category, value: helpp[category], inline: true })
+                    if(category == "Secrets" && parameter == "easter-eggs") helpEmbed.addField({ name: category, value: helpp[category], inline: true}) // only add Secrets if parameter is specified
                 }
                 helpEmbed.setColor(host.color)
                 helpEmbed.setFooter({ text: "Precipitation " + host.version.external + " " + host.version.name, iconURL: client.user.displayAvatarURL() })
@@ -247,9 +260,26 @@ var command = {
                     currentMessage[message.author.id] = m;
                 })
             }
+        },
+        console: function (args) {
+            let cmdList = {};
+            client.commands.each(cmd => {
+                if(!cmd.execute.console) return;
+                let chelp = cmd.cat 
+                let cname = cmd.name
+                if(!cmdList[chelp]) {
+                    cmdList[chelp] = cname;
+                } else {
+                    cmdList[chelp] = cmdList[chelp] + ", " + cname
+                }
+            })
+            log("here is a list of all commands that can be executed in the console\n", logging.output, "help")
+            for(category in cmdList) {
+                log(cmdList[category], logging.output, category.toLowerCase())
+            }
         }
     },
-    ver: "3.1.0",
+    ver: "3.2.0",
     cat: "General",
     prereqs: {
         dm: true,

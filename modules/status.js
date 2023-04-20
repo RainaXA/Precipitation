@@ -18,11 +18,66 @@
 
 const host = require('../host.json');
 
-const status = host.version.external + " " + host.version.name + " || " + host.prefix + "help"
+let status = {
+  content: host.version.external + " " + host.version.name + " || " + host.prefix + "help",
+  phase: 0
+}
+let timePhase = 0;
 
 function setStatus() {
-  client.user.setActivity(status);
-  setTimeout(setStatus, 60000)
+  switch(status.phase) {
+    case 0:
+      status.content = host.version.external + " " + host.version.name + " || " + host.prefix + "help"
+      status.phase++;
+      setTimeout(setStatus, 30000)
+      break;
+    case 1:
+      status.content = "...magic! || " + host.prefix + "help"
+      status.phase++;
+      setTimeout(setStatus, 30000)
+      break;
+    case 2:
+      var uptime = parseInt(client.uptime);
+      uptime = Math.floor(uptime / 1000);
+      var seconds = Math.floor(uptime);
+      var minutes = Math.floor(uptime / 60);
+      var hours = 0;
+      var days = 0;
+      while (seconds >= 60) {
+        seconds = seconds - 60;
+      }
+      while (minutes >= 60) {
+        hours++;
+        minutes = minutes - 60;
+      }
+      while (hours >= 24) {
+        days++;
+        hours = hours - 24;
+      }
+      if(days < 10) {
+        days = "0" + days
+      }
+      if(hours < 10) {
+        hours = "0" + hours
+      }
+      if(minutes < 10) {
+        minutes = "0" + minutes
+      }
+      if(seconds < 10) {
+        seconds = "0" + seconds
+      }
+      status.content = days + ":" + hours + ":" + minutes + ":" + seconds + " || " + host.prefix + "help"
+      if(seconds == 25 || seconds == 55) { // last 5 seconds update to next phase instead of going to 30 seconds
+        status.phase = 0;
+      }
+      if(seconds == 1 || seconds == 31) {
+        setTimeout(setStatus, 4000) // I DON'T FEEL LIKE A PROPER FIX LMAO
+      } else {
+        setTimeout(setStatus, 5000)
+      }
+      break;
+  }
+  client.user.setActivity(status.content);
 }
 
 client.on('ready', async() => { // init guilds on start

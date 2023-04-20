@@ -21,6 +21,7 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 
 var command = {
     name: "rm",
+    alias: ["purge"],
     desc: "Bulk delete messages.",
     args: {
         "number": {
@@ -70,12 +71,9 @@ var command = {
             } catch(err) {
                 interaction.reply({ content: "Due to a fatal error, I couldn't delete any messages.", ephemeral: true })
             }
-        },
-        console: function() {
-            log("testing with the new handler!", logging.output, "PING")
         }
     },
-    ver: "3.1.0",
+    ver: "3.2.0",
     cat: "Moderation",
     prereqs: {
         dm: false,

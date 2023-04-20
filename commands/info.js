@@ -38,6 +38,15 @@ try {
 }
 
 try {
+    var pronouns = require('./pronouns.js').exports.pronouns;
+  } catch(err) {
+    log("pronouns function not found - will display Unknown", logging.warn, "uinfo");
+    function pronouns() {
+      return "Unknown";
+    }
+}
+
+try {
     var find = require('./find.js').exports.find;
   } catch(err) {
     log("find function not found - will display message author.", logging.warn, "uinfo")
@@ -61,8 +70,14 @@ try {
 var commands = {
     "uinfo": {
         name: "uinfo",
+        alias: ["userinfo"],
         desc: "Get information on a particular user.",
-        args: "(user)",
+        args: {
+            "user": {
+                "desc": "Which user to get info on",
+                "required": false
+            }
+        },
         parameters: "",
         execute: {
             discord: function(message, args) {
@@ -88,13 +103,15 @@ var commands = {
                 } else {
                     setloc = "*not set*"
                 }
-                let botInfo = "**Name**: " + name(uinfoUser) + "\n**Gender**: " + gender(uinfoUser, "Male", "Female", "Other", "*not set*") + "\n**Birthday**: " + birthday + "\n**Location**: " + setloc
+                let botInfo = "**Name**: " + name(uinfoUser) + "\n**Pronouns**: " + pronouns(uinfoUser, "*not set*") + "\n**Birthday**: " + birthday + "\n**Location**: " + setloc
                 let uinfoMember;
-                message.guild.members.cache.each(member => {
-                    if(uinfoUser.id == member.id) {
-                    return uinfoMember = member; // search all members in the guild and if they are in the guild, then display more results
-                    }
-                })
+                if(message.guild) {
+                    message.guild.members.cache.each(member => {
+                        if(uinfoUser.id == member.id) {
+                        return uinfoMember = member; // search all members in the guild and if they are in the guild, then display more results
+                        }
+                    })
+                }
                 if (uinfoMember) {
                     accDates = accDates + "\n**Join Date**: <t:" + parseInt(uinfoMember.joinedTimestamp / 1000, 10) + ">"
                     names = names + "\n**Display Name**: " + uinfoMember.displayName
@@ -127,13 +144,15 @@ var commands = {
                 } else {
                     setloc = "*not set*"
                 }
-                let botInfo = "**Name**: " + name(uinfoUser) + "\n**Gender**: " + gender(uinfoUser, "Male", "Female", "Other", "*not set*") + "\n**Birthday**: " + birthday + "\n**Location**: " + setloc
+                let botInfo = "**Name**: " + name(uinfoUser) + "\n**Pronouns**: " + pronouns(uinfoUser, "*not set*") + "\n**Birthday**: " + birthday + "\n**Location**: " + setloc
                 let uinfoMember;
-                interaction.guild.members.cache.each(member => {
-                    if(uinfoUser.id == member.id) {
-                    return uinfoMember = member; // search all members in the guild and if they are in the guild, then display more results
-                    }
-                })
+                if(interaction.guild) {
+                    interaction.guild.members.cache.each(member => {
+                        if(uinfoUser.id == member.id) {
+                        return uinfoMember = member; // search all members in the guild and if they are in the guild, then display more results
+                        }
+                    })
+                }
                 if (uinfoMember) {
                     accDates = accDates + "\n**Join Date**: <t:" + parseInt(uinfoMember.joinedTimestamp / 1000, 10) + ">"
                     names = names + "\n**Display Name**: " + uinfoMember.displayName
@@ -150,7 +169,7 @@ var commands = {
                 return interaction.reply({embeds: [uinfo]})
             }
         },
-        ver: "3.0.0",
+        ver: "3.2.0",
         cat: "Moderation",
         prereqs: {
             dm: true,
@@ -162,8 +181,9 @@ var commands = {
     },
     "sinfo": {
         name: "sinfo",
+        alias: ["serverinfo"],
         desc: "Get information on the server.",
-        args: "",
+        args: {},
         parameters: "",
         execute: {
             discord: function(message, args) {
@@ -187,7 +207,7 @@ var commands = {
                 await interaction.reply({embeds: [embed]})
             }
         },
-        ver: "3.0.0",
+        ver: "3.2.0",
         cat: "General",
         prereqs: {
             dm: false,
