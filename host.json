@@ -1,8 +1,8 @@
 {
   "version": {
     "external": "3.2",
-    "name": "Curl Dev",
-    "internal": "3.2.0-rc1"
+    "name": "Curl",
+    "internal": "3.2.0"
   },
   "developer": {
     "startConnect": true,
