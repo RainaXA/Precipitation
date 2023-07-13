@@ -600,6 +600,7 @@ var commands = {
                 let multiargs = args.split(" ");
                 if(!config.users[message.author.id]) config.users[message.author.id] = {}
                 if(!config.users[message.author.id].timePrefs) config.users[message.author.id].timePrefs = {}
+                let bottomText = host.version.external;
                 switch(parseInt(multiargs[0])) {
                     case 1:
                         switch(parseInt(multiargs[1])) {
