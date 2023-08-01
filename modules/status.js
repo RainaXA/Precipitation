@@ -1,5 +1,5 @@
 /* ========================================================================= *\
-    Status: module for setting the playing status in Precipitation
+    Status: Forecast module for setting the playing status in Precipitation
     Copyright (C) 2023 Raina
 
     This program is free software: you can redistribute it and/or modify
@@ -22,7 +22,6 @@ let status = {
   content: host.version.external + " " + host.version.name + " || " + host.prefix + "help",
   phase: 0
 }
-let timePhase = 0;
 
 function setStatus() {
   switch(status.phase) {
@@ -32,7 +31,7 @@ function setStatus() {
       setTimeout(setStatus, 30000)
       break;
     case 1:
-      status.content = "...magic! || " + host.prefix + "help"
+      status.content = client.guilds.cache.size + " servers || " + host.prefix + "help"
       status.phase++;
       setTimeout(setStatus, 30000)
       break;
@@ -83,3 +82,10 @@ function setStatus() {
 client.on('ready', async() => { // init guilds on start
   setStatus(); // make sure playing status does not expire
 })
+
+module.exports.info = {
+  name: "Precipitation Status",
+  desc: "Module that establishes Precipitation's Discord status",
+  ver: "1.0.0",
+  fVer: "1.2.0"
+}

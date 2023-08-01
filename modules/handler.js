@@ -1,5 +1,5 @@
 /* ========================================================================= *\
-    Handler: command handler for the Precipitation Discord bot
+    Handler: Forecast module for handling Discord commands from Precipitation
     Copyright (C) 2023 Raina
 
     This program is free software: you can redistribute it and/or modify
@@ -16,54 +16,46 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.  
 \* ========================================================================= */
 
-let fs = require('fs')
+const package = require("../package.json")
+const fs = require('fs');
+const { EmbedBuilder } = require('discord.js')
 
-const { Collection, MessageEmbed } = require('discord.js');
+sources.commands = "commands"
 
+const { Collection } = require('discord.js');
 client.commands = new Collection();
-global.commands = [];
+client.categories = {};
 
-global.loadCommands = function() {
-  fs.readdir("./commands", function(error, files) {
-    if (error) {
-      fs.mkdirSync("./commands/")
-      log("commands folder not found - creating now", logging.warn, "handler")
-    } else {
-      let modules = files.filter(f => f.split(".").pop() === "js");
-      let counter = 0;
-      try {
-        modules.forEach((f, i) => {
-          let props = require(`../commands/${f}`);
-          if(!props.name) {
-            for(item in props) {
-              if(!props[item].execute) return; // IF THERE IS NOTHING TO EXECUTE DON'T LOAD
-              client.commands.set(props[item].name, props[item]);
-              counter++;
-              if(props[item].execute.slash) commands.push(props[item].data.toJSON())
-              if(props[item].ver == "3.0.0") log(props[item].name + " is not up to date with the new argument system", logging.warn, "handler")
-              if(props[item].ver == "3.1.0") log(props[item].name + " is not up to date with the new alias system", logging.warn, "handler")
-            }
-          } else {
-            if(!props.execute) return; // IF THERE IS NOTHING TO EXECUTE DON'T LOAD
-            client.commands.set(props.name, props);
+// COMMAND LOADER
+fs.readdir("./modules/commands", function(error, files) {
+  if (error) {
+    fs.mkdirSync("./modules/commands/")
+    log("folder not found - creating now", logging.warn, sources.commands)
+  } else {
+    let modules = files.filter(f => f.split(".").pop() === "js");
+    let counter = 0;
+    try {
+      modules.forEach((f, i) => {
+        let props = require(`./commands/${f}`);
+        let cmdList = "";
+        for(item in props) {
+          if(item != "info") { // don't try to load the category info as a command
+            client.commands.set(props[item].name, props[item]);
+            cmdList += props[item].name + "\n"
+            client.categories[props.info] = cmdList;
             counter++;
-            if(props.execute) {
-              if(props.execute.slash) commands.push(props.data.toJSON())
-            }
-            if(props.ver == "3.0.0") log(props.name + " is not up to date with the new argument system", logging.warn, "handler")
-            if(props.ver == "3.1.0") log(props.name + " is not up to date with the new alias system", logging.warn, "handler")
+            //if(props[item].execute.slash) commands.push(props[item].data.toJSON())
           }
-          log("loaded command " + props.name)
-        })
-      } catch (err) {
-        log("Sorry, but a command had an error: " + err.stack, logging.error, "LOADER")
-      }
-      log("loaded " + counter + " commands.", logging.success, "handler")
+        }
+      })
+    } catch (err) {
+      log("Sorry, but a command had an error: " + err.stack, logging.error, "LOADER")
     }
-  })
-}
-loadCommands();
+    log("loaded " + counter + " commands", logging.success, sources.commands)
+  }
+})
 
+// RUNNING COMMANDS
 function executeCommand(message, args, parameter, cmd) {
   if(!cmd.help) {
     if(message.guild) {
@@ -117,16 +109,17 @@ function processCommand(message) { // used in editing messages + normal messages
     if(!validCommand) message.channel.send("Sorry, but it appears this command is unknown.");
   } catch(err) {
     log(err.stack, logging.error, "error")
-    let errorEmbed = new MessageEmbed()
+    let errorEmbed = new EmbedBuilder()
     .setTitle(":zap: EXCEPTION")
     .setDescription(String(err))
-    .setColor("YELLOW")
+    .setColor("Yellow")
     .setFooter({text: "Precipitation " + host.version.external })
     message.channel.send({embeds: [errorEmbed]})
   }
 }
 
 function initCommand(message) {
+  if(!config.guilds[message.guild.id]) config.guilds[message.guild.id] = {};
   if (message.content.startsWith("<@" + client.user.id + ">")) {
     global.messagePrefix = "<@" + client.user.id + ">"
   } else if (!message.guild) {
@@ -136,7 +129,7 @@ function initCommand(message) {
     global.messagePrefix = config.guilds[message.guild.id].prefix
     if(!config.guilds[message.guild.id].disabled) config.guilds[message.guild.id].disabled = [];
   }
-  if(message.content.toLowerCase().startsWith(messagePrefix) && !message.author.bot) {
+  if(message.content.toLowerCase().startsWith(host.prefix) && !message.author.bot) {
     if(!config.users[message.author.id]) config.users[message.author.id] = {}
     if(getTextInput(message.author.id, host.id["blacklisted"])) return message.channel.send("Sorry, but you are blacklisted from the bot. If you feel you've been falsely banned, please make an appeal to <@" + host.id["owner"] + ">.")
     processCommand(message);
@@ -173,3 +166,10 @@ client.on('interactionCreate', async interaction => {
   }
   return;
 });
+
+module.exports.info = {
+  name: "Precipitation Command Handler",
+  desc: "Module that loads and executes Precipitation's commands when called for",
+  ver: "1.0.0",
+  fVer: "1.2.0"
+}
