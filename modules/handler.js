@@ -166,10 +166,3 @@ client.on('interactionCreate', async interaction => {
   }
   return;
 });
-
-module.exports.info = {
-  name: "Precipitation Command Handler",
-  desc: "Module that loads and executes Precipitation's commands when called for",
-  ver: "1.0.0",
-  fVer: "1.2.0"
-}
