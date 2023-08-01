@@ -1,16 +1,16 @@
 {
   "version": {
-    "external": "3.2",
-    "name": "Curl",
-    "internal": "3.2.0"
+    "external": "4.0",
+    "name": "Korat",
+    "internal": "4.0.0-dev23.08.01"
   },
   "developer": {
     "startConnect": true,
     "debugging": false,
-    "branch": "stable"
+    "branch": "roll"
   },
-  "prefix": "pr:",
-  "color": "BLUE",
+  "prefix": "pr;",
+  "color": "Yellow",
   "slurs": ["nigger", "nigga", "retard", "fag", "tranny", "testingwordforprecipitationslurs"],
   "token": "",
   "id": {
